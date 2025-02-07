@@ -165,20 +165,21 @@ public class BaseMdParser implements MdParser {
             String c = reader.readStringOrEmpty(new TextReader.Globber() {
                 int backtics = 0;
                 boolean ignoreNext = false;
+
                 @Override
                 public TextReader.GlobberRet accept(StringBuilder curr, char next) {
                     if (backtics >= 3) {
                         return TextReader.GlobberRet.REJECT_LAST;
                     }
                     if (next == '\\') {
-                        ignoreNext=true;
+                        ignoreNext = true;
                         return TextReader.GlobberRet.WAIT_FOR_MORE;
-                    }else if (next == '`') {
+                    } else if (next == '`') {
                         backtics++;
                         if (backtics == 3) {
-                            if(ignoreNext){
-                                backtics=0;
-                                ignoreNext=false;
+                            if (ignoreNext) {
+                                backtics = 0;
+                                ignoreNext = false;
                                 return TextReader.GlobberRet.WAIT_FOR_MORE;
                             }
                             return TextReader.GlobberRet.ACCEPT;
@@ -186,7 +187,7 @@ public class BaseMdParser implements MdParser {
                         return TextReader.GlobberRet.WAIT_FOR_MORE;
                     } else {
                         backtics = 0;
-                        ignoreNext=false;
+                        ignoreNext = false;
                         return TextReader.GlobberRet.WAIT_FOR_MORE;
                     }
                 }
@@ -515,7 +516,7 @@ public class BaseMdParser implements MdParser {
                             }
                             textOrUrls.add(new MdLink("", anchorPatternMatcher.group("name"), anchorPatternMatcher.group("url")));
                             text1Remainings = text1Remainings.substring(anchorPatternMatcher.end());
-                        }else {
+                        } else {
                             textOrUrls.add(new MdText(text1Remainings, true));
                             text1Remainings = "";
                         }
@@ -603,7 +604,10 @@ public class BaseMdParser implements MdParser {
         if (reader.peekChar() == '<') {
             MdXml t = reader.readXmlTag();
             if (t != null) {
-                if (t.getTagType() == MdXml.XmlTagType.AUTO_CLOSE) {
+                if (
+                        t.getTagType() == MdXml.XmlTagType.AUTO_CLOSE
+                                || (t.getTagType() == MdXml.XmlTagType.VOID)
+                ) {
                     return t;
                 }
                 if (t.getTagType() == MdXml.XmlTagType.CLOSE) {
@@ -864,7 +868,7 @@ public class BaseMdParser implements MdParser {
         }
     }
 
-    private List<MdHorizontalAlign> readHeaderRowAlignments(MdRow headers, MdRow sorts){
+    private List<MdHorizontalAlign> readHeaderRowAlignments(MdRow headers, MdRow sorts) {
         boolean isSortRow = sorts != null;
         List<MdHorizontalAlign> sortAligns = new ArrayList<>();
         if (sorts != null) {
@@ -897,20 +901,21 @@ public class BaseMdParser implements MdParser {
                 }
             }
         }
-        if(isSortRow){
+        if (isSortRow) {
             return sortAligns;
         }
         return null;
     }
+
     private MdElement readTable() {
         List<MdColumn> columns = new ArrayList<>();
         MdRow headers = readRow();
         MdRow nextRow = readRow();
-        List<MdHorizontalAlign> sortAligns= readHeaderRowAlignments(headers,nextRow);
-        if(sortAligns!=null){
-            nextRow=readRow();
-        }else{
-            sortAligns=new ArrayList<>();
+        List<MdHorizontalAlign> sortAligns = readHeaderRowAlignments(headers, nextRow);
+        if (sortAligns != null) {
+            nextRow = readRow();
+        } else {
+            sortAligns = new ArrayList<>();
         }
         for (int i = 0; i < headers.size(); i++) {
             MdHorizontalAlign ha = i < sortAligns.size() ? sortAligns.get(i) : MdHorizontalAlign.LEFT;

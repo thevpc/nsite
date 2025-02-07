@@ -443,6 +443,17 @@ public class TextReader {
                     }
                     props.put(pn, pv);
                 }
+                if(mode == MdXml.XmlTagType.OPEN){
+                    switch (s){
+                        case "br":
+                        case "hr":
+                        case "img":
+                        case "input":
+                        case "button":{
+                            mode = MdXml.XmlTagType.VOID;
+                        }
+                    }
+                }
                 return new MdXml(
                         mode, s, props, null
                 );

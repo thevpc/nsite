@@ -98,6 +98,7 @@ public class MdXml extends MdAbstractElement {
         OPEN,
         CLOSE,
         AUTO_CLOSE,
+        VOID,
     }
 
     @Override
