@@ -212,9 +212,9 @@ public class NDocProcessorManager {
                 String s1 = path.toString();
                 String s2 = absolutePath.toString();
                 if (s1.equals(s2)) {
-                    context.getLog().debug(contextName1, "[" + proc + "] [" + NStringUtils.firstNonBlank(mimeType, "no-mimetype") + "] process path : " + s1);
+                    context.getLog().info(contextName1, "[" + proc + "] [" + NStringUtils.firstNonBlank(mimeType, "no-mimetype") + "] process path : " + s1);
                 } else {
-                    context.getLog().debug(contextName1, "[" + proc + "] [" + NStringUtils.firstNonBlank(mimeType, "no-mimetype") + "] process path : " + s1 + " = " + s2);
+                    context.getLog().info(contextName1, "[" + proc + "] [" + NStringUtils.firstNonBlank(mimeType, "no-mimetype") + "] process path : " + s1 + " = " + s2);
                 }
                 proc.processPath(path, mimeType0,
                         context.newChild()

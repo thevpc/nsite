@@ -6,6 +6,7 @@
 package net.thevpc.nuts.lib.doc.mimetype;
 
 import net.thevpc.nuts.NConstants;
+import net.thevpc.nuts.io.NIO;
 import net.thevpc.nuts.io.NPath;
 
 import java.io.IOException;
@@ -98,7 +99,7 @@ public class DefaultNDocMimeTypeResolver implements NDocMimeTypeResolver {
     @Override
     public String resolveMimetype(String path) {
         try {
-            String s = nameToMimeType.get(NPath.of(path).getName().toString());
+            String s = nameToMimeType.get(NPath.of(path).getName());
             if(s!=null){
                 return s;
             }
@@ -108,11 +109,11 @@ public class DefaultNDocMimeTypeResolver implements NDocMimeTypeResolver {
                     return r;
                 }
             }
-            String mimeType = Files.probeContentType(NPath.of(path).toPath().get());
+            String mimeType = NIO.of().probeContentType(NPath.of(path));
             if (mimeType != null) {
                 return mimeType;
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(DefaultNDocMimeTypeResolver.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "application/binary";

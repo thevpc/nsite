@@ -5,6 +5,9 @@
  */
 package net.thevpc.nuts.lib.doc.context;
 
+import net.thevpc.nuts.NErr;
+import net.thevpc.nuts.NOut;
+
 import java.io.PrintStream;
 
 /**
@@ -19,30 +22,23 @@ public class DefaultNDocLog implements NDocLog {
 
     @Override
     public void info(String title, String message) {
-        out().println("[info ] "+title + ": " + message);
+        NOut.println("[info ] "+title + ": " + message);
     }
 
-    protected PrintStream err() {
-        return System.err;
-    }
-
-    protected PrintStream out() {
-        return System.out;
-    }
 
     @Override
     public void error(String title, String message) {
-        err().println("[error] "+title + ": " + message);
+        NErr.println("[error] "+title + ": " + message);
     }
 
     @Override
     public void warn(String title, String message) {
-        err().println("[warn] "+title + ": " + message);
+        NErr.println("[warn] "+title + ": " + message);
     }
 
     @Override
     public void debug(String title, String message) {
-        out().println("[debug] "+title + ": " + message);
+        NErr.println("[debug] "+title + ": " + message);
     }
     
 }

@@ -4,6 +4,7 @@ import net.thevpc.nuts.expr.NExprDeclarations;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nuts.lib.doc.context.NDocContext;
 import net.thevpc.nuts.lib.doc.executor.expr.BaseNexprNExprFct;
+import net.thevpc.nuts.lib.doc.processor.html.PageToHtmlUtils;
 import net.thevpc.nuts.lib.doc.processor.pages.MPage;
 import net.thevpc.nuts.lib.doc.util.HtmlBuffer;
 import net.thevpc.nuts.lib.doc.util.StringUtils;
@@ -36,7 +37,7 @@ public class PageToHtmlFct extends BaseNexprNExprFct {
                 : "H4"
         ).body((titlePrefix != null ? (String.valueOf(titlePrefix) + " ") : "") + title.title));
         sb.newLine();
-        sb.append(fcontext.md2Html().pageContent2html(title));
+        sb.append(fcontext.md2Html().pageContent2html(title, PageToHtmlUtils.GeneratorContext.of(fcontext)));
         return sb.toString();
     }
 

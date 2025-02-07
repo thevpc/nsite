@@ -6,7 +6,6 @@
 package net.thevpc.nuts.lib.doc.context;
 
 /**
- *
  * @author thevpc
  */
 public interface NDocLog {
@@ -16,5 +15,6 @@ public interface NDocLog {
     void debug(String title, String message);
 
     void error(String title, String message);
+
     void warn(String title, String message);
 }

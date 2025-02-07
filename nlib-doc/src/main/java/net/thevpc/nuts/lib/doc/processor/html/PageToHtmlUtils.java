@@ -1,10 +1,12 @@
 package net.thevpc.nuts.lib.doc.processor.html;
 
+import net.thevpc.nuts.lib.doc.context.NDocContext;
 import net.thevpc.nuts.lib.doc.processor.pages.MPage;
 import net.thevpc.nuts.lib.doc.util.HtmlBuffer;
 import net.thevpc.nuts.lib.md.*;
 import net.thevpc.nuts.text.*;
 import net.thevpc.nuts.util.NColors;
+import net.thevpc.nuts.util.NOptional;
 import net.thevpc.nuts.util.NStringUtils;
 
 import java.awt.*;
@@ -13,10 +15,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PageToHtmlUtils {
-    public HtmlBuffer.Node pageContent2html(MPage page) {
+    public interface GeneratorContext{
+        String nextId();
+        static GeneratorContext of(NDocContext fcontext) {
+            NOptional<GeneratorContext> v = fcontext.getVar(GeneratorContext.class.getSimpleName());
+            if(!v.isPresent()) {
+                MyGeneratorContext r = new MyGeneratorContext();
+                fcontext.setVar(GeneratorContext.class.getSimpleName(), r);
+                return r;
+            }
+            return v.get();
+        }
+
+    }
+    public HtmlBuffer.Node pageContent2html(MPage page, GeneratorContext generatorContext) {
         switch (page.getType()) {
             case MARKDOWN:
-                return md2html(page.getMarkdownContent());
+                return md2html(page.getMarkdownContent(), generatorContext);
             case NTF:
                 NText ntfContent = page.getNtfContent();
                 List<NText> nnormalized = normalizeText(ntfContent);
@@ -161,7 +176,7 @@ public class PageToHtmlUtils {
     }
 
 
-    public HtmlBuffer.Node md2html(MdElement markdown) {
+    public HtmlBuffer.Node md2html(MdElement markdown, GeneratorContext generatorContext) {
         if (markdown == null) {
             return null;
         }
@@ -174,14 +189,14 @@ public class PageToHtmlUtils {
                 HtmlBuffer.Tag p = new HtmlBuffer.Tag("p")
                         .attr("class", "md-phrase");
                 for (MdElement child : markdown.asPhrase().getChildren()) {
-                    p.body(md2html(child));
+                    p.body(md2html(child, generatorContext));
                 }
                 return p;
             }
             case BODY: {
                 return new HtmlBuffer.TagList(
                         Arrays.stream(markdown.asBody().getChildren())
-                                .map(x -> md2html(x))
+                                .map(x -> md2html(x, generatorContext))
                                 .toArray(HtmlBuffer.Node[]::new)
                 );
             }
@@ -190,24 +205,24 @@ public class PageToHtmlUtils {
                 HtmlBuffer.Tag t = new HtmlBuffer.Tag("H4")
                         .attr("class", "md-title-" + title.getDepth())
                         .body(
-                                md2html(title.getValue())
+                                md2html(title.getValue(), generatorContext)
                         );
                 List<HtmlBuffer.Node> nnn = new ArrayList<>();
                 nnn.add(t);
                 for (MdElement child : title.getChildren()) {
-                    nnn.add(md2html(child));
+                    nnn.add(md2html(child, generatorContext));
                 }
                 return new HtmlBuffer.TagList(nnn.toArray(new HtmlBuffer.Node[0]));
             }
             case ITALIC: {
                 return (new HtmlBuffer.Tag("i")
                         .attr("class", "md-italic")
-                        .body(md2html(markdown.asItalic().getContent())));
+                        .body(md2html(markdown.asItalic().getContent(), generatorContext)));
             }
             case BOLD: {
                 return (new HtmlBuffer.Tag("b")
                         .attr("class", "md-bold")
-                        .body(md2html(markdown.asBold().getContent())));
+                        .body(md2html(markdown.asBold().getContent(), generatorContext)));
             }
             case CODE: {
                 MdCode code = markdown.asCode();
@@ -233,18 +248,18 @@ public class PageToHtmlUtils {
             case UNNUMBERED_ITEM: {
                 HtmlBuffer.Tag li = new HtmlBuffer.Tag("li")
                         .attr("class", "md-uli")
-                        .body(md2html(markdown.asUnNumItem().getValue()));
+                        .body(md2html(markdown.asUnNumItem().getValue(), generatorContext));
                 for (MdElement child : markdown.asUnNumItem().getChildren()) {
-                    li.body(md2html(child));
+                    li.body(md2html(child, generatorContext));
                 }
                 return li;
             }
             case NUMBERED_ITEM: {
                 HtmlBuffer.Tag li = new HtmlBuffer.Tag("li")
                         .attr("class", "md-oli")
-                        .body(md2html(markdown.asNumItem().getValue()));
+                        .body(md2html(markdown.asNumItem().getValue(), generatorContext));
                 for (MdElement child : markdown.asUnNumItem().getChildren()) {
-                    li.body(md2html(child));
+                    li.body(md2html(child, generatorContext));
                 }
                 return li;
             }
@@ -253,7 +268,7 @@ public class PageToHtmlUtils {
                 HtmlBuffer.Tag hli = new HtmlBuffer.Tag("ul")
                         .attr("class", "md-ul");
                 for (MdUnNumberedItem child : li.getChildren()) {
-                    hli.body(md2html(child));
+                    hli.body(md2html(child, generatorContext));
                 }
                 return hli;
             }
@@ -264,7 +279,7 @@ public class PageToHtmlUtils {
                 for (MdUnNumberedItem child : li.getChildren()) {
                     hli.body(new HtmlBuffer.Tag("li")
                             .attr("class", "md-oli")
-                            .body(md2html(child)));
+                            .body(md2html(child, generatorContext)));
                 }
                 return hli;
             }
@@ -304,7 +319,7 @@ public class PageToHtmlUtils {
                                 .body(new HtmlBuffer.TagList(
                                         new HtmlBuffer.Tag("span").attr("class", "badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
                                         new HtmlBuffer.Plain(" "),
-                                        md2html(li.getContent())
+                                        md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case DANGER: {
@@ -312,7 +327,7 @@ public class PageToHtmlUtils {
                                 .body(new HtmlBuffer.TagList(
                                         new HtmlBuffer.Tag("span").attr("class", "badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
                                         new HtmlBuffer.Plain(" "),
-                                        md2html(li.getContent())
+                                        md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case INFO: {
@@ -320,7 +335,7 @@ public class PageToHtmlUtils {
                                 .body(new HtmlBuffer.TagList(
 //                                        new HtmlBuffer.Tag("span").attr("class","badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
 //                                        new HtmlBuffer.Plain(" "),
-                                        md2html(li.getContent())
+                                        md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case TIP: {
@@ -328,7 +343,7 @@ public class PageToHtmlUtils {
                                 .body(new HtmlBuffer.TagList(
 //                                        new HtmlBuffer.Tag("span").attr("class","badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
 //                                        new HtmlBuffer.Plain(" "),
-                                        md2html(li.getContent())
+                                        md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case IMPORTANT: {
@@ -336,7 +351,7 @@ public class PageToHtmlUtils {
                                 .body(new HtmlBuffer.TagList(
 //                                        new HtmlBuffer.Tag("span").attr("class","badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
 //                                        new HtmlBuffer.Plain(" "),
-                                        md2html(li.getContent())
+                                        md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case NOTE: {
@@ -344,7 +359,7 @@ public class PageToHtmlUtils {
                                 .body(new HtmlBuffer.TagList(
                                         new HtmlBuffer.Tag("span").attr("class", "badge badge-success text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
                                         new HtmlBuffer.Plain(" "),
-                                        md2html(li.getContent())
+                                        md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case CAUTION: {
@@ -352,7 +367,7 @@ public class PageToHtmlUtils {
                                 .body(new HtmlBuffer.TagList(
                                         new HtmlBuffer.Tag("span").attr("class", "badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
                                         new HtmlBuffer.Plain(" "),
-                                        md2html(li.getContent())
+                                        md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     default: {
@@ -360,7 +375,7 @@ public class PageToHtmlUtils {
                                 .body(new HtmlBuffer.TagList(
                                         new HtmlBuffer.Tag("span").attr("class", "badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
                                         new HtmlBuffer.Plain(" "),
-                                        md2html(li.getContent())
+                                        md2html(li.getContent(), generatorContext)
                                 ));
                     }
                 }
@@ -374,13 +389,13 @@ public class PageToHtmlUtils {
 
                 HtmlBuffer.Tag th = new HtmlBuffer.Tag("tr");
                 th.body(new HtmlBuffer.TagList(
-                        Arrays.stream(columns).map(x -> new HtmlBuffer.Tag("th").body(md2html(x.getName()))).collect(Collectors.toList())
+                        Arrays.stream(columns).map(x -> new HtmlBuffer.Tag("th").body(md2html(x.getName(), generatorContext))).collect(Collectors.toList())
                 ));
                 rows.add(th);
                 for (MdRow row : t.getRows()) {
                     HtmlBuffer.Tag tr = new HtmlBuffer.Tag("tr");
                     tr.body(new HtmlBuffer.TagList(
-                            Arrays.stream(row.getCells()).map(x -> new HtmlBuffer.Tag("td").body(md2html(x))).collect(Collectors.toList())
+                            Arrays.stream(row.getCells()).map(x -> new HtmlBuffer.Tag("td").body(md2html(x, generatorContext))).collect(Collectors.toList())
                     ));
                     rows.add(tr);
                 }
@@ -391,7 +406,7 @@ public class PageToHtmlUtils {
                 MdXml xml = markdown.asXml();
                 switch (xml.getTag().toLowerCase()) {
                     case "tabs": {
-                        return md2htmlXmlTabs(xml);
+                        return md2htmlXmlTabs(xml, generatorContext);
                     }
                 }
                 return null;
@@ -400,13 +415,13 @@ public class PageToHtmlUtils {
         return null;
     }
 
-    private HtmlBuffer.Node md2htmlXmlTabs(MdXml xml) {
+    private HtmlBuffer.Node md2htmlXmlTabs(MdXml xml, GeneratorContext generatorContext) {
         String dv = xml.getProperties().get("defaultValue");
         String valuesString = xml.getProperties().get("values");
         //Map<String, String> map = valuesString == null ? null : NElements.of().json().parse(valuesString, Map.class);
         List<HtmlBuffer.Node> allHeader = new ArrayList<>();
         List<HtmlBuffer.Node> allContent = new ArrayList<>();
-        String newUuid = "id" + UUID.randomUUID().toString().replace("-", "");
+        String newUuid = "id" + generatorContext.nextId().replace("-", "");
         MdElement[] children = xml.getContent().asBody().getChildren();
         for (int i = 0; i < children.length; i++) {
             MdElement c = children[i];
@@ -425,7 +440,7 @@ public class PageToHtmlUtils {
             }
             {
                 HtmlBuffer.Tag h = new HtmlBuffer.Tag("div").attr("class", "tab-pane fade show " + active).attr("id", currId).attr("role", "tabpanel").attr("aria-labelledby", currId + "-tab");
-                h.body(md2html(cx.getContent()));
+                h.body(md2html(cx.getContent(), generatorContext));
                 allContent.add(h);
             }
 
@@ -456,5 +471,16 @@ public class PageToHtmlUtils {
             }
         }
         return sb.toString();
+    }
+
+    static class MyGeneratorContext implements GeneratorContext {
+        int index = 1;
+
+        @Override
+        public String nextId() {
+            int i = index;
+            index++;
+            return "i" + i;
+        }
     }
 }
