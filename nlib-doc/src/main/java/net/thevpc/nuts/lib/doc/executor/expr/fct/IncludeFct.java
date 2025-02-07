@@ -29,6 +29,9 @@ public class IncludeFct extends BaseNexprNExprFct {
         String str = (String) args.get(0).getValue().orNull();
         String path = FileProcessorUtils.toAbsolute(str, fcontext.getWorkingDirRequired());
         NPath opath = NPath.of(path);
+        if(!opath.isRegularFile()){
+            throw new IllegalArgumentException(name + " : path not found : " + path);
+        }
         fcontext.getLog().debug("eval", name + "(" + StringUtils.toLiteralString(opath) + ")");
         try (InputStream in = opath.getInputStream()) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();

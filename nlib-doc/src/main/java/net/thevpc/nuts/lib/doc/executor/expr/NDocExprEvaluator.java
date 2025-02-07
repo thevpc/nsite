@@ -65,9 +65,9 @@ public class NDocExprEvaluator implements net.thevpc.nuts.lib.doc.executor.NDocE
         });
         NExprNode nExprNode = decl2.parse(content).get();
         NOptional<Object> eval = nExprNode.eval(decl2);
-        if (!eval.isPresent()) {
-            eval = nExprNode.eval(decl2);
-        }
+//        if (!eval.isPresent()) {
+//            eval = nExprNode.eval(decl2);
+//        }
         return eval.get();
     }
 
