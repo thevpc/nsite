@@ -69,8 +69,7 @@ public class NDocContext {
 
             @Override
             public void info(String title, String message) {
-                log().verb(NLogVerb.INFO).level(Level.INFO)
-                        .log(NMsg.ofC("%s : %s", title, message));
+                NTrace.trace(NMsg.ofC("%s : %s", title, message));
             }
 
             @Override
