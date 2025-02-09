@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -696,6 +697,23 @@ public class BaseMdParser implements MdParser {
         }
         if (e.isText()) {
             return e.asText().toInline();
+        }
+        if (e.isBody()) {
+            MdBody body = e.asBody();
+            if (!body.isInline()) {
+                body = new MdBody(
+                        Arrays.stream(body.getChildren()).map(x -> {
+                            if (x.isText() && !x.isInline()) {
+                                return x.asText().toInline();
+                            }
+                            return x;
+                        }).toArray(MdElement[]::new)
+                );
+            }
+            if (!body.isInline()) {
+                throw new IllegalArgumentException("expected inline able element. got: " + e.type());
+            }
+            return body;
         }
         throw new IllegalArgumentException("expected inline able element. got: " + e.type());
     }

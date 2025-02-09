@@ -16,7 +16,12 @@ public class MdBody extends MdParent {
 
     @Override
     public boolean isInline() {
-        return false;
+//        for (MdElement child : getChildren()) {
+//            if(!child.isInline()) {
+//                return false;
+//            }
+//        }
+        return true;
     }
 
     @Override
