@@ -645,7 +645,7 @@ public class BaseMdParser implements MdParser {
         if (r < 0) {
             return null;
         }
-        if (r == '+' || r == '-' || r == '*') {
+        if (r == '+' || r == '-' || r == '*' || r == '◦' || r == '•') {
             String s = reader.readChars((char) r, 1, 10);
             if (s.length() > 0) {
                 int c = reader.readChar();
@@ -669,7 +669,7 @@ public class BaseMdParser implements MdParser {
                 return null;
             }
         } else {
-            String p = reader.peekRegexp("[ ]+[*+-] ");
+            String p = reader.peekRegexp("[ ]+[*+-•◦] ");
             if (p != null) {
                 //remove last
                 char cc = p.charAt(p.length() - 2);
