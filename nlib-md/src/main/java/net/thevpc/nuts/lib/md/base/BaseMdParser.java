@@ -384,7 +384,6 @@ public class BaseMdParser implements MdParser {
                     break;
                 }
                 case '*':
-                case '<':
                 case '_': {
                     if (cond.exit(c, reader)) {
                         addSep = "";
@@ -407,6 +406,32 @@ public class BaseMdParser implements MdParser {
                             sb.append(addSep);
                             sb.append(c);
                             addSep = "";
+                        }
+                    }
+                    break;
+                }
+                case '<': {
+                    if (cond.exit(c, reader)) {
+                        addSep = "";
+                        if (sb.length() == 0) {
+                            return null;
+                        }
+                        doLoop = false;
+                    } else {
+                        if (last <= 0 || !isWord(last)) {
+                            doLoop = false;
+                            addSep = "";
+                        } else {
+                            String su = reader.peekString(3);
+                            if(su.length()>1 && (su.charAt(1)=='/' || Character.isAlphabetic(su.charAt(1)))){
+                                //this is an XML tag.
+                                doLoop = false;
+                            }else{
+                                reader.readChar();
+                                sb.append(addSep);
+                                sb.append(c);
+                                addSep = "";
+                            }
                         }
                     }
                     break;
