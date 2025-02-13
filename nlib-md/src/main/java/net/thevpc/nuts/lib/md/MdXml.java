@@ -78,19 +78,55 @@ public class MdXml extends MdAbstractElement {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("<").append(tag);
-        if (properties != null && properties.size() > 0) {
-            for (Map.Entry<String, String> e : properties.entrySet()) {
-                sb.append(" ").append(e.getKey());
-                if (e.getValue() != null) {
-                    sb.append("=").append('"').append(MdUtils.escapeString(e.getValue())).append('"');
+        switch (tagType){
+            case OPEN:{
+                sb.append("<").append(tag);
+                if (properties != null && properties.size() > 0) {
+                    for (Map.Entry<String, String> e : properties.entrySet()) {
+                        sb.append(" ").append(e.getKey());
+                        if (e.getValue() != null) {
+                            sb.append("=").append('"').append(MdUtils.escapeString(e.getValue())).append('"');
+                        }
+                    }
                 }
+                sb.append(">");
+                sb.append(content);
+                sb.append("</").append(tag);
+                sb.append(">");
+                break;
+            }
+            case VOID:{
+                sb.append("<").append(tag);
+                if (properties != null && properties.size() > 0) {
+                    for (Map.Entry<String, String> e : properties.entrySet()) {
+                        sb.append(" ").append(e.getKey());
+                        if (e.getValue() != null) {
+                            sb.append("=").append('"').append(MdUtils.escapeString(e.getValue())).append('"');
+                        }
+                    }
+                }
+                sb.append(">");
+                break;
+            }
+            case CLOSE:{
+                sb.append("</").append(tag);
+                sb.append(">");
+                break;
+            }
+            case AUTO_CLOSE:{
+                sb.append("<").append(tag);
+                if (properties != null && properties.size() > 0) {
+                    for (Map.Entry<String, String> e : properties.entrySet()) {
+                        sb.append(" ").append(e.getKey());
+                        if (e.getValue() != null) {
+                            sb.append("=").append('"').append(MdUtils.escapeString(e.getValue())).append('"');
+                        }
+                    }
+                }
+                sb.append("/>");
+                break;
             }
         }
-        sb.append(">");
-        sb.append(content);
-        sb.append("</").append(tag);
-        sb.append(">");
         return sb.toString();
     }
 

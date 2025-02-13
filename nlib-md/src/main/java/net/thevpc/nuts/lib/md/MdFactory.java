@@ -17,6 +17,8 @@
  */
 package net.thevpc.nuts.lib.md;
 
+import net.thevpc.nuts.io.NInputSource;
+import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.lib.md.base.DefaultMdProvider;
 import net.thevpc.nuts.util.NRef;
 
@@ -54,6 +56,16 @@ public class MdFactory {
 
     public static MdParser createParser(String mimeType, InputStream inputStream) {
         return createParser(mimeType,new InputStreamReader(inputStream));
+    }
+
+    public static MdElement parse(String mimeType, NInputSource inputSource) {
+        try(MdParser p=createParser(mimeType,inputSource)) {
+            return p.parse();
+        }
+    }
+
+    public static MdParser createParser(String mimeType, NInputSource inputSource) {
+        return createParser(mimeType,inputSource.getReader());
     }
 
     public static MdParser createParser(String mimeType, Reader reader) {

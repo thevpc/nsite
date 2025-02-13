@@ -137,7 +137,12 @@ public class MdElementAndChildrenList {
                 }
             }
             case BODY: {
-                return true;
+                switch (childType) {
+                    case TITLE:
+                        return false;
+                    default:
+                        return true;
+                }
             }
             default: {
                 return false;
