@@ -423,10 +423,10 @@ public class BaseMdParser implements MdParser {
                             addSep = "";
                         } else {
                             String su = reader.peekString(3);
-                            if(su.length()>1 && (su.charAt(1)=='/' || Character.isAlphabetic(su.charAt(1)))){
+                            if (su.length() > 1 && (su.charAt(1) == '/' || Character.isAlphabetic(su.charAt(1)))) {
                                 //this is an XML tag.
                                 doLoop = false;
-                            }else{
+                            } else {
                                 reader.readChar();
                                 sb.append(addSep);
                                 sb.append(c);
@@ -951,7 +951,6 @@ public class BaseMdParser implements MdParser {
     }
 
     private MdElement readTable() {
-        List<MdColumn> columns = new ArrayList<>();
         MdRow headers = readRow();
         MdRow nextRow = readRow();
         List<MdHorizontalAlign> sortAligns = readHeaderRowAlignments(headers, nextRow);
@@ -959,10 +958,6 @@ public class BaseMdParser implements MdParser {
             nextRow = readRow();
         } else {
             sortAligns = new ArrayList<>();
-        }
-        for (int i = 0; i < headers.size(); i++) {
-            MdHorizontalAlign ha = i < sortAligns.size() ? sortAligns.get(i) : MdHorizontalAlign.LEFT;
-            columns.add(new MdColumn(headers.get(i), ha));
         }
         List<MdRow> rows = new ArrayList<>();
         if (nextRow != null) {
@@ -975,7 +970,33 @@ public class BaseMdParser implements MdParser {
             }
             rows.add(t);
         }
+        int colSize = headers.size();
+        for (MdRow row : rows) {
+            colSize = Math.max(colSize, row.size());
+        }
+        for (int i = 0; i < rows.size(); i++) {
+            MdRow row = ensureRowMinSize(rows.get(i), colSize);
+            rows.set(i, row);
+        }
+        headers = ensureRowMinSize(headers, colSize);
+        List<MdColumn> columns = new ArrayList<>();
+        for (int i = 0; i < headers.size(); i++) {
+            MdHorizontalAlign ha = i < sortAligns.size() ? sortAligns.get(i) : MdHorizontalAlign.LEFT;
+            columns.add(new MdColumn(headers.get(i), ha));
+        }
+
         return new MdTable(columns.toArray(new MdColumn[0]), rows.toArray(new MdRow[0]));
+    }
+
+    private MdRow ensureRowMinSize(MdRow t, int minSize) {
+        if (t.getCells().length < minSize) {
+            List<MdElement> t2 = new ArrayList<>(Arrays.asList(t.getCells()));
+            while (t2.size() < minSize) {
+                t2.add(new MdText("", true));
+            }
+            t = new MdRow(t2.toArray(new MdElement[0]), t.isHeader());
+        }
+        return t;
     }
 
     private MdRow readRow() {
