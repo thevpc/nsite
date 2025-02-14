@@ -4,6 +4,7 @@ import net.thevpc.nuts.lib.md.*;
 import net.thevpc.nuts.lib.md.docusaurus.DocusaurusTextReader;
 import net.thevpc.nuts.lib.md.docusaurus.TextReader;
 import net.thevpc.nuts.lib.md.util.MdElementAndChildrenList;
+import net.thevpc.nuts.util.NBlankable;
 import net.thevpc.nuts.util.NStringBuilder;
 import org.yaml.snakeyaml.Yaml;
 
@@ -316,6 +317,7 @@ public class BaseMdParser implements MdParser {
                         case STOP: {
                             addSep = "";
                             doLoop = false;
+                            cond.wasNewline = true;
                             break;
                         }
 //                        case CONSUME:{
@@ -461,6 +463,7 @@ public class BaseMdParser implements MdParser {
                 case '|': {
                     if (cond.exitOnPipe) {
                         addSep = "";
+                        cond.wasPipe = true;
                         if (sb.length() == 0) {
                             return null;
                         }
@@ -572,10 +575,12 @@ public class BaseMdParser implements MdParser {
 
     public MdElement readLine(Cond cond, SectionPathHolder path) {
         List<MdElement> all = new ArrayList<>();
+        boolean wasPipe = false;
         while (reader.hasMore()) {
             SectionPath pathBefore = path.path;
             MdElement z = readNext(cond, path);
             if (z != null) {
+                wasPipe = cond.wasPipe;
                 if (!z.isInline()) {
 //                    if (z.isText()) {
 //                        all.add(MdText.phrase(z.asText().getText()));
@@ -597,6 +602,7 @@ public class BaseMdParser implements MdParser {
                 break;
             }
         }
+        cond.wasPipe = wasPipe;
         if (all.size() == 0) {
             return null;
         }
@@ -744,6 +750,7 @@ public class BaseMdParser implements MdParser {
     }
 
     public MdElement readNext(Cond cond, SectionPathHolder path) {
+        cond.resetResult();
         int q = reader.peekChar();
         if (q < 0) {
             return null;
@@ -889,12 +896,14 @@ public class BaseMdParser implements MdParser {
                 }
                 case '|': {
                     if (cond.exit(c, reader)) {
+                        cond.wasPipe = true;
                         return null;
                     }
                     if (wasNewline0) {
                         return readTable();
                     }
                     if (cond.exitOnPipe) {
+                        cond.wasPipe = true;
                         return null;
                     }
                     //reader.readChar();//skip pipe!
@@ -1016,7 +1025,8 @@ public class BaseMdParser implements MdParser {
                     lastEmptyCol = false;
                     reader.readSpaces();
                     if (reader.readChar('|')) {
-                        MdElement cell = readLine(new Cond()
+                        Cond c2 = new Cond();
+                        MdElement cell = readLine(c2
                                         .setExitOnPipe(true)
                                         .setConsumeNewline(NewLineAction.STOP)
                                 , new SectionPathHolder());
@@ -1026,8 +1036,18 @@ public class BaseMdParser implements MdParser {
                             cells.add(cell);
                             break;
                         } else {
-                            cell = trimElement(cell);
-                            cells.add(cell);
+                            if (c2.wasPipe) {
+                                cell = trimElement(cell);
+                                cells.add(cell);
+                            } else {
+                                if(cell instanceof MdText  && NBlankable.isBlank(((MdText) cell).getText())){
+                                    //this is trailing strings
+                                    break;
+                                }else {
+                                    cell = trimElement(cell);
+                                    cells.add(cell);
+                                }
+                            }
                         }
                     } else {
                         break;
@@ -1224,6 +1244,7 @@ public class BaseMdParser implements MdParser {
         boolean exitOnUnderscore2;
         boolean exitOnStar1;
         boolean exitOnStar2;
+        boolean wasPipe;
 
         public boolean isExitOnPipe() {
             return exitOnPipe;
@@ -1400,6 +1421,10 @@ public class BaseMdParser implements MdParser {
             } catch (CloneNotSupportedException e) {
                 throw new IllegalArgumentException(e);
             }
+        }
+
+        public void resetResult() {
+            wasPipe = false;
         }
     }
 
