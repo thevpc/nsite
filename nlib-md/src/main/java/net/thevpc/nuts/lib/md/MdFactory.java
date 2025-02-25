@@ -21,6 +21,7 @@ import net.thevpc.nuts.io.NInputSource;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.lib.md.base.DefaultMdProvider;
 import net.thevpc.nuts.util.NRef;
+import net.thevpc.nuts.util.NStringUtils;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -293,7 +294,7 @@ public class MdFactory {
     }
 
     public static MdElement ul(int depth, MdElement elem) {
-        return new MdUnNumberedItem("", depth, elem, new MdElement[0]);
+        return new MdUnNumberedItem("", NStringUtils.repeat(" ",depth),depth, elem, new MdElement[0]);
     }
 
     public static MdElement ol(int number, int depth, MdElement elem) {

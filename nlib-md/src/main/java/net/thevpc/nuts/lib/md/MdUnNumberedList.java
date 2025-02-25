@@ -17,6 +17,8 @@
  */
 package net.thevpc.nuts.lib.md;
 
+import net.thevpc.nuts.lib.md.util.MdUtils;
+import net.thevpc.nuts.util.NAssert;
 import net.thevpc.nuts.util.NBlankable;
 
 import java.util.Arrays;
@@ -27,15 +29,45 @@ import java.util.Objects;
  */
 public class MdUnNumberedList extends MdParent {
     private MdElementType id;
+    private String prefix;
 
     public MdUnNumberedList(MdUnNumberedItem[] content) {
         super(content);
         id = new MdElementType(MdElementTypeGroup.UNNUMBERED_LIST, content[0].type().depth());
+        if (content.length > 1) {
+            String p = content[0].getPrefix();
+            for (int i = 1; i < content.length; i++) {
+                MdUnNumberedItem c = content[i];
+                String p2 = c.getPrefix();
+                NAssert.requireTrue(Objects.equals(p, p2), "equals " + p + " and " + p2);
+            }
+            this.prefix = p;
+        } else {
+            this.prefix = "";
+        }
     }
 
     public MdUnNumberedList(int depth, MdUnNumberedItem[] content) {
         super(content);
         id = new MdElementType(MdElementTypeGroup.UNNUMBERED_LIST, depth);
+        if (content.length > 1) {
+            String p = content[0].getPrefix();
+            for (int i = 1; i < content.length; i++) {
+                MdUnNumberedItem c = content[i];
+                String p2 = c.getPrefix();
+                if(!Objects.equals(p, p2)){
+                    boolean u = MdUtils.isUnnumberedPrefixChild(p2, p);
+                    System.out.println("why");
+                }
+                NAssert.requireTrue(Objects.equals(p, p2), "expected '" + p + "' and got '" + p2+"'");
+            }
+        } else {
+            this.prefix = "";
+        }
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 
     public MdElementType type() {

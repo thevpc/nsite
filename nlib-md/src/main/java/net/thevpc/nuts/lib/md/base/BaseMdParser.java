@@ -4,8 +4,10 @@ import net.thevpc.nuts.lib.md.*;
 import net.thevpc.nuts.lib.md.docusaurus.DocusaurusTextReader;
 import net.thevpc.nuts.lib.md.docusaurus.TextReader;
 import net.thevpc.nuts.lib.md.util.MdElementAndChildrenList;
+import net.thevpc.nuts.lib.md.util.MdUtils;
 import net.thevpc.nuts.util.NBlankable;
 import net.thevpc.nuts.util.NStringBuilder;
+import net.thevpc.nuts.util.NStringUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -624,13 +626,14 @@ public class BaseMdParser implements MdParser {
                 }
                 SectionPath newPath = path.path.resolveNext(MdElementTypeGroup.TITLE, s.length());
                 path.path = newPath;
-                return new MdTitle(s, ln, newPath.last().effDepth, new MdElement[0]);
+                return new MdTitle(s, MdUtils.trim(ln), newPath.last().effDepth, new MdElement[0]);
             }
             return null;
         } else {
             return null;
         }
     }
+
 
     public MdElement readXml() {
         if (reader.peekChar() == '<') {
@@ -672,7 +675,7 @@ public class BaseMdParser implements MdParser {
     }
 
     public MdElement readUnNumberedListItem(SectionPathHolder path, String prefix) {
-        Pattern p = Pattern.compile("^(?<space>[ ]*)(?<bullet>[-+*]+)(?<spaceAfter> )*$");
+        Pattern p = Pattern.compile("^(?<space>[ ]*)(?<bullet>([-]+|[+]+|[*]+))(?<spaceAfter> )+$");
         Matcher m = p.matcher(prefix);
         String space;
         String bullet;
@@ -692,7 +695,7 @@ public class BaseMdParser implements MdParser {
         ln = requireInline(ln);
         SectionPath newPath = path.path.resolveNext(MdElementTypeGroup.UNNUMBERED_ITEM, bullet.length());
         path.path = newPath;
-        return new MdUnNumberedItem(bullet, newPath.last().effDepth, ln, new MdElement[0]);
+        return new MdUnNumberedItem(bullet, prefix, newPath.last().effDepth, MdUtils.trim(ln), new MdElement[0]);
     }
 
     public MdElement requireInline(MdElement e) {
@@ -783,15 +786,8 @@ public class BaseMdParser implements MdParser {
                     if (cond.exit(c, reader)) {
                         return null;
                     }
-                    if (wasNewline0) {
-                        MdElement t = readUnNumberedListItem(path, String.valueOf(c));
-                        if (t != null) {
-                            return t;
-                        }
-                    } else {
-                        if (cond.exit('*', reader)) {
-                            return null;
-                        }
+                    if (cond.exit('*', reader)) {
+                        return null;
                     }
                     MdElement b = readBold(cond);
                     if (b != null) {
@@ -805,12 +801,6 @@ public class BaseMdParser implements MdParser {
                 case '+': {
                     if (cond.exit(c, reader)) {
                         return null;
-                    }
-                    if (wasNewline0) {
-                        MdElement t = readUnNumberedListItem(path, String.valueOf(c));
-                        if (t != null) {
-                            return t;
-                        }
                     }
 //                    return readText(cond.copy().setConsumeNewline(NewLineAction.STOP));
                     reader.readChar();

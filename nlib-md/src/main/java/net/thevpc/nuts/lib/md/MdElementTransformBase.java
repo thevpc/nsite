@@ -216,7 +216,7 @@ public class MdElementTransformBase {
 
     protected MdElement transformUnNumberedItem(MdElementPath<MdUnNumberedItem> path) {
         MdUnNumberedItem e = path.getElement();
-        return new MdUnNumberedItem(e.getType(), e.type().depth(), transformElement(path.append(e.getValue())), new MdElement[0]);
+        return new MdUnNumberedItem(e.getType(),e.getPrefix(), e.type().depth(), transformElement(path.append(e.getValue())), new MdElement[0]);
     }
 
     protected MdElement transformTitle(MdElementPath<MdTitle> path) {

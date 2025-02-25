@@ -20,6 +20,7 @@ package net.thevpc.nuts.lib.md;
 import net.thevpc.nuts.lib.md.base.MdAbstractElement;
 import net.thevpc.nuts.lib.md.util.MdUtils;
 import net.thevpc.nuts.util.NStringBuilder;
+import net.thevpc.nuts.util.NStringUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -31,22 +32,28 @@ import java.util.Objects;
 public class MdUnNumberedItem extends MdAbstractElement {
 
     private String type;
+    private String prefix;
     private MdElement value;
     private MdElementType id;
     private MdElement[] children;
 
-    public MdUnNumberedItem(String type, int depth, MdElement value) {
-        this(type,depth,value,new MdElement[0]);
+    public MdUnNumberedItem(String type, String prefix,int depth, MdElement value) {
+        this(type,prefix,depth,value,new MdElement[0]);
     }
 
-    public MdUnNumberedItem(String type, int depth, MdElement value,MdElement[] children) {
+    public MdUnNumberedItem(String type, String prefix,int depth, MdElement value,MdElement[] children) {
         this.type = type;
         this.value = value;
         if(!value.isInline()){
             throw new IllegalArgumentException("unexpected newline element in un-numbered item: "+value.type());
         }
+        this.prefix = NStringUtils.trimRight(prefix);
         this.children = children==null?new MdElement[0] :children ;
         id=new MdElementType(MdElementTypeGroup.UNNUMBERED_ITEM,depth);
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 
     @Override

@@ -5,6 +5,7 @@ import net.thevpc.nuts.lib.md.base.MdAbstractElement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MdElementAndChildrenList {
     private Object frontMatter;
@@ -16,7 +17,7 @@ public class MdElementAndChildrenList {
 
     public MdElement build() {
         MdElementAndChildren b = currPath.get(0).build();
-        ((MdAbstractElement)b.e).setPreambleHeader(frontMatter);
+        ((MdAbstractElement) b.e).setPreambleHeader(frontMatter);
         return b.e;
     }
 
@@ -26,7 +27,7 @@ public class MdElementAndChildrenList {
 
     public int indexOfParent(MdElement n) {
         for (int i = currPath.size() - 1; i >= 0; i--) {
-            if (isChild(n, currPath.get(i).e)) {
+            if (currPath.get(i).isParentOf(n)) {
                 return i;
             }
         }
@@ -80,75 +81,6 @@ public class MdElementAndChildrenList {
 
     }
 
-    public boolean isChild(MdElement a, MdElement b) {
-        MdElementTypeGroup childType = a.type().group();
-        int childDepth = a.type().depth();
-        MdElementTypeGroup parentType = b.type().group();
-        int parentDepth = b.type().depth();
-        switch (parentType) {
-            case TITLE: {
-                switch (childType) {
-                    case TITLE:
-                        return childDepth > parentDepth;
-                    default:
-                        return true;
-                }
-            }
-            case NUMBERED_LIST: {
-                switch (childType) {
-                    case NUMBERED_ITEM: {
-                        return childDepth >= parentDepth;
-                    }
-                    default:
-                        return false;
-                }
-            }
-            case UNNUMBERED_LIST: {
-                switch (childType) {
-                    case UNNUMBERED_ITEM: {
-                        return childDepth >= parentDepth;
-                    }
-                    default:
-                        return false;
-                }
-            }
-            case UNNUMBERED_ITEM:{
-                switch (childType) {
-                    case UNNUMBERED_ITEM: {
-                        return childDepth > parentDepth;
-                    }
-                    case NUMBERED_ITEM: {
-                        return childDepth > parentDepth;
-                    }
-                    default:
-                        return false;
-                }
-            }
-            case NUMBERED_ITEM: {
-                switch (childType) {
-                    case NUMBERED_ITEM: {
-                        return childDepth > parentDepth;
-                    }
-                    case UNNUMBERED_ITEM: {
-                        return childDepth > parentDepth;
-                    }
-                    default:
-                        return false;
-                }
-            }
-            case BODY: {
-                switch (childType) {
-                    case TITLE:
-                        return false;
-                    default:
-                        return true;
-                }
-            }
-            default: {
-                return false;
-            }
-        }
-    }
 
     public Object getFrontMatter() {
         return frontMatter;

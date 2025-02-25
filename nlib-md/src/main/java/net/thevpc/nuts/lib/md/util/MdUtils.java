@@ -1,5 +1,11 @@
 package net.thevpc.nuts.lib.md.util;
 
+import net.thevpc.nuts.lib.md.MdBody;
+import net.thevpc.nuts.lib.md.MdElement;
+import net.thevpc.nuts.lib.md.MdPhrase;
+import net.thevpc.nuts.lib.md.MdText;
+import net.thevpc.nuts.util.NStringUtils;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -8,6 +14,53 @@ import java.util.List;
 
 public class MdUtils {
     private static final char[] HEXARR = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
+    public static MdElement trim(MdElement e) {
+        return trim(e, true, true);
+    }
+
+    public static MdElement trim(MdElement e, boolean left, boolean right) {
+        if (!left && !right) {
+            return e;
+        }
+        if (e instanceof MdText) {
+            MdText u = (MdText) e;
+            String s = u.getText();
+            s = (left && right) ? NStringUtils.trim(s) : left ? NStringUtils.trimLeft(s) : NStringUtils.trimRight(s);
+            MdText p = new MdText(s, u.isInline());
+            p.setPreambleHeader(e.getPreambleHeader());
+            return p;
+        } else if (e instanceof MdPhrase) {
+            MdElement[] c = ((MdPhrase) e).getChildren();
+            if (c.length > 0) {
+                if (left) {
+                    c[0] = trim(c[0], true, false);
+                }
+                if (right) {
+                    c[c.length - 1] = trim(c[c.length - 1], false, true);
+                }
+                MdPhrase p = new MdPhrase(c);
+                p.setPreambleHeader(e.getPreambleHeader());
+                return p;
+            }
+            return e;
+        } else if (e instanceof MdBody) {
+            MdElement[] c = ((MdBody) e).getChildren();
+            if (c.length > 0) {
+                if (left) {
+                    c[0] = trim(c[0], true, false);
+                }
+                if (right) {
+                    c[c.length - 1] = trim(c[c.length - 1], false, true);
+                }
+                MdBody p = new MdBody(c);
+                p.setPreambleHeader(e.getPreambleHeader());
+                return p;
+            }
+            return e;
+        }
+        return e;
+    }
 
     public static String times(char c, int x) {
         char[] s = new char[x];
@@ -104,5 +157,15 @@ public class MdUtils {
 
     public static char toHex(int nibble) {
         return HEXARR[(nibble & 0xF)];
+    }
+
+    public static boolean isUnnumberedPrefixChild(String childPrefix,String parentPrefix){
+        if(childPrefix.length() > parentPrefix.length()){
+            if(childPrefix.endsWith(parentPrefix)){
+                String s = childPrefix.substring(0, childPrefix.length() - parentPrefix.length());
+                return s.trim().isEmpty();
+            }
+        }
+        return false;
     }
 }

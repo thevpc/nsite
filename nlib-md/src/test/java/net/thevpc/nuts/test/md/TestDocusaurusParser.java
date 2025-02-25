@@ -73,9 +73,9 @@ public class TestDocusaurusParser {
         System.out.println(e);
     }
 
-//    @Test
+    //    @Test
     public void test04() {
-        if(Files.exists(Paths.get("documentation/website/.dir-template"))) {
+        if (Files.exists(Paths.get("documentation/website/.dir-template"))) {
             String file = "documentation/website/.dir-template/src/docs/intro/nuts-and-maven.md";
             try (FileReader fr = new FileReader(file)) {
 
@@ -98,8 +98,8 @@ public class TestDocusaurusParser {
                 new MdElement[]{
                         new MdUnNumberedList(
                                 new MdUnNumberedItem[]{
-                                        new MdUnNumberedItem("*", 1, MdText.phrase("one")),
-                                        new MdUnNumberedItem("*", 1, MdText.phrase("two")),
+                                        new MdUnNumberedItem("*", "*", 1, MdText.phrase("one")),
+                                        new MdUnNumberedItem("*", "*", 1, MdText.phrase("two")),
                                 }
                         )
                 }
@@ -271,10 +271,10 @@ public class TestDocusaurusParser {
         li.add(new MdTitle("##", MdText.phrase("Title 2"), 2));
         li.add(MdText.phrase("description 5"));
         li.add(MdText.phrase("description 6"));
-        li.add(new MdUnNumberedItem("*", 1, MdText.phrase("item 1")));
-        li.add(new MdUnNumberedItem("*", 1, MdText.phrase("item 2")));
-        li.add(new MdUnNumberedItem("*", 2, MdText.phrase("item 2.1")));
-        li.add(new MdUnNumberedItem("*", 1, MdText.phrase("item 3")));
+        li.add(new MdUnNumberedItem("*", "*", 1, MdText.phrase("item 1")));
+        li.add(new MdUnNumberedItem("*", "*", 1, MdText.phrase("item 2")));
+        li.add(new MdUnNumberedItem("*", "**", 2, MdText.phrase("item 2.1")));
+        li.add(new MdUnNumberedItem("*", "**", 1, MdText.phrase("item 3")));
         li.add(MdText.phrase("description 7"));
         li.add(new MdTitle("##", MdText.phrase("Title 3"), 2));
         li.add(MdText.phrase("description 7"));
@@ -302,7 +302,7 @@ public class TestDocusaurusParser {
     @Test
     public void testRemoveMe() {
         try {
-            MdParser parser = MdFactory.createParser(null,new FileReader(
+            MdParser parser = MdFactory.createParser(null, new FileReader(
                     "/home/vpc/xprojects/nuts/nuts-community/documentation/website/src/include/documentation/01-intro/.folder-info.md"
             ));
             MdElement p = parser.parse();
