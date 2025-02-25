@@ -671,52 +671,28 @@ public class BaseMdParser implements MdParser {
         return null;
     }
 
-    public MdElement readUnNumberedListItem(SectionPathHolder path) {
-        int r = reader.peekChar();
-        if (r < 0) {
-            return null;
-        }
-        if (r == '+' || r == '-' || r == '*' || r == '◦' || r == '•') {
-            String s = reader.readChars((char) r, 1, 10);
-            if (s.length() > 0) {
-                int c = reader.readChar();
-                if (c == ' ') {
-                    MdElement ln = readLine(new Cond(), new SectionPathHolder());
-                    if (ln == null) {
-                        ln = MdText.empty();
-                    }
-                    ln = requireInline(ln);
-                    SectionPath newPath = path.path.resolveNext(MdElementTypeGroup.UNNUMBERED_ITEM, s.length());
-                    path.path = newPath;
-                    return new MdUnNumberedItem(s, newPath.last().effDepth, ln, new MdElement[0]);
-                }
-                if (c >= 0) {
-                    reader.unread(c);
-                }
-                reader.unread(s);
-                return null;
-            } else {
-                reader.unread(s);
-                return null;
-            }
+    public MdElement readUnNumberedListItem(SectionPathHolder path, String prefix) {
+        Pattern p = Pattern.compile("^(?<space>[ ]*)(?<bullet>[-+*]+)(?<spaceAfter> )*$");
+        Matcher m = p.matcher(prefix);
+        String space;
+        String bullet;
+        String spaceAfter;
+        if (m.matches()) {
+            space = m.group("space");
+            bullet = m.group("bullet");
+            spaceAfter = m.group("spaceAfter");
         } else {
-            String p = reader.peekRegexp("[ ]+[*+-•◦] ");
-            if (p != null) {
-                //remove last
-                char cc = p.charAt(p.length() - 2);
-                int depth = p.substring(0, p.length() - 2).length();
-                reader.readString(p);
-                MdElement ln = readLine(new Cond(), new SectionPathHolder());
-                if (ln == null) {
-                    ln = MdText.empty();
-                }
-                ln = requireInline(ln);
-                SectionPath newPath = path.path.resolveNext(MdElementTypeGroup.UNNUMBERED_ITEM, depth + 1);
-                path.path = newPath;
-                return new MdUnNumberedItem(String.valueOf(cc), newPath.last().effDepth, ln, new MdElement[0]);
-            }
+            throw new IllegalArgumentException("invalid unnumbered " + prefix);
         }
-        return null;
+        reader.readString(prefix);
+        MdElement ln = readLine(new Cond(), new SectionPathHolder());
+        if (ln == null) {
+            ln = MdText.empty();
+        }
+        ln = requireInline(ln);
+        SectionPath newPath = path.path.resolveNext(MdElementTypeGroup.UNNUMBERED_ITEM, bullet.length());
+        path.path = newPath;
+        return new MdUnNumberedItem(bullet, newPath.last().effDepth, ln, new MdElement[0]);
     }
 
     public MdElement requireInline(MdElement e) {
@@ -766,19 +742,20 @@ public class BaseMdParser implements MdParser {
             if (wasNewline0) {
                 cond = cond.copy().setWasNewline(false);
             }
+            String peeked = "";
             if (wasNewline0) {
-                if (!cond.exitOnStar1 && !cond.exitOnStar2 && reader.peekRegexp("[ ]+[*] ") != null) {
-                    MdElement t = readUnNumberedListItem(path);
+                if (!cond.exitOnStar1 && !cond.exitOnStar2 && (peeked = reader.peekRegexp("[ ]*[*]+ ")) != null) {
+                    MdElement t = readUnNumberedListItem(path, peeked);
                     if (t != null) {
                         return t;
                     }
-                } else if (/*!cond.exitOnStar1 && !cond.exitOnStar2 && */reader.peekRegexp("[ ]+[+] ") != null) {
-                    MdElement t = readUnNumberedListItem(path);
+                } else if (/*!cond.exitOnStar1 && !cond.exitOnStar2 && */(peeked = reader.peekRegexp("[ ]*[+]+ ")) != null) {
+                    MdElement t = readUnNumberedListItem(path, peeked);
                     if (t != null) {
                         return t;
                     }
-                } else if (/*!cond.exitOnStar1 && !cond.exitOnStar2 && */reader.peekRegexp("[ ]+[-] ") != null) {
-                    MdElement t = readUnNumberedListItem(path);
+                } else if (/*!cond.exitOnStar1 && !cond.exitOnStar2 && */(peeked = reader.peekRegexp("[ ]*[-]+ ")) != null) {
+                    MdElement t = readUnNumberedListItem(path, peeked);
                     if (t != null) {
                         return t;
                     }
@@ -807,7 +784,7 @@ public class BaseMdParser implements MdParser {
                         return null;
                     }
                     if (wasNewline0) {
-                        MdElement t = readUnNumberedListItem(path);
+                        MdElement t = readUnNumberedListItem(path, String.valueOf(c));
                         if (t != null) {
                             return t;
                         }
@@ -830,7 +807,7 @@ public class BaseMdParser implements MdParser {
                         return null;
                     }
                     if (wasNewline0) {
-                        MdElement t = readUnNumberedListItem(path);
+                        MdElement t = readUnNumberedListItem(path, String.valueOf(c));
                         if (t != null) {
                             return t;
                         }
@@ -1040,10 +1017,10 @@ public class BaseMdParser implements MdParser {
                                 cell = trimElement(cell);
                                 cells.add(cell);
                             } else {
-                                if(cell instanceof MdText  && NBlankable.isBlank(((MdText) cell).getText())){
+                                if (cell instanceof MdText && NBlankable.isBlank(((MdText) cell).getText())) {
                                     //this is trailing strings
                                     break;
-                                }else {
+                                } else {
                                     cell = trimElement(cell);
                                     cells.add(cell);
                                 }

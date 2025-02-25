@@ -19,6 +19,7 @@ package net.thevpc.nuts.lib.md;
 
 import net.thevpc.nuts.lib.md.base.MdAbstractElement;
 import net.thevpc.nuts.lib.md.util.MdUtils;
+import net.thevpc.nuts.util.NStringBuilder;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -72,7 +73,23 @@ public class MdUnNumberedItem extends MdAbstractElement {
 
     @Override
     public String toString() {
-        return MdUtils.times('*', type().depth()) + " " + getValue();
+        NStringBuilder sb=new NStringBuilder();
+        char cc='-';
+        if(type!=null && !type.trim().isEmpty()){
+            cc=type.trim().charAt(0);
+        }
+        sb.append(MdUtils.times(cc, type().depth()));
+        sb.append(" ").append(getValue());
+        if(children!=null){
+            for (MdElement child : children) {
+                if(!sb.endsWith('\n') && !sb.endsWith('\r')){
+                    sb.append("\n");
+                }
+                String ss = child.toString();
+                sb.append(new NStringBuilder(ss).indent("  "));
+            }
+        }
+        return sb.toString();
     }
 
 
