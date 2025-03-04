@@ -37,7 +37,7 @@ class ListTagNode extends TagNode {
     }
 
     @Override
-    public void run(ProcessStreamContext ctx) throws IOException {
+    public void run(ProcessStreamContext ctx)  {
         for (TagNode child : children) {
             child.run(ctx);
         }

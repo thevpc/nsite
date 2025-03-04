@@ -3,6 +3,7 @@ package net.thevpc.nuts.lib.doc.processor.base;
 import net.thevpc.nuts.util.NLiteral;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 class PlainTagNode extends TagNode {
     private String value;
@@ -11,15 +12,19 @@ class PlainTagNode extends TagNode {
         this.value = value;
     }
 
-    public void run(ProcessStreamContext ctx) throws IOException {
-        ctx.out.write(value);
+    public void run(ProcessStreamContext ctx) {
+        try {
+            ctx.out.write(value);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
     }
 
     @Override
     public String toString() {
-        String a=value;
-        if(a.length()>20){
-            a=a.substring(0,20)+"...";
+        String a = value;
+        if (a.length() > 20) {
+            a = a.substring(0, 20) + "...";
         }
         return "Plain(" + NLiteral.of(a).toStringLiteral() + ')';
     }

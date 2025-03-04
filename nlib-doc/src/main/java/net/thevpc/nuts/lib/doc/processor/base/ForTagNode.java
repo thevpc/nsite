@@ -43,7 +43,7 @@ class ForTagNode extends TagNode {
     }
 
     @Override
-    public void run(ProcessStreamContext ctx) throws IOException {
+    public void run(ProcessStreamContext ctx)  {
         if (varLoopInfo != null) {
             Object o = ctx.context.eval(varLoopInfo.iterableExpr, exprLang);
             Iterator it = null;

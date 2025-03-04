@@ -8,6 +8,7 @@ package net.thevpc.nuts.lib.doc.deprecated;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.xml.parsers.DocumentBuilder;
@@ -53,7 +54,7 @@ public class XmlUtils {
         };
     }
 
-    public static boolean addMavenModule(Document doc, String moduleName) throws IOException {
+    public static boolean addMavenModule(Document doc, String moduleName)  {
         for (Node modules : toItertable(doc.getElementsByTagName("modules"))) {
             if (findChildElement(modules, x -> x.getNodeName().equals(moduleName)) == null) {
                 modules.appendChild(createElementWithText(doc, "module", moduleName));
@@ -63,13 +64,13 @@ public class XmlUtils {
         return false;
     }
 
-    public static Element createElementWithText(Document doc, String element, String text) throws IOException {
+    public static Element createElementWithText(Document doc, String element, String text)  {
         Element m = doc.createElement(element);
         m.appendChild(doc.createTextNode(text));
         return m;
     }
 
-    public static void addMavenDependency(Document doc, String groupId, String artifactId, String version, String scope, boolean update) throws IOException {
+    public static void addMavenDependency(Document doc, String groupId, String artifactId, String version, String scope, boolean update)  {
         for (Node dependencies : toItertable(doc.getElementsByTagName("dependencies"))) {
             Element oldDependency = findChildElement(dependencies, x
                     -> {
@@ -122,7 +123,7 @@ public class XmlUtils {
         boolean accept(Text e);
     }
 
-    public static Element findChildElementWithText(Node modules, String childName, String childText) throws IOException {
+    public static Element findChildElementWithText(Node modules, String childName, String childText)  {
         return findChildElement(modules, x -> {
             try {
                 return x.getNodeName().equals(childName) && findChildText(x, y -> {
@@ -142,14 +143,14 @@ public class XmlUtils {
         return list;
     }
 
-    public static void removeChildren(Node modules) throws IOException {
+    public static void removeChildren(Node modules)  {
         ArrayList<Node> a = makeCollection(toItertable(modules.getChildNodes()));
         for (Node module : makeCollection(toItertable(modules.getChildNodes()))) {
             modules.removeChild(module);
         }
     }
 
-    public static Element findChildText(Node modules, TextFilter e) throws IOException {
+    public static Element findChildText(Node modules, TextFilter e)  {
         for (Node module : toItertable(modules.getChildNodes())) {
             if (module instanceof Text && e.accept((Text) module)) {
                 return (Element) module;
@@ -158,7 +159,7 @@ public class XmlUtils {
         return null;
     }
 
-    public static Element findChildElement(Node modules, ElementFilter e) throws IOException {
+    public static Element findChildElement(Node modules, ElementFilter e)  {
         for (Node module : toItertable(modules.getChildNodes())) {
             if (module instanceof Element && e.accept((Element) module)) {
                 return (Element) module;
@@ -167,7 +168,7 @@ public class XmlUtils {
         return null;
     }
 
-    public static Document load(String str) throws IOException {
+    public static Document load(String str)  {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -178,13 +179,15 @@ public class XmlUtils {
             doc.getDocumentElement().normalize();
             return doc;
         } catch (ParserConfigurationException ex) {
-            throw new IOException(ex);
+            throw new IllegalArgumentException(ex);
         } catch (SAXException ex) {
-            throw new IOException(ex);
+            throw new IllegalArgumentException(ex);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
-    public static String toString(Document doc) throws IOException {
+    public static String toString(Document doc)  {
         try {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -195,7 +198,7 @@ public class XmlUtils {
             transformer.transform(input, output);
             return sw.toString();
         } catch (TransformerException ex) {
-            throw new IOException(ex);
+            throw new IllegalArgumentException(ex);
         }
     }
 

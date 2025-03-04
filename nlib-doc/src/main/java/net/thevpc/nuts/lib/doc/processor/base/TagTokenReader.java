@@ -3,6 +3,7 @@ package net.thevpc.nuts.lib.doc.processor.base;
 import net.thevpc.nuts.io.NCharReader;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 public class TagTokenReader {
     String startTag;
@@ -96,161 +97,165 @@ public class TagTokenReader {
         }
     }
 
-    private TagToken readSpecialToken() throws IOException {
-        int brackets = 0;
-        if (!br.read(startTag)) {
-            throw new IllegalArgumentException("expected " + startTag);
-        }
-        StringBuilderImage buffer = new StringBuilderImage();
-        buffer.appendImageOnly(startTag);
-        boolean end = false;
-        while (!end) {
-            int c = br.peek();
-            if (c < 0) {
-                break;
+    private TagToken readSpecialToken()  {
+        try {
+            int brackets = 0;
+            if (!br.read(startTag)) {
+                throw new IllegalArgumentException("expected " + startTag);
             }
-            switch (c) {
-                case '/': {
-                    if (br.read("//")) {
-                        buffer.append("//");
+            StringBuilderImage buffer = new StringBuilderImage();
+            buffer.appendImageOnly(startTag);
+            boolean end = false;
+            while (!end) {
+                int c = br.peek();
+                if (c < 0) {
+                    break;
+                }
+                switch (c) {
+                    case '/': {
+                        if (br.read("//")) {
+                            buffer.append("//");
+                            while (true) {
+                                int cc = br.read();
+                                if (cc < 0) {
+                                    break;
+                                } else if (cc == '\n') {
+                                    buffer.append((char) cc);
+                                    break;
+                                } else {
+                                    buffer.append((char) cc);
+                                }
+                            }
+                        } else {
+                            buffer.append((char) c);
+                        }
+                        break;
+                    }
+                    case '"': {
+                        buffer.append(br.readChar());
                         while (true) {
                             int cc = br.read();
                             if (cc < 0) {
                                 break;
-                            } else if (cc == '\n') {
+                            } else if (cc == '"') {
                                 buffer.append((char) cc);
                                 break;
+                            } else if (cc == '\\') {
+                                buffer.append((char) cc);
+                                cc = br.read();
+                                if (cc >= 0) {
+                                    buffer.append((char) cc);
+                                }
                             } else {
                                 buffer.append((char) cc);
                             }
                         }
-                    } else {
-                        buffer.append((char) c);
+                        break;
                     }
-                    break;
-                }
-                case '"': {
-                    buffer.append(br.readChar());
-                    while (true) {
-                        int cc = br.read();
-                        if (cc < 0) {
-                            break;
-                        } else if (cc == '"') {
-                            buffer.append((char) cc);
-                            break;
-                        } else if (cc == '\\') {
-                            buffer.append((char) cc);
-                            cc = br.read();
-                            if (cc >= 0) {
-                                buffer.append((char) cc);
-                            }
-                        } else {
-                            buffer.append((char) cc);
-                        }
-                    }
-                    break;
-                }
-                case '\'': {
-                    buffer.append(br.readChar());
-                    while (true) {
-                        int cc = br.read();
-                        if (cc < 0) {
-                            break;
-                        } else if (cc == '\'') {
-                            buffer.append((char) cc);
-                            break;
-                        } else if (cc == '\\') {
-                            buffer.append((char) cc);
-                            cc = br.read();
-                            if (cc >= 0) {
-                                buffer.append((char) cc);
-                            }
-                        } else {
-                            buffer.append((char) cc);
-                        }
-                    }
-                    break;
-                }
-                case '`': {
-                    buffer.append(br.readChar());
-                    while (true) {
-                        int cc = br.read();
-                        if (cc < 0) {
-                            break;
-                        } else if (cc == '`') {
-                            buffer.append((char) cc);
-                            break;
-                        } else if (cc == '\\') {
-                            buffer.append((char) cc);
-                            cc = br.read();
-                            if (cc >= 0) {
-                                buffer.append((char) cc);
-                            }
-                        } else {
-                            buffer.append((char) cc);
-                        }
-                    }
-                    break;
-                }
-                case '{': {
-                    brackets++;
-                    if(isReadEndOfTag(buffer)){
-                        end = true;
-                    }else{
+                    case '\'': {
                         buffer.append(br.readChar());
+                        while (true) {
+                            int cc = br.read();
+                            if (cc < 0) {
+                                break;
+                            } else if (cc == '\'') {
+                                buffer.append((char) cc);
+                                break;
+                            } else if (cc == '\\') {
+                                buffer.append((char) cc);
+                                cc = br.read();
+                                if (cc >= 0) {
+                                    buffer.append((char) cc);
+                                }
+                            } else {
+                                buffer.append((char) cc);
+                            }
+                        }
+                        break;
                     }
-                    break;
-                }
-                case '}': {
-                    brackets--;
-                    boolean peek = br.peek(endTag);
-                    if (brackets <= 0) {
-                        if(isReadEndOfTag(buffer)){
+                    case '`': {
+                        buffer.append(br.readChar());
+                        while (true) {
+                            int cc = br.read();
+                            if (cc < 0) {
+                                break;
+                            } else if (cc == '`') {
+                                buffer.append((char) cc);
+                                break;
+                            } else if (cc == '\\') {
+                                buffer.append((char) cc);
+                                cc = br.read();
+                                if (cc >= 0) {
+                                    buffer.append((char) cc);
+                                }
+                            } else {
+                                buffer.append((char) cc);
+                            }
+                        }
+                        break;
+                    }
+                    case '{': {
+                        brackets++;
+                        if (isReadEndOfTag(buffer)) {
                             end = true;
-                        }else{
+                        } else {
                             buffer.append(br.readChar());
                         }
-                    } else {
+                        break;
+                    }
+                    case '}': {
+                        brackets--;
+                        boolean peek = br.peek(endTag);
+                        if (brackets <= 0) {
+                            if (isReadEndOfTag(buffer)) {
+                                end = true;
+                            } else {
+                                buffer.append(br.readChar());
+                            }
+                        } else {
+                            buffer.append(br.readChar());
+                        }
+                        break;
+                    }
+                    default: {
                         buffer.append(br.readChar());
                     }
-                    break;
-                }
-                default: {
-                    buffer.append(br.readChar());
                 }
             }
-        }
-        String ss = buffer.buffer.toString().trim();
-        if (ss.startsWith(":")) {
-            if (TagStreamProcessor.startsWithWord(ss, ":if")) {
-                return new TagToken(TagTokenType.IF, ss.substring(":if".length()).trim());
+            String ss = buffer.buffer.toString().trim();
+            if (ss.startsWith(":")) {
+                if (TagStreamProcessor.startsWithWord(ss, ":if")) {
+                    return new TagToken(TagTokenType.IF, ss.substring(":if".length()).trim());
 
-            } else if (TagStreamProcessor.startsWithWord(ss, ":else if")) {
-                return new TagToken(TagTokenType.CTRL_ELSE_IF, ss.substring(":else if".length()).trim());
+                } else if (TagStreamProcessor.startsWithWord(ss, ":else if")) {
+                    return new TagToken(TagTokenType.CTRL_ELSE_IF, ss.substring(":else if".length()).trim());
 
-            } else if (TagStreamProcessor.startsWithWord(ss, ":else")) {
-                return new TagToken(TagTokenType.CTRL_ELSE, ss.substring(":else".length()).trim());
+                } else if (TagStreamProcessor.startsWithWord(ss, ":else")) {
+                    return new TagToken(TagTokenType.CTRL_ELSE, ss.substring(":else".length()).trim());
 
-            } else if (TagStreamProcessor.startsWithWord(ss, ":for")) {
-                return new TagToken(TagTokenType.FOR, ss.substring(":for".length()).trim());
+                } else if (TagStreamProcessor.startsWithWord(ss, ":for")) {
+                    return new TagToken(TagTokenType.FOR, ss.substring(":for".length()).trim());
 
-            } else if (TagStreamProcessor.startsWithWord(ss, ":include")) {
-                return new TagToken(TagTokenType.INCLUDE, ss.substring(":include".length()).trim());
+                } else if (TagStreamProcessor.startsWithWord(ss, ":include")) {
+                    return new TagToken(TagTokenType.INCLUDE, ss.substring(":include".length()).trim());
 
-            } else if (TagStreamProcessor.startsWithWord(ss, ":end")) {
-                return new TagToken(TagTokenType.CTRL_END, ss.substring(":end".length()).trim());
+                } else if (TagStreamProcessor.startsWithWord(ss, ":end")) {
+                    return new TagToken(TagTokenType.CTRL_END, ss.substring(":end".length()).trim());
 
-            } else if (ss.startsWith("::")) {
-                return new TagToken(TagTokenType.STATEMENT, ss.substring(2));
+                } else if (ss.startsWith("::")) {
+                    return new TagToken(TagTokenType.STATEMENT, ss.substring(2));
 
-            } else if (ss.startsWith(":")) {
-                return new TagToken(TagTokenType.STATEMENT, ss.substring(1));
+                } else if (ss.startsWith(":")) {
+                    return new TagToken(TagTokenType.STATEMENT, ss.substring(1));
 
-            } else {
-                return new TagToken(TagTokenType.CTRL_OTHER, ss);
+                } else {
+                    return new TagToken(TagTokenType.CTRL_OTHER, ss);
+                }
             }
+            return new TagToken(TagTokenType.EXPR, ss);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-        return new TagToken(TagTokenType.EXPR, ss);
     }
 
     private boolean isReadEndOfTag(StringBuilderImage image) {

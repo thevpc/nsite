@@ -1,6 +1,7 @@
 package net.thevpc.nuts.lib.doc.processor.base;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 class ExpressionTagNode extends TagNode {
     private final String exprLang;
@@ -11,9 +12,13 @@ class ExpressionTagNode extends TagNode {
         this.expr = expr;
     }
 
-    public void run(ProcessStreamContext ctx) throws IOException {
+    public void run(ProcessStreamContext ctx)  {
         String s = ctx.context.executeString(expr, exprLang);
-        ctx.out.write(s);
+        try {
+            ctx.out.write(s);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override

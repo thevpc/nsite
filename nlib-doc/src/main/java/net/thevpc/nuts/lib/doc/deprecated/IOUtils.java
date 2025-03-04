@@ -7,12 +7,8 @@ package net.thevpc.nuts.lib.doc.deprecated;
 
 import net.thevpc.nuts.text.NText;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
@@ -23,15 +19,15 @@ import java.util.Properties;
  */
 public class IOUtils {
 
-    public static String getTextResource(String url) throws IOException {
+    public static String getTextResource(String url)  {
         URL r = IOUtils.class.getResource(url);
         if (r == null) {
-            throw new IOException("Resource not found : [" + url + "]");
+            throw new UncheckedIOException(new IOException("Resource not found : [" + url + "]"));
         }
         return getText(r);
     }
 
-    public static String extractFileName(String str) throws IOException {
+    public static String extractFileName(String str)  {
         int i = str.lastIndexOf('/');
         if (i < 0) {
             return str;
@@ -39,19 +35,21 @@ public class IOUtils {
         return str.substring(i + 1);
     }
 
-    public static void writeStringAppend(String str, File file) throws IOException {
+    public static void writeStringAppend(String str, File file)  {
         File pf = file.getParentFile();
         if (pf != null) {
             pf.mkdirs();
         }
-        FileWriter fileWriter = new FileWriter(file, true);
-        fileWriter.append("\n" + str);
+        try(FileWriter fileWriter = new FileWriter(file, true)) {
+            fileWriter.append("\n" + str);
 //        fileWriter.flush();
-        fileWriter.close();
+        }catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
 //        System.out.println("####[APPEND TO]#### " + file.getPath());
     }
 
-    public static void writeString(String str, File file, ProjectTemplate project) throws IOException {
+    public static void writeString(String str, File file, ProjectTemplate project)  {
         TemplateConsole console = project.getConsole();
         String old = file.exists() ? getText(file) : null;
         boolean isOverride = false;
@@ -72,10 +70,12 @@ public class IOUtils {
         if (pf != null) {
             pf.mkdirs();
         }
-        FileWriter fileWriter = new FileWriter(file);
-        fileWriter.write(str);
-        fileWriter.flush();
-        fileWriter.close();
+        try(FileWriter fileWriter = new FileWriter(file)) {
+            fileWriter.write(str);
+            fileWriter.flush();
+        }catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         if (isOverride) {
             console.println("[OVERRIDE] %s%n", file);
         } else {
@@ -84,31 +84,38 @@ public class IOUtils {
         }
     }
 
-    public static String getText(File website) throws IOException {
-        return getText(website.toURI().toURL());
+    public static String getText(File website)  {
+        try {
+            return getText(website.toURI().toURL());
+        } catch (MalformedURLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
-    public static String getText(URL website) throws IOException {
-        URLConnection connection = website.openConnection();
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                        connection.getInputStream()));
+    public static String getText(URL website)  {
+        try {
+            URLConnection connection = website.openConnection();
+            StringBuilder response = new StringBuilder();
+            try(BufferedReader in = new BufferedReader(
+                    new InputStreamReader(
+                            connection.getInputStream()))) {
+                String inputLine;
+                boolean first = true;
+                 while((inputLine =in.readLine())!=null){
+                    if (first) {
+                        first = false;
+                    } else {
+                        response.append("\n");
+                    }
+                    response.append(inputLine);
+                }
 
-        StringBuilder response = new StringBuilder();
-        String inputLine;
-        boolean first = true;
-        while ((inputLine = in.readLine()) != null) {
-            if (first) {
-                first = false;
-            } else {
-                response.append("\n");
             }
-            response.append(inputLine);
+
+            return response.toString();
+        }catch (IOException ex){
+            throw new UncheckedIOException(ex);
         }
-
-        in.close();
-
-        return response.toString();
     }
 
     public static String toString(Properties newProperties, String comments) {

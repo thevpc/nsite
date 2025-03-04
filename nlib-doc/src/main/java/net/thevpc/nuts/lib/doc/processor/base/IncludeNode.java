@@ -5,6 +5,7 @@ import net.thevpc.nuts.io.NPath;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 
 class IncludeNode extends TagNode {
     private final String exprLang;
@@ -15,7 +16,7 @@ class IncludeNode extends TagNode {
         this.expr = expr;
     }
 
-    public void run(ProcessStreamContext ctx) throws IOException {
+    public void run(ProcessStreamContext ctx) {
         Object eval = ctx.context.eval(expr, exprLang);
         try (InputStream in = NPath.of((String) eval).getInputStream()) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -26,6 +27,8 @@ class IncludeNode extends TagNode {
 //            WriterOutputStream wout = new WriterOutputStream(ctx.out);
 //            ctx.getStreamProcessor().processStream(in, wout,ctx.context);
 //            wout.flush();
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
     }
 

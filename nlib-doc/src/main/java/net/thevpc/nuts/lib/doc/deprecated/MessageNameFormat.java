@@ -9,6 +9,7 @@ import net.thevpc.nuts.util.NBlankable;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,7 +19,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- *
  * @author thevpc
  */
 public class MessageNameFormat {
@@ -32,15 +32,8 @@ public class MessageNameFormat {
             message = "";
         }
         this.message = message;
-        try {
-            //parse here ...
-            part = new MessageParser(new StringReader(message)).parse();
-        } catch (IOException ex) {
-            //should never happen
-            throw new IllegalArgumentException(ex);
-        }
+        part = new MessageParser(new StringReader(message)).parse();
     }
-
 
 
     private static class MessageParser {
@@ -51,32 +44,291 @@ public class MessageNameFormat {
             this.r = r;
         }
 
-        private MessagePart parse() throws IOException {
-            List<MessagePart> all = new ArrayList<>();
-            while (true) {
+        private MessagePart parse() {
+            try {
+                List<MessagePart> all = new ArrayList<>();
+                while (true) {
+                    r.mark(1);
+                    int c = r.read();
+                    if (c == -1) {
+                        break;
+                    }
+                    if (c == '$') {
+                        r.reset();
+                        all.add(readDollarVar());
+                    } else {
+                        r.reset();
+                        StringBuilder sb = new StringBuilder();
+                        while (true) {
+                            r.mark(1);
+                            c = r.read();
+                            if (c == '\\') {
+                                c = r.read();
+                                switch (c) {
+                                    case -1: {
+                                        sb.append('\\');
+                                        break;
+                                    }
+                                    case '\\': {
+                                        sb.append('\\');
+                                        break;
+                                    }
+                                    case 'n': {
+                                        sb.append('\n');
+                                        break;
+                                    }
+                                    case 't': {
+                                        sb.append('\t');
+                                        break;
+                                    }
+                                    case '$': {
+                                        sb.append('$');
+                                        break;
+                                    }
+                                    default: {
+                                        sb.append((char) c);
+                                        break;
+                                    }
+                                }
+                            } else if (c == '$') {
+                                r.reset();
+                                break;
+                            } else if (c == -1) {
+                                break;
+                            } else {
+                                sb.append((char) c);
+                            }
+                        }
+                        all.add(new MessagePartFixed(sb.toString()));
+                    }
+                }
+                if (all.isEmpty()) {
+                    return null;
+                }
+                if (all.size() == 1) {
+                    return all.get(0);
+                }
+                return new MessagePartList(all);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        private Number readLiteralNumber() {
+            try {
+                consumeWhites();
                 r.mark(1);
                 int c = r.read();
-                if (c == -1) {
-                    break;
+                StringBuilder sb = new StringBuilder();
+                int sign = 1;
+                if (c == '-') {
+                    sign = -1;
+                    //this is
+                    c = r.read();
                 }
-                if (c == '$') {
-                    r.reset();
-                    all.add(readDollarVar());
-                } else {
-                    r.reset();
-                    StringBuilder sb = new StringBuilder();
+                if (c == '.' || c >= '0' && c <= '9') {
+                    sb.append((char) c);
+                    //now read until it is no more parsable as number
                     while (true) {
                         r.mark(1);
                         c = r.read();
-                        if (c == '\\') {
+                        if (c == -1) {
+                            String s = sb.toString();
+                            if (s.indexOf('.') >= 0 || s.indexOf('E') >= 0) {
+                                return Double.parseDouble(s);
+                            }
+                            return Integer.parseInt(s);
+                        } else if (c == '.' || c >= '0' && c <= '9' || c == 'E' || c == '+') {
+                            String s = sb.toString() + ((char) c);
+                            if (s.indexOf('.') >= 0 || s.indexOf('E') >= 0) {
+                                if (isValidDouble(s)) {
+                                    sb.append((char) c);
+                                } else {
+                                    r.reset();
+                                    s = sb.toString();
+                                    if (s.indexOf('.') >= 0 || s.indexOf('E') >= 0) {
+                                        return Double.parseDouble(s);
+                                    }
+                                    return Integer.parseInt(s) * sign;
+                                }
+                            } else {
+                                if (isValidInt(s)) {
+                                    sb.append((char) c);
+                                } else {
+                                    r.reset();
+                                    s = sb.toString();
+                                    return Integer.parseInt(s) * sign;
+                                }
+                            }
+                        } else {
+                            r.reset();
+                            String s = sb.toString();
+                            if (s.indexOf('.') >= 0 || s.indexOf('E') >= 0) {
+                                return Double.parseDouble(s);
+                            }
+                            return Integer.parseInt(s);
+                        }
+                    }
+                } else {
+                    r.reset();
+                    return null;
+                }
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        private String readName() {
+            try {
+                int c;
+                //read name
+                StringBuilder n = new StringBuilder();
+                while (true) {
+                    r.mark(1);
+                    c = r.read();
+                    if (c == -1) {
+                        break;
+                    } else if (c != '$' && Character.isJavaIdentifierPart(c)) {
+                        n.append((char) c);
+                    } else {
+                        r.reset();
+                        break;
+                    }
+                }
+                return n.toString();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        private MessagePart readDollarVar() {
+            try {
+                r.mark(1);
+                int c = r.read();
+                if (c != '$') {
+                    throw new IllegalArgumentException("Expected $");
+                }
+                r.mark(1);
+                c = r.read();
+                if (c != '{') {
+                    r.reset();
+                    return new MessagePartExpr(new NameExprNode(readName()));
+                } else {
+                    ExprNode layout = readLayoutNode(true);
+                    consumeWhites();
+                    r.mark(1);
+                    int acc = r.read();
+                    if (acc == -1 || acc == '}') {
+                        //this is ok;
+                    } else {
+                        r.reset();
+                    }
+                    return new MessagePartExpr(layout);
+                }
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        private void consumeWhites() {
+            try {
+                while (true) {
+                    r.mark(1);
+                    int c = r.read();
+                    if (c == -1) {
+                        break;
+                    } else if (Character.isWhitespace(c)) {
+                        //consumre
+                    } else {
+                        r.reset();
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        private ExprNode readLayoutNode(boolean acceptLiterals) {
+            try {
+                consumeWhites();
+                if (acceptLiterals) {
+                    Number p = readLiteralNumber();
+                    if (p != null) {
+                        return new LiteralExprNode(p);
+                    }
+                    String s = readLiteralString();
+                    if (s != null) {
+                        return new LiteralExprNode(s);
+                    }
+                }
+                String n = readName();
+                consumeWhites();
+                r.mark(1);
+                int c = r.read();
+                if (c == -1) {
+                    return new NameExprNode(n);
+                } else if (c == '(') {
+                    FunctionExprNode f = new FunctionExprNode(n);
+                    ExprNode a = readLayoutNode(true);
+                    if (a != null) {
+                        f.args.add(a);
+                        while (true) {
+                            consumeWhites();
+                            r.mark(1);
+                            c = r.read();
+                            if (c == -1) {
+                                break;
+                            } else if (c == ',') {
+                                consumeWhites();
+                            } else if (c == ')') {
+                                break;
+                            } else {
+                                r.reset();
+                                consumeWhites();
+                            }
+                            a = readLayoutNode(true);
+                            if (a != null) {
+                                f.args.add(a);
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    return f;
+                } else {
+                    r.reset();
+                    return new NameExprNode(n);
+                }
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        private String readLiteralString() {
+            try {
+                StringBuilder sb = new StringBuilder();
+                r.mark(1);
+                int c = r.read();
+                if (c != '\'' && c != '"' && c != '`') {
+                    r.reset();
+                    return null;
+                }
+                int start = c;
+                boolean more = true;
+                while (more) {
+                    c = r.read();
+                    switch (c) {
+                        case -1: {
+                            more = false;
+                            break;
+                        }
+                        case '\\': {
                             c = r.read();
                             switch (c) {
                                 case -1: {
                                     sb.append('\\');
-                                    break;
-                                }
-                                case '\\': {
-                                    sb.append('\\');
+                                    more = false;
                                     break;
                                 }
                                 case 'n': {
@@ -87,261 +339,30 @@ public class MessageNameFormat {
                                     sb.append('\t');
                                     break;
                                 }
-                                case '$': {
-                                    sb.append('$');
+                                case 'f': {
+                                    sb.append('\f');
                                     break;
                                 }
                                 default: {
                                     sb.append((char) c);
-                                    break;
                                 }
                             }
-                        } else if (c == '$') {
-                            r.reset();
-                            break;
-                        } else if (c == -1) {
-                            break;
-                        } else {
-                            sb.append((char) c);
-                        }
-                    }
-                    all.add(new MessagePartFixed(sb.toString()));
-                }
-            }
-            if (all.isEmpty()) {
-                return null;
-            }
-            if (all.size() == 1) {
-                return all.get(0);
-            }
-            return new MessagePartList(all);
-        }
-
-        private Number readLiteralNumber() throws IOException {
-            consumeWhites();
-            r.mark(1);
-            int c = r.read();
-            StringBuilder sb = new StringBuilder();
-            int sign = 1;
-            if (c == '-') {
-                sign = -1;
-                //this is
-                c = r.read();
-            }
-            if (c == '.' || c >= '0' && c <= '9') {
-                sb.append((char) c);
-                //now read until it is no more parsable as number
-                while (true) {
-                    r.mark(1);
-                    c = r.read();
-                    if (c == -1) {
-                        String s = sb.toString();
-                        if (s.indexOf('.') >= 0 || s.indexOf('E') >= 0) {
-                            return Double.parseDouble(s);
-                        }
-                        return Integer.parseInt(s);
-                    } else if (c == '.' || c >= '0' && c <= '9' || c == 'E' || c == '+') {
-                        String s = sb.toString() + ((char) c);
-                        if (s.indexOf('.') >= 0 || s.indexOf('E') >= 0) {
-                            if (isValidDouble(s)) {
-                                sb.append((char) c);
-                            } else {
-                                r.reset();
-                                s = sb.toString();
-                                if (s.indexOf('.') >= 0 || s.indexOf('E') >= 0) {
-                                    return Double.parseDouble(s);
-                                }
-                                return Integer.parseInt(s) * sign;
-                            }
-                        } else {
-                            if (isValidInt(s)) {
-                                sb.append((char) c);
-                            } else {
-                                r.reset();
-                                s = sb.toString();
-                                return Integer.parseInt(s) * sign;
-                            }
-                        }
-                    } else {
-                        r.reset();
-                        String s = sb.toString();
-                        if (s.indexOf('.') >= 0 || s.indexOf('E') >= 0) {
-                            return Double.parseDouble(s);
-                        }
-                        return Integer.parseInt(s);
-                    }
-                }
-            } else {
-                r.reset();
-                return null;
-            }
-        }
-
-        private String readName() throws IOException {
-            int c;
-            //read name
-            StringBuilder n = new StringBuilder();
-            while (true) {
-                r.mark(1);
-                c = r.read();
-                if (c == -1) {
-                    break;
-                } else if (c != '$' && Character.isJavaIdentifierPart(c)) {
-                    n.append((char) c);
-                } else {
-                    r.reset();
-                    break;
-                }
-            }
-            return n.toString();
-        }
-
-        private MessagePart readDollarVar() throws IOException {
-            r.mark(1);
-            int c = r.read();
-            if (c != '$') {
-                throw new IllegalArgumentException("Expected $");
-            }
-            r.mark(1);
-            c = r.read();
-            if (c != '{') {
-                r.reset();
-                return new MessagePartExpr(new NameExprNode(readName()));
-            } else {
-                ExprNode layout = readLayoutNode(true);
-                consumeWhites();
-                r.mark(1);
-                int acc = r.read();
-                if (acc == -1 || acc == '}') {
-                    //this is ok;
-                } else {
-                    r.reset();
-                }
-                return new MessagePartExpr(layout);
-            }
-        }
-
-        private void consumeWhites() throws IOException {
-            while (true) {
-                r.mark(1);
-                int c = r.read();
-                if (c == -1) {
-                    break;
-                } else if (Character.isWhitespace(c)) {
-                    //consumre
-                } else {
-                    r.reset();
-                    break;
-                }
-            }
-        }
-
-        private ExprNode readLayoutNode(boolean acceptLiterals) throws IOException {
-            consumeWhites();
-            if (acceptLiterals) {
-                Number p = readLiteralNumber();
-                if (p != null) {
-                    return new LiteralExprNode(p);
-                }
-                String s = readLiteralString();
-                if (s != null) {
-                    return new LiteralExprNode(s);
-                }
-            }
-            String n = readName();
-            consumeWhites();
-            r.mark(1);
-            int c = r.read();
-            if (c == -1) {
-                return new NameExprNode(n);
-            } else if (c == '(') {
-                FunctionExprNode f = new FunctionExprNode(n);
-                ExprNode a = readLayoutNode(true);
-                if (a != null) {
-                    f.args.add(a);
-                    while (true) {
-                        consumeWhites();
-                        r.mark(1);
-                        c = r.read();
-                        if (c == -1) {
-                            break;
-                        } else if (c == ',') {
-                            consumeWhites();
-                        } else if (c == ')') {
-                            break;
-                        } else {
-                            r.reset();
-                            consumeWhites();
-                        }
-                        a = readLayoutNode(true);
-                        if (a != null) {
-                            f.args.add(a);
-                        } else {
                             break;
                         }
-                    }
-                }
-                return f;
-            } else {
-                r.reset();
-                return new NameExprNode(n);
-            }
-        }
-
-        private String readLiteralString() throws IOException {
-            StringBuilder sb = new StringBuilder();
-            r.mark(1);
-            int c = r.read();
-            if (c != '\'' && c != '"' && c != '`') {
-                r.reset();
-                return null;
-            }
-            int start = c;
-            boolean more = true;
-            while (more) {
-                c = r.read();
-                switch (c) {
-                    case -1: {
-                        more = false;
-                        break;
-                    }
-                    case '\\': {
-                        c = r.read();
-                        switch (c) {
-                            case -1: {
-                                sb.append('\\');
+                        default: {
+                            if (c == start) {
                                 more = false;
-                                break;
-                            }
-                            case 'n': {
-                                sb.append('\n');
-                                break;
-                            }
-                            case 't': {
-                                sb.append('\t');
-                                break;
-                            }
-                            case 'f': {
-                                sb.append('\f');
-                                break;
-                            }
-                            default: {
+                            } else {
                                 sb.append((char) c);
                             }
+                            break;
                         }
-                        break;
-                    }
-                    default: {
-                        if (c == start) {
-                            more = false;
-                        } else {
-                            sb.append((char) c);
-                        }
-                        break;
                     }
                 }
+                return sb.toString();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             }
-            return sb.toString();
         }
 
         private boolean isValidInt(String s) {
@@ -366,12 +387,12 @@ public class MessageNameFormat {
 
     public static interface Function {
 
-        Object eval(ExprNode[] args, MessageNameFormat format, java.util.function.Function<String,Object> provider, MessageNameFormatContext messageNameFormatContext);
+        Object eval(ExprNode[] args, MessageNameFormat format, java.util.function.Function<String, Object> provider, MessageNameFormatContext messageNameFormatContext);
     }
 
     public static interface ExprNode {
 
-        Object format(MessageNameFormat format, java.util.function.Function<String,Object> provider, MessageNameFormatContext messageNameFormatContext);
+        Object format(MessageNameFormat format, java.util.function.Function<String, Object> provider, MessageNameFormatContext messageNameFormatContext);
 
     }
 
@@ -384,7 +405,7 @@ public class MessageNameFormat {
         }
 
         @Override
-        public Object format(MessageNameFormat format, java.util.function.Function<String,Object> f, MessageNameFormatContext messageNameFormatContext) {
+        public Object format(MessageNameFormat format, java.util.function.Function<String, Object> f, MessageNameFormatContext messageNameFormatContext) {
             return literal;
         }
 
@@ -404,7 +425,7 @@ public class MessageNameFormat {
         }
 
         @Override
-        public Object format(MessageNameFormat format, java.util.function.Function<String,Object> provider, MessageNameFormatContext messageNameFormatContext) {
+        public Object format(MessageNameFormat format, java.util.function.Function<String, Object> provider, MessageNameFormatContext messageNameFormatContext) {
             return provider.apply(name);
         }
 
@@ -425,11 +446,11 @@ public class MessageNameFormat {
         }
 
         @Override
-        public Object format(MessageNameFormat format, java.util.function.Function<String,Object> provider, MessageNameFormatContext messageNameFormatContext) {
+        public Object format(MessageNameFormat format, java.util.function.Function<String, Object> provider, MessageNameFormatContext messageNameFormatContext) {
             return format(args, format, provider, messageNameFormatContext);
         }
 
-        public Object format(List<ExprNode> args, MessageNameFormat format, java.util.function.Function<String,Object> provider, MessageNameFormatContext messageNameFormatContext) {
+        public Object format(List<ExprNode> args, MessageNameFormat format, java.util.function.Function<String, Object> provider, MessageNameFormatContext messageNameFormatContext) {
             Function f = messageNameFormatContext.getFunction(name);
             if (f != null) {
                 return f.eval(args.toArray(new ExprNode[args.size()]), format, provider, messageNameFormatContext);
@@ -464,7 +485,7 @@ public class MessageNameFormat {
         return format(map == null ? null : new StringToObjectMap(map), messageNameFormatContext);
     }
 
-    public String format(java.util.function.Function<String,Object> provider, MessageNameFormatContext messageNameFormatContext) {
+    public String format(java.util.function.Function<String, Object> provider, MessageNameFormatContext messageNameFormatContext) {
         StringBuilder sb = new StringBuilder(message.length() + 1);
         if (part != null) {
             part.format(this, provider, sb, messageNameFormatContext);
@@ -474,7 +495,7 @@ public class MessageNameFormat {
 
     private static interface MessagePart {
 
-        void format(MessageNameFormat format, java.util.function.Function<String,Object> stringToObject, StringBuilder sb, MessageNameFormatContext messageNameFormatContext);
+        void format(MessageNameFormat format, java.util.function.Function<String, Object> stringToObject, StringBuilder sb, MessageNameFormatContext messageNameFormatContext);
     }
 
     private static class MessagePartExpr implements MessagePart {
@@ -486,7 +507,7 @@ public class MessageNameFormat {
         }
 
         @Override
-        public void format(MessageNameFormat format, java.util.function.Function<String,Object> stringToObject, StringBuilder sb, MessageNameFormatContext messageNameFormatContext) {
+        public void format(MessageNameFormat format, java.util.function.Function<String, Object> stringToObject, StringBuilder sb, MessageNameFormatContext messageNameFormatContext) {
             Object o = layout.format(format, stringToObject, messageNameFormatContext);
             sb.append(String.valueOf(o));
         }
@@ -506,7 +527,7 @@ public class MessageNameFormat {
         }
 
         @Override
-        public void format(MessageNameFormat format, java.util.function.Function<String,Object> f, StringBuilder sb, MessageNameFormatContext messageNameFormatContext) {
+        public void format(MessageNameFormat format, java.util.function.Function<String, Object> f, StringBuilder sb, MessageNameFormatContext messageNameFormatContext) {
             for (MessagePart part : all) {
                 part.format(format, f, sb, messageNameFormatContext);
             }
@@ -521,7 +542,7 @@ public class MessageNameFormat {
             this.value = value;
         }
 
-        public void format(MessageNameFormat format, java.util.function.Function<String,Object> f, StringBuilder sb, MessageNameFormatContext messageNameFormatContext) {
+        public void format(MessageNameFormat format, java.util.function.Function<String, Object> f, StringBuilder sb, MessageNameFormatContext messageNameFormatContext) {
             sb.append(value);
         }
 
@@ -532,7 +553,7 @@ public class MessageNameFormat {
 
     }
 
-    ////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////
     public static DateFormat resolveDateFormat(String dateFormatString, Locale loc, String defaultDateFormatString) {
         if (NBlankable.isBlank(dateFormatString)) {
             dateFormatString = defaultDateFormatString;

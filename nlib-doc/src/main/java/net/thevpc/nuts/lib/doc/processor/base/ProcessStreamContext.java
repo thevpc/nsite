@@ -27,7 +27,7 @@ public class ProcessStreamContext {
         return tagStreamProcessor;
     }
 
-    public TagNode next() throws IOException {
+    public TagNode next()  {
         List<TagNode> r = new ArrayList<>();
         while (true) {
             TagNode u = nr.next();

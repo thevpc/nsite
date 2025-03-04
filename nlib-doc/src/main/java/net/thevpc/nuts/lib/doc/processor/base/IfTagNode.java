@@ -16,7 +16,7 @@ class IfTagNode extends TagNode {
         elseIfBranches.add(new ElseIf(expr,null));
     }
 
-    public void run(ProcessStreamContext ctx) throws IOException {
+    public void run(ProcessStreamContext ctx)  {
         for (ElseIf e : elseIfBranches) {
             Object exprResult = ctx.context.eval(e.expr, exprLang);
             if (NLiteral.of(exprResult).asBoolean().orElse(false)) {

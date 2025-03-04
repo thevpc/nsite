@@ -11,7 +11,7 @@ class StatementTagNode extends TagNode {
         this.expr = expr;
     }
 
-    public void run(ProcessStreamContext ctx) throws IOException {
+    public void run(ProcessStreamContext ctx)  {
         Object u = ctx.context.eval(expr, exprLang);
     }
     @Override

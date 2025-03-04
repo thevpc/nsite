@@ -258,59 +258,35 @@ public class DefaultProjectTemplate implements ProjectTemplate {
     }
 
     public Document loadSourceXmlDocument(String from) throws UncheckedIOException {
-        try {
-            return XmlUtils.load(IOUtils.getTextResource(sourceConvertPath(from)));
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
+        return XmlUtils.load(IOUtils.getTextResource(sourceConvertPath(from)));
     }
 
     public Document loadTargetXmlDocument(String from) throws UncheckedIOException {
-        try {
-            return XmlUtils.load(IOUtils.getText(convertToPath(from)));
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
+        return XmlUtils.load(IOUtils.getText(convertToPath(from)));
     }
 
     public void storeTargetXmlDocument(Document doc, String to) throws UncheckedIOException {
-        try {
-            IOUtils.writeString(XmlUtils.toString(doc), convertToPath(to), this);
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
+        IOUtils.writeString(XmlUtils.toString(doc), convertToPath(to), this);
     }
 
     public void copyXml(String from, String toFolder) throws UncheckedIOException {
-        try {
-            String n = IOUtils.extractFileName(from);
-            String text = IOUtils.getTextResource(sourceConvertPath(from));
-            String converted = _StringUtils.replacePlaceHolders(text, "${{", "}}", dollar_converter);
-            IOUtils.writeString(converted, convertToPath(toFolder + "/" + n), this);
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
+        String n = IOUtils.extractFileName(from);
+        String text = IOUtils.getTextResource(sourceConvertPath(from));
+        String converted = _StringUtils.replacePlaceHolders(text, "${{", "}}", dollar_converter);
+        IOUtils.writeString(converted, convertToPath(toFolder + "/" + n), this);
     }
 
     public void copyXml(String from, String toFolder, String newName) throws UncheckedIOException {
-        try {
-            String text = IOUtils.getTextResource(sourceConvertPath(from));
-            String converted = _StringUtils.replacePlaceHolders(text, "${{", "}}", dollar_converter);
-            IOUtils.writeString(converted, convertToPath(toFolder + "/" + newName), this);
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
+        String text = IOUtils.getTextResource(sourceConvertPath(from));
+        String converted = _StringUtils.replacePlaceHolders(text, "${{", "}}", dollar_converter);
+        IOUtils.writeString(converted, convertToPath(toFolder + "/" + newName), this);
     }
 
     public void copyProperties(String from, String toFolder) throws UncheckedIOException {
-        try {
-            String n = IOUtils.extractFileName(from);
-            String text = IOUtils.getTextResource(sourceConvertPath(from));
-            String converted = _StringUtils.replacePlaceHolders(text, "${{", "}}", dollar_converter);
-            IOUtils.writeString(converted, convertToPath(toFolder + "/" + n), this);
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
+        String n = IOUtils.extractFileName(from);
+        String text = IOUtils.getTextResource(sourceConvertPath(from));
+        String converted = _StringUtils.replacePlaceHolders(text, "${{", "}}", dollar_converter);
+        IOUtils.writeString(converted, convertToPath(toFolder + "/" + n), this);
     }
 
     public void targetAppendProperty(String toFile, String name, String value) throws UncheckedIOException {
@@ -342,25 +318,17 @@ public class DefaultProjectTemplate implements ProjectTemplate {
     }
 
     public void copyJava(String from, String toFolder) throws UncheckedIOException {
-        try {
-            String text = IOUtils.getTextResource(sourceConvertPath(from));
-            String converted = _StringUtils.replacePlaceHolders(text, "${{", "}}", dollar_converter);
-            ClassInfo c = JavaUtils.detectedJavaClassInfo(converted);
-            IOUtils.writeString(converted, new File(convertToPath(toFolder).getPath() + "/" + c.getFullClassName().replace('.', '/') + ".java"), this);
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
+        String text = IOUtils.getTextResource(sourceConvertPath(from));
+        String converted = _StringUtils.replacePlaceHolders(text, "${{", "}}", dollar_converter);
+        ClassInfo c = JavaUtils.detectedJavaClassInfo(converted);
+        IOUtils.writeString(converted, new File(convertToPath(toFolder).getPath() + "/" + c.getFullClassName().replace('.', '/') + ".java"), this);
     }
 
     public void copyScala(String from, String toFolder) throws UncheckedIOException {
-        try {
-            String text = IOUtils.getTextResource(sourceConvertPath(from));
-            String converted = _StringUtils.replacePlaceHolders(text, "${{", "}}", dollar_converter);
-            ClassInfo c = JavaUtils.detectedScalaClassInfo(converted);
-            IOUtils.writeString(converted, new File(convertToPath(toFolder).getPath() + "/" + c.getFullClassName().replace('.', '/') + ".scala"), this);
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
+        String text = IOUtils.getTextResource(sourceConvertPath(from));
+        String converted = _StringUtils.replacePlaceHolders(text, "${{", "}}", dollar_converter);
+        ClassInfo c = JavaUtils.detectedScalaClassInfo(converted);
+        IOUtils.writeString(converted, new File(convertToPath(toFolder).getPath() + "/" + c.getFullClassName().replace('.', '/') + ".scala"), this);
     }
 
     public String getTargetRoot() {
@@ -376,13 +344,9 @@ public class DefaultProjectTemplate implements ProjectTemplate {
     }
 
     public void targetAddPomParentModule(String pomxml, String modulePath) throws UncheckedIOException {
-        try {
-            Document doc = loadTargetXmlDocument(pomxml);
-            if (XmlUtils.addMavenModule(doc, replacePlaceHoldersSimple(modulePath))) {
-                storeTargetXmlDocument(doc, pomxml);
-            }
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
+        Document doc = loadTargetXmlDocument(pomxml);
+        if (XmlUtils.addMavenModule(doc, replacePlaceHoldersSimple(modulePath))) {
+            storeTargetXmlDocument(doc, pomxml);
         }
     }
 
