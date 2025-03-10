@@ -303,7 +303,7 @@ public class TestDocusaurusParser {
     public void testRemoveMe() {
         try {
             MdParser parser = MdFactory.createParser(null, new FileReader(
-                    "/home/vpc/xprojects/nuts/nuts-community/nuts/documentation/website/src/include/documentation/01-intro/.folder-info.md"
+                    "/home/vpc/xprojects/nuts-world/nuts/nuts/documentation/website/src/include/documentation/01-intro/.folder-info.md"
             ));
             MdElement p = parser.parse();
             System.out.println(p);
