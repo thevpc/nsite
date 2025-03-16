@@ -1,6 +1,6 @@
 ```sh ndoc``` is a documentation tool
 
-`ndoc` is a simple templating tool. It is used to generate statically Nuts website from
+`ndoc` is a simple templating tool. It's used to generate statically Nuts website from
 markdown documents.
 `ndoc` can also be embedded as a library (as `net.thevpc.nuts.lib:nlib-doc#0.8.5.0`)
 

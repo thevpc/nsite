@@ -6,7 +6,6 @@ import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.lib.doc.context.NDocContext;
 import net.thevpc.nuts.lib.doc.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nuts.util.NMemorySize;
-import net.thevpc.nuts.util.NMemorySizeFormat;
 
 import java.util.List;
 
@@ -22,7 +21,7 @@ public class FileContentLengthString extends BaseNexprNExprFct {
         }
         NDocContext fcontext = fcontext(context);
         String str = (String) args.get(0).getValue().orNull();
-        long contentLength = NPath.of(str).getContentLength();
+        long contentLength = NPath.of(str).contentLength();
         if(contentLength<0){
             return "NOT_FOUND";
         }

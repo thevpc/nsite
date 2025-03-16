@@ -128,7 +128,7 @@ public class MessageNameFormat {
                 }
                 if (c == '.' || c >= '0' && c <= '9') {
                     sb.append((char) c);
-                    //now read until it is no more parsable as number
+                    //now read until It's no more parsable as number
                     while (true) {
                         r.mark(1);
                         c = r.read();
