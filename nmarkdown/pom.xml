@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.thevpc.nuts.lib</groupId>
-    <artifactId>nlib-doc</artifactId>
+    <artifactId>nmarkdown</artifactId>
     <version>0.8.5.0</version>
     <packaging>jar</packaging>
-    <name>Nuts Community Library for Folder Templating</name>
+    <name>Nuts Community Library for Markdown support</name>
     <url>https://github.com/thevpc/nuts</url>
-    <description>Nuts Static Site Generator and Javadoc Library</description>
+    <description>Markdown Support for Nuts</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -54,39 +55,10 @@
     </licenses>
 
     <dependencies>
-        <dependency>
-            <groupId>net.thevpc.nuts</groupId>
-            <artifactId>nuts-lib</artifactId>
-            <version>0.8.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.thevpc.nuts.toolbox</groupId>
-            <artifactId>nsh</artifactId>
-            <version>0.8.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.thevpc.nuts.lib</groupId>
-            <artifactId>nlib-md</artifactId>
-            <version>0.8.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.javaparser</groupId>
-            <artifactId>javaparser-symbol-solver-core</artifactId>
-            <version>3.16.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.javaparser</groupId>
-            <artifactId>javaparser-core</artifactId>
-            <version>3.16.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.8.2</version>
-            <scope>test</scope>
-        </dependency>
+        <dependency><groupId>net.thevpc.nuts</groupId><artifactId>nuts-lib</artifactId><version>0.8.5.0</version></dependency>
+        <dependency><groupId>org.yaml</groupId><artifactId>snakeyaml</artifactId><version>2.2</version></dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter-api</artifactId><version>5.8.2</version><scope>test</scope></dependency>
     </dependencies>
-
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
@@ -203,7 +175,7 @@
                         <configuration>
                             <archive>
                                 <manifestEntries>
-                                    <Automatic-Module-Name>net.thevpc.nuts.lib.template</Automatic-Module-Name>
+                                    <Automatic-Module-Name>net.thevpc.nuts.lib.md</Automatic-Module-Name>
                                 </manifestEntries>
                             </archive>
                         </configuration>

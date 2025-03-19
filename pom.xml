@@ -9,8 +9,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>ndoc</module>
-        <module>nlib-md</module>
-        <module>nlib-doc</module>
+        <module>nmarkdown</module>
+        <module>ndoc-lib</module>
     </modules>
     <properties>
     </properties>

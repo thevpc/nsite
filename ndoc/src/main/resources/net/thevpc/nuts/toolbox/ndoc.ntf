@@ -2,7 +2,7 @@
 
 `ndoc` is a simple templating tool. It's used to generate statically Nuts website from
 markdown documents.
-`ndoc` can also be embedded as a library (as `net.thevpc.nuts.lib:nlib-doc#0.8.5.0`)
+`ndoc` can also be embedded as a library (as `net.thevpc.nuts.lib:ndoc-lib#0.8.5.0`)
 
 ### INSTALL
 
