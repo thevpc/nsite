@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.thevpc.nuts.builders</groupId>
-    <artifactId>ndoc-builder</artifactId>
+    <artifactId>nsite-builder</artifactId>
     <version>0.8.5.0</version>
     <packaging>pom</packaging>
     <modules>
-        <module>ndoc</module>
+        <module>nsite</module>
         <module>nmarkdown</module>
-        <module>ndoc-lib</module>
+        <module>nsite-lib</module>
     </modules>
     <properties>
     </properties>
