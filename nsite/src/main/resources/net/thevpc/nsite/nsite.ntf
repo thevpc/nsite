@@ -1,0 +1,52 @@
+```sh nsite``` is a documentation tool
+
+`nsite` is a simple templating tool. It's used to generate statically Nuts website from
+markdown documents.
+`nsite` can also be embedded as a library (as `net.thevpc.nuts.lib:nsite-lib#0.8.5.0`)
+
+### INSTALL
+
+```
+nuts install nsite
+```
+
+##) EXAMPLE OF USAGE
+
+```
+nuts nsite --source your-folder  --target the-generated-folder
+```
+
+###) SYNOPSYS
+
+```
+nuts nsite (--source=<path>)+ (--resource=<path>)* --target=<path> (<other-options>)*
+```
+
+Options are :
+
+- `-s=<...>` ou `--source=<...>` :  source file or folder to process.
+- `--resource=<...>` :         source file or folder that are copied as is and are not processed by the template engine.
+- `-t=<...>` ou `--target=<...>` : target folder where the generated files will be located
+
+### Templating format ()
+```
+    \{{: statement}}
+    \{{expression}}
+    \{{:for varName(,index):<expression}} ... \{{:end}}
+    \{{:if expression}} ... \{{:else if expression}} ... \{{:else if expression}} \{{:end}}
+```
+
+
+
+##) SYNOPSIS:
+
+
+```nuts -Zy -w test nsite --progress=none --skip-errors -bZKy nsite --backend=docusaurus --source /data/git/nuts/core/nuts --target /data/git/nuts/documentation/website/docs/javadocs```
+    generate javadoc
+
+==ntemplate== generate files and forlder from template file/folder
+
+##) EXAMPLES:
+
+# nsite: generate folder
+nuts -Zy -w test ntemplate --progress=none --skip-errors -bZy ntemplate -p $ProjectFileDir$/dir-template

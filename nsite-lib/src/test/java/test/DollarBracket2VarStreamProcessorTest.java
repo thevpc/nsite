@@ -2,8 +2,8 @@ package test;
 
 import net.thevpc.nuts.NWorkspace;
 import net.thevpc.nuts.Nuts;
-import net.thevpc.nuts.lib.nsite.context.NDocContext;
-import net.thevpc.nuts.lib.nsite.processor.base.TagStreamProcessor;
+import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.processor.base.TagStreamProcessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

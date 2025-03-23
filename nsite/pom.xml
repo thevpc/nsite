@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>net.thevpc.nuts.toolbox</groupId>
+    <groupId>net.thevpc.nsite</groupId>
     <artifactId>nsite</artifactId>
     <version>0.8.5.0</version>
     <packaging>jar</packaging>
@@ -61,7 +61,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.thevpc.nuts.lib</groupId>
+            <groupId>net.thevpc.nsite</groupId>
             <artifactId>nsite-lib</artifactId>
             <version>0.8.5.0</version>
         </dependency>
@@ -88,7 +88,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Automatic-Module-Name>net.thevpc.nuts.toolbox.ndoc</Automatic-Module-Name>
+                            <Automatic-Module-Name>net.thevpc.ndoc</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -201,7 +201,7 @@
                         <configuration>
                             <archive>
                                 <manifestEntries>
-                                    <Automatic-Module-Name>net.thevpc.nuts.toolbox.ndoc</Automatic-Module-Name>
+                                    <Automatic-Module-Name>net.thevpc.ndoc</Automatic-Module-Name>
                                 </manifestEntries>
                             </archive>
                         </configuration>
