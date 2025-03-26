@@ -125,7 +125,7 @@ public class ValidatorFactory {
     public final StringValidator BOOLEAN = new StringValidator() {
         @Override
         public String validate(String value) {
-            Boolean b = NLiteral.of(value).asBoolean().orNull();
+            Boolean b = NLiteral.of(value).asBooleanValue().orNull();
             if (b == null) {
                 throw new IllegalArgumentException("Invalid boolean");
             }
