@@ -28,9 +28,9 @@ public class ProcessCmd extends NshBuiltinDefault {
         Options o = context.getOptions();
         NSession session = context.getSession();
         if (cmdLine.isNonOption(0)) {
-            o.args.add(cmdLine.next().flatMap(NLiteral::asStringValue).get());
+            o.args.add(cmdLine.next().flatMap(NLiteral::asString).get());
             while (cmdLine.hasNext()) {
-                o.args.add(cmdLine.next().flatMap(NLiteral::asStringValue).get());
+                o.args.add(cmdLine.next().flatMap(NLiteral::asString).get());
             }
             return true;
         }
