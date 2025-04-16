@@ -29,7 +29,7 @@ public class NSiteMain implements NApplication {
 
             @Override
             public boolean nextNonOption(NArg nonOption, NCmdLine cmdLine, NCmdLineContext context) {
-                config.addSource(cmdLine.next().flatMap(NLiteral::asString).get());
+                config.addSource(cmdLine.next().get().getImage());
                 return false;
             }
 
