@@ -1,5 +1,9 @@
 package net.thevpc.nsite.processor.pages;
 
+import net.thevpc.nuts.elem.NElement;
+import net.thevpc.nuts.elem.NElements;
+import net.thevpc.nuts.elem.NObjectElement;
+import net.thevpc.nuts.elem.NPairElement;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nsite.context.NDocContext;
 import net.thevpc.nuts.lib.md.MdElement;
@@ -14,6 +18,7 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MPageLoader {
 
@@ -80,7 +85,7 @@ public class MPageLoader {
                             if (!nextLine.startsWith("#")) {
                                 int i = nextLine.indexOf(':');
                                 if (i > 0) {
-                                    setPageHeaderVar(g, nextLine.substring(0, i).trim(), nextLine.substring(i + 1).trim());
+                                    setPageHeaderVar(g, nextLine.substring(0, i).trim(), NElements.of().ofString(nextLine.substring(i + 1).trim()));
                                 }
                             }
                             headerLines.add(nextLine);
@@ -107,48 +112,49 @@ public class MPageLoader {
                 .setPath(path.toString())
                 .setTitle(path.getName())
                 .setPathName(path.getName());
-        Object mdHeader = md.getPreambleHeader();
-        if (mdHeader instanceof Map) {
-            for (Map.Entry<?, ?> fe : ((Map<?, ?>) mdHeader).entrySet()) {
-                if (fe.getKey() instanceof String) {
-                    setPageHeaderVar(g, (String) fe.getKey(), fe.getValue());
+        NElement mdHeader = md.getPreambleHeader();
+        if (mdHeader instanceof NObjectElement) {
+            for (NElement fe : ((NObjectElement) mdHeader).children()) {
+                if(fe.isNamedPair()){
+                    NPairElement pair = fe.asPair().get();
+                    setPageHeaderVar(g, pair.key().asStringValue().orNull() , pair.value());
                 }
             }
         }
         return g.setMarkdownContent(md);
     }
 
-    private static void setPageHeaderVar(MPage g, String key, Object value) {
+    private static void setPageHeaderVar(MPage g, String key, NElement value) {
         switch (NStringUtils.trim(key)) {
             case "id": {
-                g.setId(NLiteral.of(value).asString().orNull());
+                g.setId(value.asStringValue().orNull());
                 break;
             }
             case "title": {
-                g.setTitle(NLiteral.of(value).asString().orNull());
+                g.setTitle(value.asStringValue().orNull());
                 break;
             }
             case "order": {
-                g.setOrder(NLiteral.of(value).asInt().orElse(0));
+                g.setOrder(value.asIntValue().orElse(0));
                 break;
             }
             case "sort": {
-                g.setSortAsc(NLiteral.of(value).asBoolean().orElse(!"desc".equalsIgnoreCase(String.valueOf(value))));
+                g.setSortAsc(value.asBooleanValue().orElse(!"desc".equalsIgnoreCase(String.valueOf(value))));
                 break;
             }
             case "author": {
-                g.setAuthor(NLiteral.of(value).asString().orNull());
+                g.setAuthor(value.asStringValue().orNull());
                 break;
             }
             case "authorTitle":
             case "author_title": {
-                g.setAuthorTitle(NLiteral.of(value).asString().orNull());
+                g.setAuthorTitle(value.asStringValue().orNull());
                 break;
             }
             case "authorUrl":
             case "authorURL":
             case "author_url": {
-                g.setAuthorURL(NLiteral.of(value).asString().orNull());
+                g.setAuthorURL(value.asStringValue().orNull());
                 break;
             }
             case "authorImageUrl":
@@ -156,49 +162,47 @@ public class MPageLoader {
             case "author_image_url":
             case "authorImage":
             case "author_image": {
-                g.setAuthorImageUrl(NLiteral.of(value).asString().orNull());
+                g.setAuthorImageUrl(value.asStringValue().orNull());
                 break;
             }
             case "menuTitle":
             case "menu_title":
             case "sidebarLabel":
             case "sidebar_label": {
-                g.setMenuTitle(NLiteral.of(value).asString().orNull());
+                g.setMenuTitle(value.asStringValue().orNull());
                 break;
             }
             case "subTitle":
             case "sub_title": {
-                g.setSubTitle(NLiteral.of(value).asString().orNull());
+                g.setSubTitle(value.asStringValue().orNull());
                 break;
             }
             case "website": {
-                g.setWebsite(NLiteral.of(value).asString().orNull());
+                g.setWebsite(value.asStringValue().orNull());
                 break;
             }
             case "hmi": {
-                g.setHmi(NLiteral.of(value).asString().orNull());
+                g.setHmi(value.asStringValue().orNull());
                 break;
             }
             case "category": {
-                g.setCategory(NLiteral.of(value).asString().orNull());
+                g.setCategory(value.asStringValue().orNull());
                 break;
             }
             case "installCommand": {
-                g.setInstallCommand(NLiteral.of(value).asString().orNull());
+                g.setInstallCommand(value.asStringValue().orNull());
                 break;
             }
             case "exampleCommand": {
-                g.setExampleCommand(NLiteral.of(value).asString().orNull());
+                g.setExampleCommand(value.asStringValue().orNull());
                 break;
             }
             case "publishDate":
             case "publish_date": {
-                if (value instanceof Date) {
-                    g.setPublishDate(((Date) value).toInstant());
-                } else if (value instanceof Instant) {
-                    g.setPublishDate(((Instant) value));
+                if (value.isAnyDate()) {
+                    g.setPublishDate(value.asInstantValue().get());
                 } else {
-                    String d = NLiteral.of(value).asString().orNull();
+                    String d = value.asStringValue().orNull();
                     if (d != null) {
                         g.setPublishDate(parseDate(d));
                     }
@@ -206,8 +210,8 @@ public class MPageLoader {
                 break;
             }
             case "tags": {
-                if (value instanceof String[]) {
-                    g.setTags((String[]) value);
+                if(value.isArray() && value.asArray().get().children().stream().allMatch(x->x.isAnyString() || x.isNull())){
+                    g.setTags(value.asArray().get().children().stream().map(x->x.asStringValue().orNull()).toArray(String[]::new));
                 }
                 break;
             }
