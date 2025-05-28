@@ -449,7 +449,7 @@ public class NDocContext {
                                         .setUserParentProperties(true)
                         );
                     } catch (Exception ex) {
-                        getLog().error("file", "error processing mimeType : " + mimeType + ". " + NExceptionHandler.getErrorMessage(ex));
+                        getLog().error("file", "error processing mimeType : " + mimeType + ". " + NExceptions.getErrorMessage(ex));
                     }
                     return bos.toString();
                 }
