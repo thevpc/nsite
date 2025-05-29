@@ -454,7 +454,7 @@ public class MdDoclet /*extends Doclet*/ {
             for (JDClassDoc classDoc : entry.getValue()) {
                 doc.add(printClass(classDoc));
             }
-            try (MdWriter out = MdFactory.createWriter(config.getBackend(), new FileWriter(file))) {
+            try (MdWriter out = MdFactory.createWriter(new FileWriter(file), config.getBackend())) {
                 out.write(new MdDocument(
                         id,name,null,null,null,null,MdFactory.seq(doc)
                 ));

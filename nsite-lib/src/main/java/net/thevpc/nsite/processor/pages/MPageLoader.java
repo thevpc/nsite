@@ -11,14 +11,12 @@ import net.thevpc.nuts.lib.md.MdFactory;
 import net.thevpc.nuts.lib.md.MdParser;
 import net.thevpc.nuts.text.NText;
 import net.thevpc.nuts.text.NTexts;
-import net.thevpc.nuts.util.NLiteral;
 import net.thevpc.nuts.util.NStringUtils;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MPageLoader {
 
@@ -106,7 +104,7 @@ public class MPageLoader {
 
 
     private static MPage loadFileMarkdown(NPath path, NDocContext fcontext, InputStream is) {
-        MdParser p = MdFactory.createParser(MdFactory.MIMETYPE_DOCUSAURUS, is);
+        MdParser p = MdFactory.createParser(is);
         MdElement md = p.parse();
         MPage g = new MPage(MPageType.MARKDOWN)
                 .setPath(path.toString())
