@@ -83,7 +83,7 @@ public class MPageLoader {
                             if (!nextLine.startsWith("#")) {
                                 int i = nextLine.indexOf(':');
                                 if (i > 0) {
-                                    setPageHeaderVar(g, nextLine.substring(0, i).trim(), NElements.of().ofString(nextLine.substring(i + 1).trim()));
+                                    setPageHeaderVar(g, nextLine.substring(0, i).trim(), NElements.ofString(nextLine.substring(i + 1).trim()));
                                 }
                             }
                             headerLines.add(nextLine);

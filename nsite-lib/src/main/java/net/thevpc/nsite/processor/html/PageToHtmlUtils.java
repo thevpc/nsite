@@ -418,7 +418,7 @@ public class PageToHtmlUtils {
     private HtmlBuffer.Node md2htmlXmlTabs(MdXml xml, GeneratorContext generatorContext) {
         String dv = xml.getProperties().get("defaultValue");
         String valuesString = xml.getProperties().get("values");
-        //Map<String, String> map = valuesString == null ? null : NElements.of().json().parse(valuesString, Map.class);
+        //Map<String, String> map = valuesString == null ? null : NElementParser.ofJson().parse(valuesString, Map.class);
         List<HtmlBuffer.Node> allHeader = new ArrayList<>();
         List<HtmlBuffer.Node> allContent = new ArrayList<>();
         String newUuid = "id" + generatorContext.nextId().replace("-", "");

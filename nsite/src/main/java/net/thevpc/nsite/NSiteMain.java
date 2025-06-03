@@ -6,7 +6,6 @@ import net.thevpc.nuts.cmdline.NCmdLineRunner;
 import net.thevpc.nuts.cmdline.NArg;
 import net.thevpc.nuts.cmdline.NCmdLine;
 import net.thevpc.nsite.context.NDocContext;
-import net.thevpc.nuts.util.NLiteral;
 
 public class NSiteMain implements NApplication {
     NDocProjectConfig config = new NDocProjectConfig();
@@ -17,7 +16,7 @@ public class NSiteMain implements NApplication {
 
     @Override
     public void run() {
-        NApp.of().processCmdLine(new NCmdLineRunner() {
+        NApp.of().runCmdLine(new NCmdLineRunner() {
 
             @Override
             public boolean nextOption(NArg option, NCmdLine cmdLine, NCmdLineContext context) {
