@@ -1,7 +1,6 @@
 package net.thevpc.nsite.processor.pages;
 
 import net.thevpc.nuts.elem.NElement;
-import net.thevpc.nuts.elem.NElements;
 import net.thevpc.nuts.elem.NObjectElement;
 import net.thevpc.nuts.elem.NPairElement;
 import net.thevpc.nuts.io.NPath;
@@ -83,7 +82,7 @@ public class MPageLoader {
                             if (!nextLine.startsWith("#")) {
                                 int i = nextLine.indexOf(':');
                                 if (i > 0) {
-                                    setPageHeaderVar(g, nextLine.substring(0, i).trim(), NElements.ofString(nextLine.substring(i + 1).trim()));
+                                    setPageHeaderVar(g, nextLine.substring(0, i).trim(), NElement.ofString(nextLine.substring(i + 1).trim()));
                                 }
                             }
                             headerLines.add(nextLine);
