@@ -1,7 +1,6 @@
 package net.thevpc.nsite;
 
 import net.thevpc.nuts.*;
-import net.thevpc.nuts.cmdline.NCmdLineContext;
 import net.thevpc.nuts.cmdline.NCmdLineRunner;
 import net.thevpc.nuts.cmdline.NArg;
 import net.thevpc.nuts.cmdline.NCmdLine;
@@ -19,7 +18,7 @@ public class NSiteMain implements NApplication {
         NApp.of().runCmdLine(new NCmdLineRunner() {
 
             @Override
-            public boolean nextOption(NArg option, NCmdLine cmdLine, NCmdLineContext context) {
+            public boolean nextOption(NArg option, NCmdLine cmdLine) {
                 if(config.configureFirst(cmdLine)){
                     return true;
                 }
@@ -27,14 +26,14 @@ public class NSiteMain implements NApplication {
             }
 
             @Override
-            public boolean nextNonOption(NArg nonOption, NCmdLine cmdLine, NCmdLineContext context) {
+            public boolean nextNonOption(NArg nonOption, NCmdLine cmdLine) {
                 config.addSource(cmdLine.next().get().getImage());
                 return false;
             }
 
 
             @Override
-            public void run(NCmdLine cmdLine, NCmdLineContext context) {
+            public void run(NCmdLine cmdLine) {
                 new NDocContext().run(config);
             }
         });
