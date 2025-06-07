@@ -16,21 +16,18 @@ public class NSiteMain implements NApplication {
     @Override
     public void run() {
         NApp.of().runCmdLine(new NCmdLineRunner() {
-
             @Override
-            public boolean nextOption(NArg option, NCmdLine cmdLine) {
-                if(config.configureFirst(cmdLine)){
-                    return true;
+            public boolean next(NArg arg, NCmdLine cmdLine) {
+                if(arg.isOption()){
+                    if(config.configureFirst(cmdLine)){
+                        return true;
+                    }
+                    return false;
+                }else{
+                    config.addSource(cmdLine.next().get().getImage());
+                    return false;
                 }
-                return false;
             }
-
-            @Override
-            public boolean nextNonOption(NArg nonOption, NCmdLine cmdLine) {
-                config.addSource(cmdLine.next().get().getImage());
-                return false;
-            }
-
 
             @Override
             public void run(NCmdLine cmdLine) {

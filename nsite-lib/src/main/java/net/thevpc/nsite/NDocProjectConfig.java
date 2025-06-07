@@ -210,53 +210,53 @@ public class NDocProjectConfig implements NCmdLineConfigurable ,Cloneable{
         switch (option.key()) {
             case "-i":
             case "--init": {
-                cmdLine.withNextEntry((v, r) -> NDocProjectConfig.this.addInitScript(v));
+                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.addInitScript(v.stringValue()));
                 return true;
             }
             case "--clean": {
-                cmdLine.withNextFlag((v, r) -> NDocProjectConfig.this.setClean(v));
+                cmdLine.withNextFlag((v) -> NDocProjectConfig.this.setClean(v.booleanValue()));
                 return true;
             }
             case "--script": {
-                cmdLine.withNextEntry((v, r) -> NDocProjectConfig.this.setScriptType(v));
+                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.setScriptType(v.stringValue()));
                 return true;
             }
             case "-t":
             case "--to": {
-                cmdLine.withNextEntry((v, r) -> NDocProjectConfig.this.setTargetFolder(v));
+                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.setTargetFolder(v.stringValue()));
                 return true;
             }
             case "-s":
             case "--src": {
-                cmdLine.withNextEntry((v, r) -> NDocProjectConfig.this.addSource(v));
+                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.addSource(v.stringValue()));
                 return true;
             }
             case "-p":
             case "--project": {
-                cmdLine.withNextEntry((v, r) -> NDocProjectConfig.this.setProjectPath(v));
+                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.setProjectPath(v.stringValue()));
                 return true;
             }
             case "-r":
             case "--resource": {
-                cmdLine.withNextEntry((v, r) -> NDocProjectConfig.this.addResourceSource(v));
+                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.addResourceSource(v.stringValue()));
                 return true;
             }
             ///////////////////////////
 
             case "--java-source": {
-                cmdLine.withNextEntry((v, r) -> javaSourcePaths.add(v));
+                cmdLine.withNextEntry((v) -> javaSourcePaths.add(v.stringValue()));
                 return true;
             }
             case "--javadoc-target": {
-                cmdLine.withNextEntry((v, r) -> javadocTarget = v);
+                cmdLine.withNextEntry((v) -> javadocTarget = v.stringValue());
                 return true;
             }
             case "--java-package": {
-                cmdLine.withNextEntry((v, r) -> javaPackages.add(v));
+                cmdLine.withNextEntry((v) -> javaPackages.add(v.stringValue()));
                 return true;
             }
             case "--javadoc-backend": {
-                cmdLine.withNextEntry((v, r) -> javadocBackend = v);
+                cmdLine.withNextEntry((v) -> javadocBackend = v.stringValue());
                 return true;
             }
         }
