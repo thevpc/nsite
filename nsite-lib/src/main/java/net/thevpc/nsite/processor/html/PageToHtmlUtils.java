@@ -60,14 +60,14 @@ public class PageToHtmlUtils {
     private HtmlBuffer.Node ntf2html(NText elem) {
         switch (elem.getType()) {
             case PLAIN: {
-                return new HtmlBuffer.Plain(((NTextPlain) elem).getText());
+                return new HtmlBuffer.Plain(((NTextPlain) elem).getValue());
             }
             case LINK: {
                 NTextLink lnk = (NTextLink) elem;
                 return new HtmlBuffer.Tag("a")
-                        .attr("href", lnk.getText())
+                        .attr("href", lnk.getValue())
                         .attr("class", "md-link")
-                        .body(lnk.getText());
+                        .body(lnk.getValue());
             }
             case TITLE: {
                 NTextTitle title = (NTextTitle) elem;
@@ -90,7 +90,7 @@ public class PageToHtmlUtils {
                 NTextCode c = (NTextCode) elem;
                 String type = "default";
                 String language = c.getQualifier();
-                String text = c.getText();
+                String text = c.getValue();
                 boolean inline = false;
                 if (inline) {
                     String value = text;
