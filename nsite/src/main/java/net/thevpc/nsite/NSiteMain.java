@@ -6,14 +6,15 @@ import net.thevpc.nuts.cmdline.NArg;
 import net.thevpc.nuts.cmdline.NCmdLine;
 import net.thevpc.nsite.context.NDocContext;
 
-public class NSiteMain implements NApplication {
+@NApp.Info
+public class NSiteMain {
     NDocProjectConfig config = new NDocProjectConfig();
 
     public static void main(String[] args) {
         NApp.builder(args).run();
     }
 
-    @Override
+    @NApp.Main
     public void run() {
         NApp.of().runCmdLine(new NCmdLineRunner() {
             @Override
