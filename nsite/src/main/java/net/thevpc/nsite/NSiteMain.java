@@ -10,7 +10,7 @@ public class NSiteMain implements NApplication {
     NDocProjectConfig config = new NDocProjectConfig();
 
     public static void main(String[] args) {
-        NApplication.main(NSiteMain.class, args);
+        NApp.builder(args).run();
     }
 
     @Override
