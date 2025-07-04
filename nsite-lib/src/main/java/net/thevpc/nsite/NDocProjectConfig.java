@@ -210,54 +210,43 @@ public class NDocProjectConfig implements NCmdLineConfigurable ,Cloneable{
         switch (option.key()) {
             case "-i":
             case "--init": {
-                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.addInitScript(v.stringValue()));
-                return true;
+                return cmdLine.matcher().matchEntry((v) -> NDocProjectConfig.this.addInitScript(v.stringValue())).anyMatch();
             }
             case "--clean": {
-                cmdLine.withNextFlag((v) -> NDocProjectConfig.this.setClean(v.booleanValue()));
-                return true;
+                return cmdLine.matcher().matchFlag((v) -> NDocProjectConfig.this.setClean(v.booleanValue())).anyMatch();
             }
             case "--script": {
-                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.setScriptType(v.stringValue()));
-                return true;
+                return cmdLine.matcher().matchEntry((v) -> NDocProjectConfig.this.setScriptType(v.stringValue())).anyMatch();
             }
             case "-t":
             case "--to": {
-                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.setTargetFolder(v.stringValue()));
-                return true;
+                return cmdLine.matcher().matchEntry((v) -> NDocProjectConfig.this.setTargetFolder(v.stringValue())).anyMatch();
             }
             case "-s":
             case "--src": {
-                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.addSource(v.stringValue()));
-                return true;
+                return cmdLine.matcher().matchEntry((v) -> NDocProjectConfig.this.addSource(v.stringValue())).anyMatch();
             }
             case "-p":
             case "--project": {
-                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.setProjectPath(v.stringValue()));
-                return true;
+                return cmdLine.matcher().matchEntry((v) -> NDocProjectConfig.this.setProjectPath(v.stringValue())).anyMatch();
             }
             case "-r":
             case "--resource": {
-                cmdLine.withNextEntry((v) -> NDocProjectConfig.this.addResourceSource(v.stringValue()));
-                return true;
+                return cmdLine.matcher().matchEntry((v) -> NDocProjectConfig.this.addResourceSource(v.stringValue())).anyMatch();
             }
             ///////////////////////////
 
             case "--java-source": {
-                cmdLine.withNextEntry((v) -> javaSourcePaths.add(v.stringValue()));
-                return true;
+                return cmdLine.matcher().matchEntry((v) -> javaSourcePaths.add(v.stringValue())).anyMatch();
             }
             case "--javadoc-target": {
-                cmdLine.withNextEntry((v) -> javadocTarget = v.stringValue());
-                return true;
+                return cmdLine.matcher().matchEntry((v) -> javadocTarget = v.stringValue()).anyMatch();
             }
             case "--java-package": {
-                cmdLine.withNextEntry((v) -> javaPackages.add(v.stringValue()));
-                return true;
+                return cmdLine.matcher().matchEntry((v) -> javaPackages.add(v.stringValue())).anyMatch();
             }
             case "--javadoc-backend": {
-                cmdLine.withNextEntry((v) -> javadocBackend = v.stringValue());
-                return true;
+                return cmdLine.matcher().matchEntry((v) -> javadocBackend = v.stringValue()).anyMatch();
             }
         }
         return false;
