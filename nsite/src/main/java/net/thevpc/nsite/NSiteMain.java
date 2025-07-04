@@ -25,7 +25,7 @@ public class NSiteMain {
                     }
                     return false;
                 }else{
-                    config.addSource(cmdLine.next().get().getImage());
+                    config.addSource(cmdLine.next().get().image());
                     return false;
                 }
             }

@@ -8,7 +8,6 @@ import net.thevpc.nsite.context.NDocContext;
 import net.thevpc.nsh.cmd.NshBuiltinDefault;
 import net.thevpc.nsh.eval.NshExecutionContext;
 import net.thevpc.nsite.util.StringUtils;
-import net.thevpc.nuts.util.NLiteral;
 import net.thevpc.nuts.util.NMsg;
 
 import java.util.ArrayList;
@@ -28,9 +27,9 @@ public class ProcessCmd extends NshBuiltinDefault {
         Options o = context.getOptions();
         NSession session = context.getSession();
         if (cmdLine.isNonOption(0)) {
-            o.args.add(cmdLine.next().get().getImage());
+            o.args.add(cmdLine.next().get().image());
             while (cmdLine.hasNext()) {
-                o.args.add(cmdLine.next().get().getImage());
+                o.args.add(cmdLine.next().get().image());
             }
             return true;
         }
