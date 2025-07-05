@@ -6,7 +6,7 @@ import net.thevpc.nuts.cmdline.NArg;
 import net.thevpc.nuts.cmdline.NCmdLine;
 import net.thevpc.nsite.context.NDocContext;
 
-@NApp.Definition
+@NAppDefinition
 public class NSiteMain {
     NDocProjectConfig config = new NDocProjectConfig();
 
@@ -14,7 +14,7 @@ public class NSiteMain {
         NApp.builder(args).run();
     }
 
-    @NApp.Runner
+    @NAppRunner
     public void run() {
         NApp.of().runCmdLine(new NCmdLineRunner() {
             @Override
