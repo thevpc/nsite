@@ -6,7 +6,7 @@ import net.thevpc.nuts.cmdline.NArg;
 import net.thevpc.nuts.cmdline.NCmdLine;
 import net.thevpc.nsite.context.NDocContext;
 
-@NApp.Info
+@NApp.Definition
 public class NSiteMain {
     NDocProjectConfig config = new NDocProjectConfig();
 
