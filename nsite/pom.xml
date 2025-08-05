@@ -77,7 +77,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Automatic-Module-Name>net.thevpc.ndoc</Automatic-Module-Name>
+                            <Automatic-Module-Name>net.thevpc.ntexup</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -190,7 +190,7 @@
                         <configuration>
                             <archive>
                                 <manifestEntries>
-                                    <Automatic-Module-Name>net.thevpc.ndoc</Automatic-Module-Name>
+                                    <Automatic-Module-Name>net.thevpc.ntexup</Automatic-Module-Name>
                                 </manifestEntries>
                             </archive>
                         </configuration>
