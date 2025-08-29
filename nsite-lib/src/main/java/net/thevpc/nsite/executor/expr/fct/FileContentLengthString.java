@@ -3,7 +3,7 @@ package net.thevpc.nsite.executor.expr.fct;
 import net.thevpc.nuts.expr.NExprDeclarations;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nuts.io.NPath;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nuts.util.NMemorySize;
 
@@ -19,7 +19,7 @@ public class FileContentLengthString extends BaseNexprNExprFct {
         if (args.size() != 1) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
-        NDocContext fcontext = fcontext(context);
+        NSiteContext fcontext = fcontext(context);
         String str = (String) args.get(0).getValue().orNull();
         long contentLength = NPath.of(str).contentLength();
         if(contentLength<0){
