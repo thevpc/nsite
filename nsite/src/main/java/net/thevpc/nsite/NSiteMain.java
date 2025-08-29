@@ -4,11 +4,11 @@ import net.thevpc.nuts.*;
 import net.thevpc.nuts.cmdline.NCmdLineRunner;
 import net.thevpc.nuts.cmdline.NArg;
 import net.thevpc.nuts.cmdline.NCmdLine;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 
 @NAppDefinition
 public class NSiteMain {
-    NDocProjectConfig config = new NDocProjectConfig();
+    NSiteProjectConfig config = new NSiteProjectConfig();
 
     public static void main(String[] args) {
         NApp.builder(args).run();
@@ -32,7 +32,7 @@ public class NSiteMain {
 
             @Override
             public void run(NCmdLine cmdLine) {
-                new NDocContext().run(config);
+                new NSiteContext().run(config);
             }
         });
     }
