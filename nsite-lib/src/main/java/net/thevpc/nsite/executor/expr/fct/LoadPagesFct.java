@@ -4,7 +4,7 @@ import net.thevpc.nuts.expr.NExprDeclarations;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nuts.io.NDigest;
 import net.thevpc.nuts.io.NPath;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.processor.pages.MPage;
 import net.thevpc.nsite.processor.pages.MPageLoader;
@@ -27,7 +27,7 @@ public class LoadPagesFct extends BaseNexprNExprFct {
         if (args.size() != 1) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
-        NDocContext fcontext = fcontext(context);
+        NSiteContext fcontext = fcontext(context);
 
         Object strOrGroup = args.get(0).getValue().orNull();
         String str = null;
