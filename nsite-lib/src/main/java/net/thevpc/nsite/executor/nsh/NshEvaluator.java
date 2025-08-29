@@ -3,8 +3,8 @@ package net.thevpc.nsite.executor.nsh;
 import net.thevpc.nuts.NOut;
 import net.thevpc.nuts.NSession;
 import net.thevpc.nuts.io.NTerminal;
-import net.thevpc.nsite.executor.NDocExprEvaluator;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.executor.NSiteExprEvaluator;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsh.eval.NshContext;
 import net.thevpc.nsh.parser.nodes.NshVar;
 import net.thevpc.nsh.parser.nodes.NshVarListener;
@@ -13,11 +13,11 @@ import net.thevpc.nsh.Nsh;
 import net.thevpc.nsh.NshConfig;
 import net.thevpc.nsite.util.StringUtils;
 
-public class NshEvaluator implements NDocExprEvaluator {
+public class NshEvaluator implements NSiteExprEvaluator {
     private final Nsh shell;
-    private final NDocContext docContext;
+    private final NSiteContext docContext;
 
-    public NshEvaluator(NDocContext docContext) {
+    public NshEvaluator(NSiteContext docContext) {
         this.docContext = docContext;
         shell = new Nsh(new NshConfig()
                 .setIncludeDefaultBuiltins(true).setIncludeExternalExecutor(true)
@@ -54,7 +54,7 @@ public class NshEvaluator implements NDocExprEvaluator {
     }
 
     @Override
-    public Object eval(String content, NDocContext context) {
+    public Object eval(String content, NSiteContext context) {
         NshContext ctx = shell.createInlineContext(shell.getRootContext(), context.getSourcePath().orElse("nsh"), new String[0]);
         NSession session = NSession.of().copy().setTerminal(NTerminal.ofMem());
         return session.callWith(()->{
