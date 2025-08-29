@@ -3,7 +3,7 @@ package net.thevpc.nsite.executor.expr.fct;
 import net.thevpc.nuts.expr.NExprDeclarations;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nuts.io.NPath;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class ExecFct extends BaseNexprNExprFct {
         if (args.size() != 1) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
-        NDocContext fcontext = fcontext(context);
+        NSiteContext fcontext = fcontext(context);
         String pathString = (String) args.get(0).getValue().orNull();
         NPath path = NPath.of(pathString);
         return fcontext.getExecutorManager().executeRegularFile(path, null);
