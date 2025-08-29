@@ -2,7 +2,7 @@ package net.thevpc.nsite.executor.expr.fct;
 
 import net.thevpc.nuts.expr.NExprDeclarations;
 import net.thevpc.nuts.expr.NExprNodeValue;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 
 import java.text.SimpleDateFormat;
@@ -20,7 +20,7 @@ public class FormatDateFct extends BaseNexprNExprFct {
         if (args.size() != 1 && args.size() != 2) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
-        NDocContext fcontext = fcontext(context);
+        NSiteContext fcontext = fcontext(context);
 
         Object d = args.get(0).getValue().orNull();
         if(d==null){
