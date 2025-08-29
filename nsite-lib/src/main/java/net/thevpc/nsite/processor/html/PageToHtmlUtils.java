@@ -1,6 +1,6 @@
 package net.thevpc.nsite.processor.html;
 
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.processor.pages.MPage;
 import net.thevpc.nsite.util.HtmlBuffer;
 import net.thevpc.nuts.lib.md.*;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class PageToHtmlUtils {
     public interface GeneratorContext{
         String nextId();
-        static GeneratorContext of(NDocContext fcontext) {
+        static GeneratorContext of(NSiteContext fcontext) {
             NOptional<GeneratorContext> v = fcontext.getVar(GeneratorContext.class.getSimpleName());
             if(!v.isPresent()) {
                 MyGeneratorContext r = new MyGeneratorContext();
