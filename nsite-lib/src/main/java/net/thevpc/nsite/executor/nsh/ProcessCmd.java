@@ -4,7 +4,7 @@ import net.thevpc.nuts.*;
 import net.thevpc.nuts.cmdline.NArg;
 import net.thevpc.nuts.cmdline.NCmdLine;
 import net.thevpc.nuts.io.NPath;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsh.cmd.NshBuiltinDefault;
 import net.thevpc.nsh.eval.NshExecutionContext;
 import net.thevpc.nsite.util.StringUtils;
@@ -15,9 +15,9 @@ import java.util.List;
 
 public class ProcessCmd extends NshBuiltinDefault {
 
-    private final NDocContext documentContext;
+    private final NSiteContext documentContext;
 
-    public ProcessCmd(NDocContext documentContext) {
+    public ProcessCmd(NSiteContext documentContext) {
         super("process", 10, Options.class);
         this.documentContext = documentContext;
     }
