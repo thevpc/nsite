@@ -2,7 +2,7 @@ package test;
 
 import net.thevpc.nuts.NWorkspace;
 import net.thevpc.nuts.Nuts;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.processor.base.TagStreamProcessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ public class DollarBracket2VarStreamProcessorTest {
             TagStreamProcessor.DOLLAR_BARACKET2.processStream(
                     new ByteArrayInputStream(template.getBytes()),
                     out,
-                    new NDocContext()
+                    new NSiteContext()
             );
             System.out.println(out);
             Assertions.assertEquals(result,out.toString());
