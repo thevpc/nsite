@@ -1,8 +1,8 @@
 package net.thevpc.nsite.processor.base;
 
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.mimetype.MimeTypeConstants;
-import net.thevpc.nsite.processor.NDocStreamProcessor;
+import net.thevpc.nsite.processor.NSiteStreamProcessor;
 
 import java.io.*;
 
@@ -14,7 +14,7 @@ import java.io.*;
  * ${:end}
  * ${:for}
  */
-public class TagStreamProcessor implements NDocStreamProcessor {
+public class TagStreamProcessor implements NSiteStreamProcessor {
     public static final TagStreamProcessor DOLLAR =new TagStreamProcessor("${","}", MimeTypeConstants.NEXPR);
     public static final TagStreamProcessor DOLLAR_BARACKET2 =new TagStreamProcessor("${{","}}",MimeTypeConstants.NEXPR);
     public static final TagStreamProcessor BARACKET2=new TagStreamProcessor("{{","}}",MimeTypeConstants.NEXPR);
@@ -51,7 +51,7 @@ public class TagStreamProcessor implements NDocStreamProcessor {
     }
 
     @Override
-    public void processStream(InputStream source, OutputStream target, NDocContext context) {
+    public void processStream(InputStream source, OutputStream target, NSiteContext context) {
         try {
             ProcessStreamContext ctx = new ProcessStreamContext(this,source, context);
             ctx.out = new BufferedWriter(new OutputStreamWriter(target));
