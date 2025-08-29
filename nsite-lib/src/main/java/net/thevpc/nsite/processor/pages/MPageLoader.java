@@ -4,7 +4,7 @@ import net.thevpc.nuts.elem.NElement;
 import net.thevpc.nuts.elem.NObjectElement;
 import net.thevpc.nuts.elem.NPairElement;
 import net.thevpc.nuts.io.NPath;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nuts.lib.md.MdElement;
 import net.thevpc.nuts.lib.md.MdFactory;
 import net.thevpc.nuts.lib.md.MdParser;
@@ -19,7 +19,7 @@ import java.util.*;
 
 public class MPageLoader {
 
-    public static MPage load(NPath path, NDocContext fcontext) {
+    public static MPage load(NPath path, NSiteContext fcontext) {
         if (path.isDirectory()) {
             NPath u = path.resolve(".folder-info.md");
             if (u.isRegularFile()) {
@@ -45,7 +45,7 @@ public class MPageLoader {
         return null;
     }
 
-    private static MPage loadFile(NPath path, NDocContext fcontext) {
+    private static MPage loadFile(NPath path, NSiteContext fcontext) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         fcontext.getProcessorManager().processSourceRegularFile(path, null, bos);
         if (path.getName().endsWith(".md")) {
@@ -58,7 +58,7 @@ public class MPageLoader {
     }
 
 
-    private static MPage loadFileNtf(NPath path, NDocContext fcontext, InputStream is) {
+    private static MPage loadFileNtf(NPath path, NSiteContext fcontext, InputStream is) {
         int maxRowSize = 1024 * 4;
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             br.mark(maxRowSize);
@@ -102,7 +102,7 @@ public class MPageLoader {
     }
 
 
-    private static MPage loadFileMarkdown(NPath path, NDocContext fcontext, InputStream is) {
+    private static MPage loadFileMarkdown(NPath path, NSiteContext fcontext, InputStream is) {
         MdParser p = MdFactory.createParser(is);
         MdElement md = p.parse();
         MPage g = new MPage(MPageType.MARKDOWN)
