@@ -2,7 +2,7 @@ package net.thevpc.nsite.executor.expr.fct;
 
 import net.thevpc.nuts.expr.NExprDeclarations;
 import net.thevpc.nuts.expr.NExprNodeValue;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.processor.html.PageToHtmlUtils;
 import net.thevpc.nsite.processor.pages.MPage;
@@ -20,7 +20,7 @@ public class PageContentToHtmlFct extends BaseNexprNExprFct {
         if (args.size() != 1 && args.size() != 2) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
-        NDocContext fcontext = fcontext(context);
+        NSiteContext fcontext = fcontext(context);
         MPage page = (MPage) args.get(0).getValue().orNull();
         fcontext.getLog().debug("eval", name + "(" + StringUtils.toLiteralString(page) + ")");
         if (page == null) {
