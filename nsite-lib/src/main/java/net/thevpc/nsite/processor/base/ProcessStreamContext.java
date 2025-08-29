@@ -1,6 +1,6 @@
 package net.thevpc.nsite.processor.base;
 
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nuts.io.NCharReader;
 
 import java.io.*;
@@ -11,11 +11,11 @@ public class ProcessStreamContext {
     final TagStreamProcessor tagStreamProcessor;
     TagTokenReader tr;
     TagNodeReader nr;
-    NDocContext context;
+    NSiteContext context;
     Writer out;
     InputStream source;
 
-    public ProcessStreamContext(TagStreamProcessor tagStreamProcessor, InputStream source, NDocContext context) {
+    public ProcessStreamContext(TagStreamProcessor tagStreamProcessor, InputStream source, NSiteContext context) {
         this.context = context;
         this.tagStreamProcessor = tagStreamProcessor;
         tr = new TagTokenReader(tagStreamProcessor.startTag, tagStreamProcessor.endTag, tagStreamProcessor.escape, tagStreamProcessor.exprLang,
