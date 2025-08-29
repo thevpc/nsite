@@ -6,8 +6,8 @@
 package net.thevpc.nsite.executor;
 
 import net.thevpc.nuts.io.NPath;
-import net.thevpc.nsite.context.NDocContext;
-import net.thevpc.nsite.processor.NDocStreamExecutor;
+import net.thevpc.nsite.context.NSiteContext;
+import net.thevpc.nsite.processor.NSiteStreamExecutor;
 import net.thevpc.nsite.util.FileProcessorUtils;
 
 import java.io.IOException;
@@ -19,21 +19,21 @@ import java.io.UncheckedIOException;
  *
  * @author thevpc
  */
-public class StreamToExecutor implements NDocExecutor {
+public class StreamToExecutor implements NSiteExecutor {
 
-    private NDocStreamExecutor streamExecutor;
+    private NSiteStreamExecutor streamExecutor;
 
-    public StreamToExecutor(NDocStreamExecutor streamExecutor) {
+    public StreamToExecutor(NSiteStreamExecutor streamExecutor) {
         this.streamExecutor = streamExecutor;
     }
 
     @Override
-    public Object eval(InputStream source, NDocContext context) {
+    public Object eval(InputStream source, NSiteContext context) {
         return streamExecutor.eval(source, context);
     }
 
     @Override
-    public void processPath(NPath source, String mimeType, NDocContext context) {
+    public void processPath(NPath source, String mimeType, NSiteContext context) {
         String p = context.getPathTranslator().translatePath(source.toString());
         if (p != null) {
             NPath targetPath = NPath.of(p);
@@ -51,7 +51,7 @@ public class StreamToExecutor implements NDocExecutor {
     }
 
     @Override
-    public void processStream(InputStream source, OutputStream target, NDocContext context) {
+    public void processStream(InputStream source, OutputStream target, NSiteContext context) {
         streamExecutor.processStream(source, target, context);
     }
 
