@@ -2,7 +2,7 @@ package net.thevpc.nsite.executor.expr.fct;
 
 import net.thevpc.nuts.expr.NExprDeclarations;
 import net.thevpc.nuts.expr.NExprNodeValue;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.util.StringUtils;
 
@@ -16,7 +16,7 @@ public class PrintFct extends BaseNexprNExprFct {
 
     @Override
     public Object eval(String name, List<NExprNodeValue> args, NExprDeclarations context) {
-        NDocContext fcontext = fcontext(context);
+        NSiteContext fcontext = fcontext(context);
 
         List<String> all = new ArrayList<>();
         for (NExprNodeValue arg : args) {
