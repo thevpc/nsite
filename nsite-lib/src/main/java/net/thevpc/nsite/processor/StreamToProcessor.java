@@ -6,7 +6,7 @@
 package net.thevpc.nsite.processor;
 
 import net.thevpc.nuts.io.NPath;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,17 +17,17 @@ import java.io.UncheckedIOException;
  *
  * @author thevpc
  */
-public class StreamToProcessor implements NDocProcessor {
+public class StreamToProcessor implements NSiteProcessor {
 
-    private NDocStreamProcessor streamProcessor;
+    private NSiteStreamProcessor streamProcessor;
 
-    public StreamToProcessor(NDocStreamProcessor streamProcessor) {
+    public StreamToProcessor(NSiteStreamProcessor streamProcessor) {
         this.streamProcessor = streamProcessor;
     }
 
 
     @Override
-    public void processPath(NPath source, String mimeType, NDocContext context) {
+    public void processPath(NPath source, String mimeType, NSiteContext context) {
         String p = context.getPathTranslator().translatePath(source.toString());
         if (p != null) {
             NPath targetPath = NPath.of(p);
@@ -45,7 +45,7 @@ public class StreamToProcessor implements NDocProcessor {
     }
 
     @Override
-    public void processStream(InputStream source, OutputStream target, NDocContext context) {
+    public void processStream(InputStream source, OutputStream target, NSiteContext context) {
         streamProcessor.processStream(source, target, context);
     }
 
