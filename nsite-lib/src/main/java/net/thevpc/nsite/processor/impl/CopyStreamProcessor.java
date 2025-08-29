@@ -1,17 +1,17 @@
 package net.thevpc.nsite.processor.impl;
 
-import net.thevpc.nsite.context.NDocContext;
-import net.thevpc.nsite.processor.NDocStreamProcessor;
+import net.thevpc.nsite.context.NSiteContext;
+import net.thevpc.nsite.processor.NSiteStreamProcessor;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 
-public class CopyStreamProcessor implements NDocStreamProcessor {
+public class CopyStreamProcessor implements NSiteStreamProcessor {
 
     @Override
-    public void processStream(InputStream source, OutputStream target, NDocContext context) {
+    public void processStream(InputStream source, OutputStream target, NSiteContext context) {
         try {
             byte[] buffer = new byte[1024];
             int r;
