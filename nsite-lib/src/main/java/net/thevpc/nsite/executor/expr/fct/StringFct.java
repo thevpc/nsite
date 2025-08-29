@@ -2,7 +2,7 @@ package net.thevpc.nsite.executor.expr.fct;
 
 import net.thevpc.nuts.expr.NExprDeclarations;
 import net.thevpc.nuts.expr.NExprNodeValue;
-import net.thevpc.nsite.context.NDocContext;
+import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.util.StringUtils;
 import net.thevpc.nuts.util.NLiteral;
@@ -19,7 +19,7 @@ public class StringFct extends BaseNexprNExprFct {
         if (args.size() != 1) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
-        NDocContext fcontext = fcontext(context);
+        NSiteContext fcontext = fcontext(context);
 
         String str = (String) args.get(0).getValue().orNull();
         fcontext.getLog().debug("eval", name + "(" + StringUtils.toLiteralString(str) + ")");
