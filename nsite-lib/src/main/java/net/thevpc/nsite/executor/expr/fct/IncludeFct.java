@@ -7,6 +7,8 @@ import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.util.FileProcessorUtils;
 import net.thevpc.nsite.util.StringUtils;
+import net.thevpc.nuts.log.NLog;
+import net.thevpc.nuts.util.NMsg;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,7 +34,7 @@ public class IncludeFct extends BaseNexprNExprFct {
         if(!opath.isRegularFile()){
             throw new IllegalArgumentException(name + " : path not found : " + path);
         }
-        fcontext.getLog().debug("eval", name + "(" + StringUtils.toLiteralString(opath) + ")");
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%] %s(%s)","eval",name,StringUtils.toLiteralString(opath)));
         try (InputStream in = opath.getInputStream()) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             fcontext.getProcessorManager().processStream(in, out, fcontext.getMimeTypeResolver().resolveMimetype(opath.toString()));
