@@ -8,6 +8,8 @@ import net.thevpc.nsite.processor.html.PageToHtmlUtils;
 import net.thevpc.nsite.processor.pages.MPage;
 import net.thevpc.nsite.util.HtmlBuffer;
 import net.thevpc.nsite.util.StringUtils;
+import net.thevpc.nuts.log.NLog;
+import net.thevpc.nuts.util.NMsg;
 import net.thevpc.nuts.util.NStringBuilder;
 
 import java.util.*;
@@ -26,7 +28,7 @@ public class PageToHtmlFct extends BaseNexprNExprFct {
 
         MPage title = (MPage) args.get(0).getValue().orNull();
         Object titlePrefix = args.size() > 1 ? args.get(1).getValue().orNull() : null;
-        fcontext.getLog().debug("eval", name + "(" + StringUtils.toLiteralString(title) + ")");
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%] %s(%s)","eval",name,StringUtils.toLiteralString(title) + ")"));
         if (title == null) {
             return "";
         }
