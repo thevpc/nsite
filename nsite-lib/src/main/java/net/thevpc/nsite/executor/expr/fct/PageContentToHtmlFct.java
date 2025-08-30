@@ -7,6 +7,8 @@ import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.processor.html.PageToHtmlUtils;
 import net.thevpc.nsite.processor.pages.MPage;
 import net.thevpc.nsite.util.StringUtils;
+import net.thevpc.nuts.log.NLog;
+import net.thevpc.nuts.util.NMsg;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ public class PageContentToHtmlFct extends BaseNexprNExprFct {
         }
         NSiteContext fcontext = fcontext(context);
         MPage page = (MPage) args.get(0).getValue().orNull();
-        fcontext.getLog().debug("eval", name + "(" + StringUtils.toLiteralString(page) + ")");
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%] %s(%s)","eval",name,StringUtils.toLiteralString(page) + ")"));
         if (page == null) {
             return "";
         }
