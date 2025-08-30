@@ -4,6 +4,8 @@ import net.thevpc.nsite.executor.NSiteExprEvaluator;
 import net.thevpc.nsite.executor.expr.fct.*;
 import net.thevpc.nuts.expr.*;
 import net.thevpc.nsite.context.NSiteContext;
+import net.thevpc.nuts.log.NLog;
+import net.thevpc.nuts.util.NMsg;
 import net.thevpc.nuts.util.NOptional;
 
 public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
@@ -34,6 +36,7 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
         declareFunction(new PageContentToHtmlFct());
         declareFunction(new FormatDateFct());
         declareFunction(new FileContentLengthString());
+        declareFunction(new EitherFct());
     }
 
     @Override
@@ -69,6 +72,9 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
 //        if (!eval.isPresent()) {
 //            eval = nExprNode.eval(decl2);
 //        }
+        if(!eval.isPresent()) {
+            NLog.ofScoped(DefaultNSiteExprEvaluator.class).log(NMsg.ofC("unable to evaluate %s : %s", eval,eval.getMessage().get()));
+        }
         return eval.get();
     }
 
