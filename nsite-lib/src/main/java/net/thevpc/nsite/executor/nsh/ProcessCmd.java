@@ -8,6 +8,7 @@ import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsh.cmd.NshBuiltinDefault;
 import net.thevpc.nsh.eval.NshExecutionContext;
 import net.thevpc.nsite.util.StringUtils;
+import net.thevpc.nuts.log.NLog;
 import net.thevpc.nuts.util.NMsg;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class ProcessCmd extends NshBuiltinDefault {
             throw new NExecutionException(NMsg.ofC("%s : invalid arguments count", getName()), NExecutionException.ERROR_1);
         }
         for (String pathString : o.args) {
-            documentContext.getLog().debug("eval", getName() + "(" + StringUtils.toLiteralString(pathString) + ")");
+            NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s (%s)", "eval", getName(), StringUtils.toLiteralString(pathString)));
             documentContext.getExecutorManager().executeRegularFile(NPath.of(pathString), null);
         }
     }
