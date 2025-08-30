@@ -1,5 +1,6 @@
 package net.thevpc.nsite.processor.pages;
 
+import net.thevpc.nuts.elem.NObjectElement;
 import net.thevpc.nuts.lib.md.MdElement;
 import net.thevpc.nuts.text.NText;
 
@@ -33,7 +34,7 @@ public class MPage {
     private Instant publishDate;
     private Instant lastModified;
     private String[] tags;
-    private Map<String, Object> typeInfo;
+    private NObjectElement typeInfo;
 
 
     public String getInstallCommand() {
@@ -100,11 +101,11 @@ public class MPage {
         this.subTitle = subTitle;
     }
 
-    public Map<String, Object> getTypeInfo() {
+    public NObjectElement getTypeInfo() {
         return typeInfo;
     }
 
-    public void setTypeInfo(Map<String, Object> typeInfo) {
+    public void setTypeInfo(NObjectElement typeInfo) {
         this.typeInfo = typeInfo;
     }
 
