@@ -8,6 +8,7 @@ import net.thevpc.nsite.executor.expr.DefaultNSiteExprEvaluator;
 import net.thevpc.nsite.mimetype.MimeTypeConstants;
 import net.thevpc.nsite.processor.impl.DefaultNSiteStreamExecutor;
 import net.thevpc.nsite.util.FileProcessorUtils;
+import net.thevpc.nuts.log.NLog;
 import net.thevpc.nuts.util.NMsg;
 import net.thevpc.nuts.util.NOptional;
 
@@ -24,6 +25,7 @@ public class NSiteExecutorManager {
     private static final NSiteExecutor IGNORE_EXECUTOR = new IgnoreNSiteExecutor();
 
     private static final Map<String, NSiteExecutor> globalExecProcessorsByMimeType = new HashMap<>();
+
     static {
         globalExecProcessorsByMimeType.put(MimeTypeConstants.NEXPR, NEXPR_EXECUTOR);
         globalExecProcessorsByMimeType.put(MimeTypeConstants.IGNORE, IGNORE_EXECUTOR);
@@ -44,14 +46,14 @@ public class NSiteExecutorManager {
             NSiteExecutor proc = null;
             try {
                 proc = getExecutor(mimeType);
-                if(proc!=null){
+                if (proc != null) {
                     return NOptional.of(proc);
                 }
             } catch (Exception ex) {
-                context.getLog().error("file", "error resolving executor for mimetype " + mimeType + " and file : " + path.toString() + ". " + ex.toString());
+                NLog.ofScoped(getClass()).error(NMsg.ofC("[%s] error resolving executor for mimeType %s and file : %s. %s", "file", mimeType,path.toString(), ex).asError(ex));
             }
         }
-        return NOptional.ofNamedEmpty(NMsg.ofC("executor for %s %s",mimeTypesString,path.toString()));
+        return NOptional.ofNamedEmpty(NMsg.ofC("executor for %s %s", mimeTypesString, path.toString()));
     }
 
     public NSiteExecutor getExecutor(String mimetypes) {
@@ -161,9 +163,9 @@ public class NSiteExecutorManager {
             String s1 = path.toString();
             String s2 = absolutePath.toString();
             if (s1.equals(s2)) {
-                context.getLog().debug("file", "[" + proc + "] [" + mimeTypesString + "] execute path : " + s1);
+                NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] [%s] [%s] execute path : %s = %s", "file", proc, mimeTypesString, s1,s2));
             } else {
-                context.getLog().debug("file", "[" + proc + "] [" + mimeTypesString + "] execute path : " + s1 + " = " + s2);
+                NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] [%s] [%s] execute path : %s", "file", proc, mimeTypesString, s1));
             }
             try (InputStream in = absolutePath.getInputStream()) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
