@@ -5,16 +5,15 @@
  */
 package net.thevpc.nsite.context;
 
+import net.thevpc.nuts.util.NMsg;
+
 /**
  * @author thevpc
  */
 public interface NSiteLog {
 
-    void info(String title, String message);
-
-    void debug(String title, String message);
-
-    void error(String title, String message);
-
-    void warn(String title, String message);
+    void info(NMsg msg);
+    void debug(NMsg msg);
+    void error(NMsg msg);
+    void warn(NMsg msg);
 }
