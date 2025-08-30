@@ -12,6 +12,8 @@ import net.thevpc.nsh.parser.nodes.NshVariables;
 import net.thevpc.nsh.Nsh;
 import net.thevpc.nsh.NshConfig;
 import net.thevpc.nsite.util.StringUtils;
+import net.thevpc.nuts.log.NLog;
+import net.thevpc.nuts.util.NMsg;
 
 public class NshEvaluator implements NSiteExprEvaluator {
     private final Nsh shell;
@@ -49,7 +51,7 @@ public class NshEvaluator implements NSiteExprEvaluator {
     }
 
     public void setVar(String varName, String newValue) {
-        docContext.getLog().debug("eval", varName + "=" + StringUtils.toLiteralString(newValue));
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("%{] %s =%s", "eval", varName, StringUtils.toLiteralString(newValue)));
         docContext.setVar(varName, newValue);
     }
 
@@ -57,7 +59,7 @@ public class NshEvaluator implements NSiteExprEvaluator {
     public Object eval(String content, NSiteContext context) {
         NshContext ctx = shell.createInlineContext(shell.getRootContext(), context.getSourcePath().orElse("nsh"), new String[0]);
         NSession session = NSession.of().copy().setTerminal(NTerminal.ofMem());
-        return session.callWith(()->{
+        return session.callWith(() -> {
             ctx.setSession(session);
             shell.executeScript(content, ctx);
             return NOut.out().toString();
