@@ -11,6 +11,7 @@ import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.mimetype.MimeTypeConstants;
 import net.thevpc.nsite.processor.base.TagStreamProcessor;
 import net.thevpc.nsite.util.FileProcessorUtils;
+import net.thevpc.nuts.log.NLog;
 import net.thevpc.nuts.util.NMsg;
 import net.thevpc.nuts.util.NOptional;
 import net.thevpc.nuts.util.NStream;
@@ -32,9 +33,9 @@ public class NSiteProcessorManager {
         registerGlobalProcessorByMimeType(TagStreamProcessor.DOLLAR_BARACKET2, MimeTypeConstants.PLACEHOLDER_DOLLAR_BRACKET2);
         registerGlobalProcessorByMimeType(TagStreamProcessor.LT_PERCENT, MimeTypeConstants.PLACEHOLDER_LT_PERCENT);
 
-        registerGlobalProcessorByMimeType(TagStreamProcessor.BARACKET2, "text/html","text/markdown","text/x-shellscript", "application/x-shellscript",
+        registerGlobalProcessorByMimeType(TagStreamProcessor.BARACKET2, "text/html", "text/markdown", "text/x-shellscript", "application/x-shellscript",
                 MimeTypeConstants.ANY_TEXT
-                );
+        );
         for (String mimeType : NConstants.Ntf.MIME_TYPES) {
             registerGlobalProcessorByMimeType(TagStreamProcessor.BARACKET2, mimeType);
         }
@@ -163,7 +164,7 @@ public class NSiteProcessorManager {
             context.setRootDir(path.toString());
         }
         if (!path.exists()) {
-            context.getLog().warn("file", NMsg.ofC("source file not found %s", path).toString());
+            log().warn(NMsg.ofC("[%s] source file not found %s", "file", path));
             return;
         }
         NPath path0 = context.toAbsolutePath(path);
@@ -206,15 +207,15 @@ public class NSiteProcessorManager {
             try {
                 proc = getProcessor(mimeType0);
             } catch (Exception ex) {
-                context.getLog().error(contextName1, "error resolving processor for mimetype " + mimeType0 + " and file : " + path.toString() + ". " + ex.toString());
+                log().error(NMsg.ofC("[%s] error resolving processor for mimeType %s and file : %s. %s", contextName1, mimeType0, path.toString(), ex).asError(ex));
             }
             if (proc != null) {
                 String s1 = path.toString();
                 String s2 = absolutePath.toString();
                 if (s1.equals(s2)) {
-                    context.getLog().info(contextName1, "[" + proc + "] [" + NStringUtils.firstNonBlank(mimeType, "no-mimetype") + "] process path : " + s1);
+                    log().info(NMsg.ofC("[%s][%s] [%s] process path : %s", contextName1, proc, NStringUtils.firstNonBlank(mimeType, "no-mimetype"), s1));
                 } else {
-                    context.getLog().info(contextName1, "[" + proc + "] [" + NStringUtils.firstNonBlank(mimeType, "no-mimetype") + "] process path : " + s1 + " = " + s2);
+                    log().info(NMsg.ofC("[%s][%s] [%s] process path : %s = %s", contextName1, proc, NStringUtils.firstNonBlank(mimeType, "no-mimetype"), s1, s2));
                 }
                 proc.processPath(path, mimeType0,
                         context.newChild()
@@ -226,7 +227,8 @@ public class NSiteProcessorManager {
             }
         }
     }
-    public void processSourceRegularFile(NPath path, String mimeType,OutputStream out) {
+
+    public void processSourceRegularFile(NPath path, String mimeType, OutputStream out) {
         NPath absolutePath = context.toAbsolutePath(path);
         NPath parentPath = absolutePath.getParent();
         if (!absolutePath.isRegularFile()) {
@@ -240,17 +242,19 @@ public class NSiteProcessorManager {
             try {
                 proc = getProcessor(mimeType0);
             } catch (Exception ex) {
-                context.getLog().error(contextName1, "error resolving processor for mimetype " + mimeType0 + " and file : " + path.toString() + ". " + ex.toString());
+                log().error(NMsg.ofC("[%s] error resolving processor for mimeType %s and file : %s. %s", contextName1, mimeType0, path.toString(), ex).asError(ex));
             }
             if (proc != null) {
                 String s1 = path.toString();
                 String s2 = absolutePath.toString();
+                String mimeTypesString = NStringUtils.firstNonBlank(mimeType, "no-mimetype");
                 if (s1.equals(s2)) {
-                    context.getLog().debug(contextName1, "[" + proc + "] [" + NStringUtils.firstNonBlank(mimeType, "no-mimetype") + "] process path : " + s1);
+                    log().debug(NMsg.ofC("[%s] [%s] [%s] execute path : %s = %s", contextName1, proc, mimeTypesString, s1, s2));
                 } else {
-                    context.getLog().debug(contextName1, "[" + proc + "] [" + NStringUtils.firstNonBlank(mimeType, "no-mimetype") + "] process path : " + s1 + " = " + s2);
+                    log().debug(NMsg.ofC("[%s] [%s] [%s] execute path : %s", contextName1, proc, mimeTypesString, s1));
                 }
-                try(InputStream in=path.getInputStream()) {
+
+                try (InputStream in = path.getInputStream()) {
                     proc.processStream(in, out,
                             context.newChild()
                                     .setUserParentProperties(true)
@@ -268,7 +272,7 @@ public class NSiteProcessorManager {
     public void processSourceTree(NPath path, String targetFolder, Predicate<NPath> filter) {
         NPath opath = path.normalize();
         if (!opath.exists()) {
-            context.getLog().warn("file", NMsg.ofC("source file not found %s", opath).toString());
+            log().warn(NMsg.ofC("[%s] source file not found %s", "file", opath));
             return;
         } else if (opath.isDirectory()) {
             context.setWorkingDir(opath.toString());
@@ -279,7 +283,7 @@ public class NSiteProcessorManager {
             NPath ppath = opath.getParent();
             context.setWorkingDir(ppath.toString());
             if (targetFolder != null) {
-                context.setPathTranslator(new DefaultNSitePathTranslator(ppath,NPath.of(targetFolder) ));
+                context.setPathTranslator(new DefaultNSitePathTranslator(ppath, NPath.of(targetFolder)));
             }
         }
         processSourceTree(opath, filter);
@@ -291,7 +295,7 @@ public class NSiteProcessorManager {
         }
         NPath path0 = context.toAbsolutePath(path);
         if (!path0.exists()) {
-            context.getLog().warn("file", NMsg.ofC("source file not found %s", path0).toString());
+            log().warn(NMsg.ofC("[%s] source file not found %s", "file", path0));
             return;
         } else if (path0.isRegularFile()) {
             if (filter == null || filter.test(path0)) {
@@ -317,7 +321,7 @@ public class NSiteProcessorManager {
     public void processResourceTree(NPath path, String targetFolder, Predicate<NPath> filter) {
         NPath opath = path.normalize();
         if (!opath.exists()) {
-            context.getLog().warn("file", NMsg.ofC("source file not found %s", opath).toString());
+            log().warn(NMsg.ofC("[%s] source file not found %s", "file", opath));
             return;
         } else if (opath.isDirectory()) {
             context.setWorkingDir(opath.toString());
@@ -334,10 +338,14 @@ public class NSiteProcessorManager {
         processResourceTree(opath, filter);
     }
 
+    private static NLog log() {
+        return NLog.of(NSiteProcessorManager.class).scoped();
+    }
+
     public void processFiles(NPath path, Predicate<NPath> filter) {
         NPath path0 = context.toAbsolutePath(path);
         if (!path0.exists()) {
-            context.getLog().warn("file", NMsg.ofC("source file not found %s", path0).toString());
+            log().warn(NMsg.ofC("[%s] source file not found %s", "file", path0));
             return;
         } else if (path0.isRegularFile()) {
             if (filter == null || filter.test(path0)) {
@@ -373,16 +381,18 @@ public class NSiteProcessorManager {
             try {
                 proc = getProcessor(mimeType0);
             } catch (Exception ex) {
-                context.getLog().error(contextName1, "error resolving processor for mimetype " + mimeType0 + " and file : " + path.toString() + ". " + ex.toString());
+                log().error(NMsg.ofC("[%s] error resolving processor for mimeType %s and file : %s. %s", contextName1, mimeType0, path.toString(), ex).asError(ex));
             }
             if (proc != null) {
                 String s1 = path.toString();
                 String s2 = absolutePath.toString();
+                String mimeTypesString = NStringUtils.firstNonBlank(mimeType, "no-mimetype");
                 if (s1.equals(s2)) {
-                    context.getLog().debug(contextName1, "[" + proc + "] [" + NStringUtils.firstNonBlank(mimeType, "no-mimetype") + "] process path : " + s1);
+                    log().debug(NMsg.ofC("[%s] [%s] [%s] execute path : %s = %s", contextName1, proc, mimeTypesString, s1, s2));
                 } else {
-                    context.getLog().debug(contextName1, "[" + proc + "] [" + NStringUtils.firstNonBlank(mimeType, "no-mimetype") + "] process path : " + s1 + " = " + s2);
+                    log().debug(NMsg.ofC("[%s] [%s] [%s] execute path : %s", contextName1, proc, mimeTypesString, s1));
                 }
+
                 return NOptional.of(proc);
             }
         }
@@ -402,7 +412,7 @@ public class NSiteProcessorManager {
             try {
                 proc = getProcessor(mimeType0);
             } catch (Exception ex) {
-                context.getLog().error("file", "unsupported mimeType : " + mimeType0 + ". " + ex);
+                log().error(NMsg.ofC("[%s] unsupported mimeType %s. %s", "file", mimeType0, mimeType0, ex).asError(ex));
             }
             if (proc != null) {
                 try {
@@ -411,7 +421,7 @@ public class NSiteProcessorManager {
                                     .setUserParentProperties(true)
                     );
                 } catch (Exception ex) {
-                    context.getLog().error("file", "error processing mimeType : " + mimeType + ". " + ex);
+                    log().error(NMsg.ofC("[%s] error processing mimeType %s. %s", "file", mimeType0, mimeType0, ex).asError(ex));
                 }
                 return;
             }
