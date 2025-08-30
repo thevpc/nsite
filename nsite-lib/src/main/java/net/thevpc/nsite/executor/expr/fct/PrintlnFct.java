@@ -5,6 +5,8 @@ import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.util.StringUtils;
+import net.thevpc.nuts.log.NLog;
+import net.thevpc.nuts.util.NMsg;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ public class PrintlnFct extends BaseNexprNExprFct {
                 sb.append(String.join(", ", all)).append("\n");
             }
         }
-        fcontext.getLog().debug("eval", name + "(" + StringUtils.toLiteralString(sb.toString()) + ")");
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%] %s(%s)","eval",name,StringUtils.toLiteralString(sb.toString()) + ")"));
         return sb.toString();
     }
 }
