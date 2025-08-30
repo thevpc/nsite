@@ -9,8 +9,10 @@ import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.processor.pages.MPage;
 import net.thevpc.nsite.processor.pages.MPageLoader;
 import net.thevpc.nsite.util.StringUtils;
+import net.thevpc.nuts.log.NLog;
 import net.thevpc.nuts.util.NBlankable;
 import net.thevpc.nuts.util.NComparator;
+import net.thevpc.nuts.util.NMsg;
 import net.thevpc.nuts.util.NStringUtils;
 
 import java.util.ArrayList;
@@ -62,14 +64,24 @@ public class LoadPagesFct extends BaseNexprNExprFct {
         }else if (NPath.of(str).getName().equals(".folder-info.ntf")) {
             str = NPath.of(str).getParent().toString();
         }
-        fcontext.getLog().debug("eval", name + "(" + StringUtils.toLiteralString(str) + ")");
+        NLog.of(LoadPagesFct.class).scoped().debug(NMsg.ofC("[%] %s(%s)","eval",name,StringUtils.toLiteralString(str)));
         int finalLevel = level;
         boolean finalSortAsc = sortAsc;
         List<MPage> pages = NPath.of(str).list().stream()
+                .filter(x->{
+                    if(x.getName().equals(".folder-info.md")){
+                        return false;
+                    }
+                    if(x.getName().equals(".folder-info.ntf")){
+                        return false;
+                    }
+                    return true;
+                })
                 .map(x -> {
                     try {
                         return MPageLoader.load(x,fcontext);
-                    } catch (Exception e) {
+                    } catch (Exception ex) {
+                        NLog.ofScoped(getClass()).error(NMsg.ofC("unable to load page %s : %s",x,ex).asError(ex));
                         return null;
                     }
                 })
