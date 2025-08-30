@@ -5,6 +5,7 @@
  */
 package net.thevpc.nsite.context;
 
+import net.thevpc.nsite.executor.expr.fct.LoadPagesFct;
 import net.thevpc.nsite.processor.NSiteProcessorManager;
 import net.thevpc.nsite.util.FileProcessorUtils;
 import net.thevpc.nsite.util.StringUtils;
@@ -29,6 +30,7 @@ import java.io.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -62,39 +64,6 @@ public class NSiteContext {
     public NSiteContext() {
         executorManager = new NSiteExecutorManager(this);
         processorManager = new NSiteProcessorManager(this);
-        this.setLog(new NSiteLog() {
-            NLog logOp;
-
-            @Override
-            public void info(String title, String message) {
-                NTrace.trace(NMsg.ofC("%s : %s", title, message));
-            }
-
-            @Override
-            public void debug(String title, String message) {
-                log().log(NMsg.ofC("%s : %s", title, message).asDebug());
-            }
-
-            @Override
-            public void error(String title, String message) {
-                log()
-                        .log(NMsg.ofC("%s : %s", title, message).asError());
-            }
-
-            @Override
-            public void warn(String title, String message) {
-                log()
-                        .log(NMsg.ofC("%s : %s", title, message).asWarningAlert());
-
-            }
-
-            private NLog log() {
-                if (logOp == null) {
-                    logOp = NLog.of(NSiteContext.class);
-                }
-                return logOp;
-            }
-        });
     }
 
     public NSiteContext(NSiteContext parent) {
@@ -196,18 +165,6 @@ public class NSiteContext {
         return this;
     }
 
-
-    public NSiteLog getLog() {
-        NSiteLog ll = (NSiteLog) getVar("log", null);
-        if (ll == null) {
-            return DefaultNSiteLog.INSTANCE;
-        }
-        return ll;
-    }
-
-    public NSiteContext setLog(NSiteLog log) {
-        return setVar("log", log);
-    }
 
     public NSiteContext getParent() {
         return parent;
@@ -408,7 +365,7 @@ public class NSiteContext {
 
     public Object eval(InputStream source, String mimeType) {
         String[] mimeTypes = FileProcessorUtils.splitMimeTypes(mimeType);
-        String lastError = null;
+        NMsg lastError = null;
         for (String mimeType0 : mimeTypes) {
             NSiteExecutor proc = null;
             proc = getExecutorManager().getExecutor(mimeType0);
@@ -419,13 +376,13 @@ public class NSiteContext {
                                     .setUserParentProperties(true)
                     );
                 } catch (Exception ex) {
-                    lastError = "error processing mimeType : " + mimeType + ". " + ex.toString();
-                    getLog().error("file", lastError);
+                    lastError = NMsg.ofC("[%s] error processing mimeType : %s. : %s", "file", mimeType, ex).asError(ex);
+                    NLog.of(NSiteContext.class).scoped().error(lastError);
                 }
             }
         }
         if (lastError != null) {
-            throw new NIllegalArgumentException(NMsg.ofC("%s", lastError));
+            throw new NIllegalArgumentException(lastError);
         }
         throw new NIllegalArgumentException(NMsg.ofC("unsupported mimetype : %s", mimeType));
     }
@@ -443,7 +400,12 @@ public class NSiteContext {
                                         .setUserParentProperties(true)
                         );
                     } catch (Exception ex) {
-                        getLog().error("file", "error processing mimeType : " + mimeType + ". " + NExceptions.getErrorMessage(ex));
+                        NLog log = NLog.of(NSiteContext.class).scoped();
+                        NMsg msg = NMsg.ofC("[%s] error processing mimeType : %s. %s", "file", mimeType, ex);
+                        if(log.isLoggable(Level.FINEST)) {
+                            msg=msg.asError(ex);
+                        }
+                        log.error(msg);
                     }
                     return bos.toString();
                 }
@@ -501,122 +463,124 @@ public class NSiteContext {
         this.currentMimeType = currentMimeType;
     }
 
-    public void run(NSiteProjectConfig config) {
-        config = config.copy();
-        String scriptType = config.getScriptType();
-        String targetFolder = config.getTargetFolder();
-        setVars(config.getVars());
-        this.contextName = NStringUtils.trimToNull(config.getContextName());
-        String projectPath = config.getProjectPath();
-        boolean projectFolderSpecified = !NBlankable.isBlank(projectPath);
-        List<String> initScripts = new ArrayList<>();
-        List<String> sourcePaths = new ArrayList<>();
-        List<String> resourcePaths = new ArrayList<>();
-        NPath oProjectDirPath = null;
-        if (!projectFolderSpecified) {
-            setProjectRoot(System.getProperty("user.dir"));
-        } else {
-            oProjectDirPath = NPath.of(projectPath).normalize();
-            setProjectRoot(oProjectDirPath.toString());
-            NPath oProjectFile = oProjectDirPath.resolve(getProjectFileName());
-            if (oProjectFile.isRegularFile()) {
-                initScripts.add(oProjectFile.toString());
+    public void run(NSiteProjectConfig config0) {
+        NLog.of(NSiteContext.class).runWith(()-> {
+            NSiteProjectConfig config = config0.copy();
+            String scriptType = config.getScriptType();
+            String targetFolder = config.getTargetFolder();
+            setVars(config.getVars());
+            this.contextName = NStringUtils.trimToNull(config.getContextName());
+            String projectPath = config.getProjectPath();
+            boolean projectFolderSpecified = !NBlankable.isBlank(projectPath);
+            List<String> initScripts = new ArrayList<>();
+            List<String> sourcePaths = new ArrayList<>();
+            List<String> resourcePaths = new ArrayList<>();
+            NPath oProjectDirPath = null;
+            if (!projectFolderSpecified) {
+                setProjectRoot(System.getProperty("user.dir"));
             } else {
-                //throw new NIllegalArgumentException(NMsg.ofC("invalid project, missing project.nexpr : %s", oProjectDirPath));
-            }
-            for (NPath script : oProjectDirPath.resolve("scripts").list().stream().sorted(Comparator.comparing(x -> x.getName())).collect(Collectors.toList())) {
-                if (!Objects.equals(getProjectFileName(), script.getName())) {
+                oProjectDirPath = NPath.of(projectPath).normalize();
+                setProjectRoot(oProjectDirPath.toString());
+                NPath oProjectFile = oProjectDirPath.resolve(getProjectFileName());
+                if (oProjectFile.isRegularFile()) {
                     initScripts.add(oProjectFile.toString());
+                } else {
+                    //throw new NIllegalArgumentException(NMsg.ofC("invalid project, missing project.nexpr : %s", oProjectDirPath));
+                }
+                for (NPath script : oProjectDirPath.resolve("scripts").list().stream().sorted(Comparator.comparing(x -> x.getName())).collect(Collectors.toList())) {
+                    if (!Objects.equals(getProjectFileName(), script.getName())) {
+                        initScripts.add(oProjectFile.toString());
+                    }
+                }
+                sourcePaths.add(0, oProjectDirPath.resolve("src/main").toString());
+                resourcePaths.add(0, oProjectDirPath.resolve("src/resources").toString());
+                if (NBlankable.isBlank(targetFolder)) {
+                    targetFolder = oProjectDirPath.resolve("dist").toString();
                 }
             }
-            sourcePaths.add(0, oProjectDirPath.resolve("src/main").toString());
-            resourcePaths.add(0, oProjectDirPath.resolve("src/resources").toString());
+
             if (NBlankable.isBlank(targetFolder)) {
-                targetFolder = oProjectDirPath.resolve("dist").toString();
+                throw new NIllegalArgumentException(NMsg.ofPlain("missing target folder"));
             }
-        }
 
-        if (NBlankable.isBlank(targetFolder)) {
-            throw new NIllegalArgumentException(NMsg.ofPlain("missing target folder"));
-        }
-
-        if (config.getInitScripts() != null) {
-            for (String path : config.getInitScripts()) {
-                initScripts.add(toAbsolutePath(path, oProjectDirPath).toString());
+            if (config.getInitScripts() != null) {
+                for (String path : config.getInitScripts()) {
+                    initScripts.add(toAbsolutePath(path, oProjectDirPath).toString());
+                }
             }
-        }
-        initScripts = new ArrayList<>(new LinkedHashSet<>(initScripts));
+            initScripts = new ArrayList<>(new LinkedHashSet<>(initScripts));
 
-        if (config.getSourcePaths() != null) {
-            for (String path : config.getSourcePaths()) {
-                sourcePaths.add(toAbsolutePath(path, oProjectDirPath).toString());
+            if (config.getSourcePaths() != null) {
+                for (String path : config.getSourcePaths()) {
+                    sourcePaths.add(toAbsolutePath(path, oProjectDirPath).toString());
+                }
             }
-        }
-        sourcePaths = new ArrayList<>(new LinkedHashSet<>(sourcePaths));
+            sourcePaths = new ArrayList<>(new LinkedHashSet<>(sourcePaths));
 
-        if (config.getResourcePaths() != null) {
-            for (String path : config.getResourcePaths()) {
-                resourcePaths.add(toAbsolutePath(path, oProjectDirPath).toString());
+            if (config.getResourcePaths() != null) {
+                for (String path : config.getResourcePaths()) {
+                    resourcePaths.add(toAbsolutePath(path, oProjectDirPath).toString());
+                }
             }
-        }
-        resourcePaths = new ArrayList<>(new LinkedHashSet<>(resourcePaths));
+            resourcePaths = new ArrayList<>(new LinkedHashSet<>(resourcePaths));
 
 
-        if (sourcePaths.isEmpty()) {
-            throw new NIllegalArgumentException(NMsg.ofPlain("missing path to process"));
-        }
-
-        if (scriptType != null) {
-            if (scriptType.indexOf('/') < 0) {
-                scriptType = "text/" + scriptType;
+            if (sourcePaths.isEmpty()) {
+                throw new NIllegalArgumentException(NMsg.ofPlain("missing path to process"));
             }
-        } else {
-            //scriptType = MimeTypeConstants.APPLICATION_SIMPLE_EXPR;
-        }
 
-
-        if (projectFolderSpecified) {
-            //&& targetFolder==null
-            String tf = (String) this.getVar("targetFolder", null);
-            if (tf != null && targetFolder == null) {
-                targetFolder = tf;
+            if (scriptType != null) {
+                if (scriptType.indexOf('/') < 0) {
+                    scriptType = "text/" + scriptType;
+                }
+            } else {
+                //scriptType = MimeTypeConstants.APPLICATION_SIMPLE_EXPR;
             }
-        }
-        if (targetFolder == null) {
-            throw new NIllegalArgumentException(NMsg.ofPlain("missing target folder"));
-        }
-
-        config.setInitScripts(initScripts);
-        config.setSourcePaths(sourcePaths);
-        config.setResourcePaths(resourcePaths);
-        config.setTargetFolder(targetFolder);
-        config.setTargetFolder(resolvePath(targetFolder));
 
 
-        if (config.isClean()) {
-            cleanTargetFolder(config);
-        }
-
-        for (String initScript : initScripts) {
-            NPath fpath = NPath.of(initScript).toAbsolute();
-            this.setWorkingDir(workingPath(fpath).toString());
-            this.executeProjectFile(fpath, scriptType);
-        }
-
-
-        FileProcessorUtils.mkdirs(NPath.of(targetFolder));
-
-        if (config.getResourcePaths() != null) {
-            for (String path : new LinkedHashSet<>(config.getResourcePaths())) {
-                getProcessorManager().processResourceTree(NPath.of(path), targetFolder, config.getPathFilter());
+            if (projectFolderSpecified) {
+                //&& targetFolder==null
+                String tf = (String) this.getVar("targetFolder", null);
+                if (tf != null && targetFolder == null) {
+                    targetFolder = tf;
+                }
             }
-        }
+            if (targetFolder == null) {
+                throw new NIllegalArgumentException(NMsg.ofPlain("missing target folder"));
+            }
 
-        runJavadoc(config);
+            config.setInitScripts(initScripts);
+            config.setSourcePaths(sourcePaths);
+            config.setResourcePaths(resourcePaths);
+            config.setTargetFolder(targetFolder);
+            config.setTargetFolder(resolvePath(targetFolder));
 
-        for (String path : sourcePaths) {
-            getProcessorManager().processSourceTree(NPath.of(path), targetFolder, config.getPathFilter());
-        }
+
+            if (config.isClean()) {
+                cleanTargetFolder(config);
+            }
+
+            for (String initScript : initScripts) {
+                NPath fpath = NPath.of(initScript).toAbsolute();
+                this.setWorkingDir(workingPath(fpath).toString());
+                this.executeProjectFile(fpath, scriptType);
+            }
+
+
+            FileProcessorUtils.mkdirs(NPath.of(targetFolder));
+
+            if (config.getResourcePaths() != null) {
+                for (String path : new LinkedHashSet<>(config.getResourcePaths())) {
+                    getProcessorManager().processResourceTree(NPath.of(path), targetFolder, config.getPathFilter());
+                }
+            }
+
+            runJavadoc(config);
+
+            for (String path : sourcePaths) {
+                getProcessorManager().processSourceTree(NPath.of(path), targetFolder, config.getPathFilter());
+            }
+        });
     }
 
     private void runJavadoc(NSiteProjectConfig config) {
