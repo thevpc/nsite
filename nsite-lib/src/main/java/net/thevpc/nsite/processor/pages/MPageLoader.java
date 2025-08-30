@@ -136,7 +136,7 @@ public class MPageLoader {
                 break;
             }
             case "sort": {
-                g.setSortAsc(value.asBooleanValue().orElse(!"desc".equalsIgnoreCase(String.valueOf(value))));
+                g.setSortAsc(value.asBooleanValue().orElse(!"desc".equalsIgnoreCase(value.asStringValue().orElse(""))));
                 break;
             }
             case "author": {
@@ -213,7 +213,7 @@ public class MPageLoader {
                 break;
             }
             case "type": {
-                g.setTypeInfo((Map) value);
+                g.setTypeInfo((NObjectElement) value);
                 break;
             }
         }
