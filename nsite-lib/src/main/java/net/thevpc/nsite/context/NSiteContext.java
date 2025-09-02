@@ -5,7 +5,6 @@
  */
 package net.thevpc.nsite.context;
 
-import net.thevpc.nsite.executor.expr.fct.LoadPagesFct;
 import net.thevpc.nsite.processor.NSiteProcessorManager;
 import net.thevpc.nsite.util.FileProcessorUtils;
 import net.thevpc.nsite.util.StringUtils;
@@ -21,6 +20,8 @@ import net.thevpc.nsite.mimetype.DefaultNSiteMimeTypeResolver;
 import net.thevpc.nsite.mimetype.NSiteMimeTypeResolver;
 import net.thevpc.nsite.processor.html.PageToHtmlUtils;
 import net.thevpc.nuts.log.NLog;
+import net.thevpc.nuts.log.NLogContext;
+import net.thevpc.nuts.log.NLogs;
 import net.thevpc.nuts.util.NBlankable;
 import net.thevpc.nuts.util.NMsg;
 import net.thevpc.nuts.util.NOptional;
@@ -464,7 +465,7 @@ public class NSiteContext {
     }
 
     public void run(NSiteProjectConfig config0) {
-        NLog.of(NSiteContext.class).runWith(()-> {
+        NLogs.of().runWith(NLogContext.ofLog(NLog.of(NSiteContext.class)), ()-> {
             NSiteProjectConfig config = config0.copy();
             String scriptType = config.getScriptType();
             String targetFolder = config.getTargetFolder();
