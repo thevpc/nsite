@@ -34,31 +34,25 @@ public class PageToHtmlUtils {
                 return md2html(page.getMarkdownContent(), generatorContext);
             case NTF:
                 NText ntfContent = page.getNtfContent();
-                List<NText> nnormalized = normalizeText(ntfContent);
-                List<HtmlBuffer.Node> list =
-                        nnormalized.stream()
-                                .map(x -> ntf2html(x))
-                                .collect(Collectors.toList());
-                ;
-                return new HtmlBuffer.Tag("pre").body(new HtmlBuffer.TagList(list).setNewLine(false));
+                NText nnormalized = normalizeText(ntfContent);
+                return new HtmlBuffer.Tag("pre").body(ntf2html(nnormalized));
         }
         throw new IllegalArgumentException("unsupported page: " + page);
     }
 
-    private List<NText> normalizeText(NText text) {
-        return NTexts.of().flatten(text, new NTextTransformConfig()
+    private NNormalizedText normalizeText(NText text) {
+        return NTexts.of().normalize(text, new NTextTransformConfig()
                         .setFlatten(true)
                         .setNormalize(true)
                         .setApplyTheme(true)
                         .setThemeName(null)//perhaps override
                         .setBasicTrueStyles(true)
                         .setThemeName("whiteboard")
-                )
-                .toList();
+                );
     }
 
     private HtmlBuffer.Node ntf2html(NText elem) {
-        switch (elem.getType()) {
+        switch (elem.type()) {
             case PLAIN: {
                 return new HtmlBuffer.Plain(((NTextPlain) elem).getValue());
             }
@@ -158,7 +152,7 @@ public class PageToHtmlUtils {
                             break;
                         }
                         default: {
-                            List<NText> ee = normalizeText(elem);
+                            NText ee = normalizeText(elem);
                             hstyles.add("color: red");
                         }
                     }
