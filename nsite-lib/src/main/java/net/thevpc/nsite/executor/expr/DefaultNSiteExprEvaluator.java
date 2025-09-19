@@ -28,6 +28,7 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
         declareFunction(new PrintlnFct());
         declareFunction(new PrintFct());
         declareFunction(new StringFct());
+        declareFunction(new ToHtmlFct());
         declareFunction(new ProcessFileFct());
         declareFunction(new LoadFileFct());
         declareFunction(new IncludeFct());
@@ -73,7 +74,7 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
 //            eval = nExprNode.eval(decl2);
 //        }
         if(!eval.isPresent()) {
-            NLog.ofScoped(DefaultNSiteExprEvaluator.class).log(NMsg.ofC("unable to evaluate %s : %s", eval,eval.getMessage().get()));
+            NLog.ofScoped(DefaultNSiteExprEvaluator.class).log(NMsg.ofC("unable to evaluate %s : %s", nExprNode,eval.getMessage().get()));
         }
         return eval.get();
     }
