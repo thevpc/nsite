@@ -1,8 +1,7 @@
 package net.thevpc.nsite.processor.pages;
 
-import net.thevpc.nuts.elem.NElement;
-import net.thevpc.nuts.elem.NObjectElement;
-import net.thevpc.nuts.elem.NPairElement;
+import net.thevpc.nuts.elem.*;
+import net.thevpc.nuts.io.NIOUtils;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nuts.lib.md.MdElement;
@@ -10,66 +9,59 @@ import net.thevpc.nuts.lib.md.MdFactory;
 import net.thevpc.nuts.lib.md.MdParser;
 import net.thevpc.nuts.text.NText;
 import net.thevpc.nuts.text.NTexts;
+import net.thevpc.nuts.util.NBlankable;
+import net.thevpc.nuts.util.NStringBuilder;
 import net.thevpc.nuts.util.NStringUtils;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.*;
 
 public class MPageLoader {
 
-    public static MPage load(NPath path, NSiteContext fcontext) {
+    public static MPage loadPageFromFileOrDirectory(NPath path, NSiteContext fcontext) {
         if (path.isDirectory()) {
             NPath u = path.resolve(".folder-info.md");
             if (u.isRegularFile()) {
-                MPage mPage = loadFile(u, fcontext);
-                mPage.setPath(path.toString());
-                mPage.setPathName(path.getName());
-                return mPage;
+                return loadPageFromFile(u, fcontext);
             }
             u = path.resolve(".folder-info.ntf");
             if (u.isRegularFile()) {
-                MPage mPage = loadFile(u, fcontext);
-                mPage.setPath(path.toString());
-                mPage.setPathName(path.getName());
-                return mPage;
+                return loadPageFromFile(u, fcontext);
             }
         } else if (
                 (path.getName().endsWith(".md") && !path.getName().endsWith(".folder-info.md"))
                         ||
                         (path.getName().endsWith(".ntf") && !path.getName().endsWith(".folder-info.ntf"))
         ) {
-            return loadFile(path, fcontext);
+            return loadPageFromFile(path, fcontext);
         }
         return null;
     }
 
-    private static MPage loadFile(NPath path, NSiteContext fcontext) {
+    private static MPage loadPageFromFile(NPath path, NSiteContext fcontext) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         fcontext.getProcessorManager().processSourceRegularFile(path, null, bos);
+        String defaultContentType=null;
         if (path.getName().endsWith(".md")) {
-            return loadFileMarkdown(path, fcontext, new ByteArrayInputStream(bos.toByteArray()));
+            defaultContentType="markdown";
+        }else if (path.getName().endsWith(".ntf")) {
+            defaultContentType="ntf";
+        }else {
+            throw new IllegalArgumentException("Unsupported file type: " + path.getName());
         }
-        if (path.getName().endsWith(".ntf")) {
-            return loadFileNtf(path, fcontext, new ByteArrayInputStream(bos.toByteArray()));
-        }
-        throw new IllegalArgumentException("Unsupported file type: " + path.getName());
-    }
-
-
-    private static MPage loadFileNtf(NPath path, NSiteContext fcontext, InputStream is) {
+        ByteArrayInputStream is = new ByteArrayInputStream(bos.toByteArray());
         int maxRowSize = 1024 * 4;
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             br.mark(maxRowSize);
             String firstLine = br.readLine();
-            MPage g = new MPage(MPageType.NTF)
+            MPage g = new MPage()
                     .setPath(path.toString())
                     .setTitle(path.getName())
                     .setPathName(path.getName());
             if (firstLine != null) {
+                NStringBuilder yamlPrefix = new NStringBuilder();
                 if (firstLine.startsWith("---")) {
-                    List<String> headerLines = new ArrayList<>();
                     while (true) {
                         br.mark(maxRowSize);
                         String nextLine = br.readLine();
@@ -78,21 +70,53 @@ public class MPageLoader {
                         } else if (nextLine.startsWith("---")) {
                             break;
                         } else {
-                            nextLine = nextLine.trim();
-                            if (!nextLine.startsWith("#")) {
-                                int i = nextLine.indexOf(':');
-                                if (i > 0) {
-                                    setPageHeaderVar(g, nextLine.substring(0, i).trim(), NElement.ofString(nextLine.substring(i + 1).trim()));
-                                }
-                            }
-                            headerLines.add(nextLine);
+                            yamlPrefix.println(nextLine);
                         }
                     }
                 } else {
                     br.reset();
                 }
-                NText text = NTexts.of().parser().parse(br);
-                g.setNtfContent(text);
+                if (!yamlPrefix.isBlank()) {
+                    NElement parsed = NElementParser.ofYaml().parse(yamlPrefix.toString());
+                    NListContainerElement list = parsed.toListContainer().get();
+                    for (NElement child : list.children()) {
+                        NPairElement np = child.asNamedPair().get();
+                        String key = np.key().asStringValue().get();
+                        setPageHeaderVar(g, key, np.value());
+                    }
+                }
+                String ct = NStringUtils.trim(g.getContentType());
+                if (NBlankable.isBlank(ct)) {
+                    ct = NStringUtils.trim(defaultContentType);
+                }
+                if (ct.startsWith("text/")) {
+                    ct = ct.substring("text/".length());
+                } else if (ct.equals("application/json")) {
+                    ct = "json";
+                }
+                setPageHeaderVar(g, "contentType", NElement.ofString(ct));
+
+                String content = NIOUtils.readString(br);
+                g.setStringContent(content);
+                switch (ct) {
+                    case "ntf":
+                    case "x-ntf": {
+                        try (Reader r = new StringReader(content)) {
+                            NText text = NTexts.of().parser().parse(r);
+                            g.setParsedContent(text);
+                        }
+                        break;
+                    }
+                    case "":
+                    case "md":
+                    case "markdown": {
+                        try (Reader r = new StringReader(content)) {
+                            MdParser p = MdFactory.createParser(r);
+                            MdElement md = p.parse();
+                            g.setParsedContent(md);
+                        }
+                    }
+                }
                 return g;
             }
         } catch (IOException ex) {
@@ -101,25 +125,6 @@ public class MPageLoader {
         return null;
     }
 
-
-    private static MPage loadFileMarkdown(NPath path, NSiteContext fcontext, InputStream is) {
-        MdParser p = MdFactory.createParser(is);
-        MdElement md = p.parse();
-        MPage g = new MPage(MPageType.MARKDOWN)
-                .setPath(path.toString())
-                .setTitle(path.getName())
-                .setPathName(path.getName());
-        NElement mdHeader = md.getPreambleHeader();
-        if (mdHeader instanceof NObjectElement) {
-            for (NElement fe : ((NObjectElement) mdHeader).children()) {
-                if(fe.isNamedPair()){
-                    NPairElement pair = fe.asPair().get();
-                    setPageHeaderVar(g, pair.key().asStringValue().orNull() , pair.value());
-                }
-            }
-        }
-        return g.setMarkdownContent(md);
-    }
 
     private static void setPageHeaderVar(MPage g, String key, NElement value) {
         switch (NStringUtils.trim(key)) {
@@ -190,6 +195,10 @@ public class MPageLoader {
                 g.setInstallCommand(value.asStringValue().orNull());
                 break;
             }
+            case "contentType": {
+                g.setContentType(value.asStringValue().orNull());
+                break;
+            }
             case "exampleCommand": {
                 g.setExampleCommand(value.asStringValue().orNull());
                 break;
@@ -207,8 +216,8 @@ public class MPageLoader {
                 break;
             }
             case "tags": {
-                if(value.isArray() && value.asArray().get().children().stream().allMatch(x->x.isAnyString() || x.isNull())){
-                    g.setTags(value.asArray().get().children().stream().map(x->x.asStringValue().orNull()).toArray(String[]::new));
+                if (value.isArray() && value.asArray().get().children().stream().allMatch(x -> x.isAnyString() || x.isNull())) {
+                    g.setTags(value.asArray().get().children().stream().map(x -> x.asStringValue().orNull()).toArray(String[]::new));
                 }
                 break;
             }
