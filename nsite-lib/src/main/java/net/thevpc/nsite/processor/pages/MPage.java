@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class MPage {
-    public MPageType type;
+    public String contentType;
     public String pathName;
     public String id;
     public String path;
@@ -23,8 +23,8 @@ public class MPage {
     public String menuTitle;
     public int order;
     public int level;
-    public MdElement markdownContent;
-    public NText ntfContent;
+    public String stringContent;
+    public Object parsedContent;
     public boolean sortAsc = true;
 
     private String author;
@@ -36,6 +36,35 @@ public class MPage {
     private String[] tags;
     private NObjectElement typeInfo;
 
+    public MPage() {
+    }
+
+    public String getStringContent() {
+        return stringContent;
+    }
+
+    public MPage setStringContent(String stringContent) {
+        this.stringContent = stringContent;
+        return this;
+    }
+
+    public Object getParsedContent() {
+        return parsedContent;
+    }
+
+    public MPage setParsedContent(Object parsedContent) {
+        this.parsedContent = parsedContent;
+        return this;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public MPage setContentType(String contentType) {
+        this.contentType = contentType;
+        return this;
+    }
 
     public String getInstallCommand() {
         return installCommand;
@@ -75,22 +104,6 @@ public class MPage {
 
     public void setWebsite(String website) {
         this.website = website;
-    }
-
-    public MPage(MPageType type) {
-        this.type = type;
-    }
-
-    public MPageType getType() {
-        return type;
-    }
-
-    public NText getNtfContent() {
-        return ntfContent;
-    }
-
-    public void setNtfContent(NText ntfContent) {
-        this.ntfContent = ntfContent;
     }
 
     public String getSubTitle() {
@@ -165,18 +178,6 @@ public class MPage {
     public MPage setOrder(int order) {
         this.order = order;
         return this;
-    }
-
-    public MdElement getMarkdownContent() {
-        return markdownContent;
-    }
-
-    public MPage setMarkdownContent(MdElement markdownContent) {
-        this.markdownContent = markdownContent;
-        return this;
-    }
-
-    public MPage() {
     }
 
     public String getId() {
@@ -256,7 +257,7 @@ public class MPage {
                 ", menuTitle='" + menuTitle + '\'' +
                 ", order=" + order +
                 ", level=" + level +
-                ", markdown=" + markdownContent +
+                ", parsedContent=" + parsedContent +
                 ", sortAsc=" + sortAsc +
                 ", author='" + author + '\'' +
                 ", authorTitle='" + authorTitle + '\'' +
