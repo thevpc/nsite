@@ -8,8 +8,10 @@ import net.thevpc.nuts.text.*;
 import net.thevpc.nuts.util.NColors;
 import net.thevpc.nuts.util.NOptional;
 import net.thevpc.nuts.util.NStringUtils;
+import net.thevpc.nuts.util.NUtils;
 
 import java.awt.*;
+import java.io.StringReader;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,18 +31,10 @@ public class PageToHtmlUtils {
 
     }
     public HtmlBuffer.Node pageContent2html(MPage page, GeneratorContext generatorContext) {
-        switch (page.getType()) {
-            case MARKDOWN:
-                return md2html(page.getMarkdownContent(), generatorContext);
-            case NTF:
-                NText ntfContent = page.getNtfContent();
-                NText nnormalized = normalizeText(ntfContent);
-                return new HtmlBuffer.Tag("pre").body(ntf2html(nnormalized));
-        }
-        throw new IllegalArgumentException("unsupported page: " + page);
+        return toHtml(page.getContentType(), NUtils.firstNonNull(page.getParsedContent(),page.getStringContent()),generatorContext);
     }
 
-    private NNormalizedText normalizeText(NText text) {
+    public NNormalizedText normalizeText(NText text) {
         return NTexts.of().normalize(text, new NTextTransformConfig()
                         .setFlatten(true)
                         .setNormalize(true)
@@ -51,7 +45,7 @@ public class PageToHtmlUtils {
                 );
     }
 
-    private HtmlBuffer.Node ntf2html(NText elem) {
+    public HtmlBuffer.Node ntf2html(NText elem) {
         switch (elem.type()) {
             case PLAIN: {
                 return new HtmlBuffer.Plain(((NTextPlain) elem).getValue());
@@ -170,6 +164,50 @@ public class PageToHtmlUtils {
     }
 
 
+    public HtmlBuffer.Node toHtml(String type, Object content,GeneratorContext generatorContext) {
+        switch (NStringUtils.trim(type)) {
+            case "markdown": {
+                if(content instanceof MdElement){
+                    return md2html((MdElement) content, generatorContext);
+                }else if(content instanceof String){
+                    try (StringReader reader = new StringReader((String) content)) {
+                        MdParser p = MdFactory.createParser(reader);
+                        MdElement md = p.parse();
+                        return md2html(md, generatorContext);
+                    }
+                }else{
+                    throw new IllegalArgumentException("unsupported type: " + type);
+                }
+            }
+            case "ntf": {
+                if(content instanceof NText){
+                    NText nnormalized = normalizeText((NText) content);
+//                    return new HtmlBuffer.Tag("pre").body(ntf2html(nnormalized));
+                    return ntf2html(nnormalized);
+                }else if(content instanceof String){
+                    NText ntfContent = NText.of((String)content);
+                    NText nnormalized = normalizeText(ntfContent);
+//                    return new HtmlBuffer.Tag("pre").body(ntf2html(nnormalized));
+                    return ntf2html(nnormalized);
+                }else{
+                    throw new IllegalArgumentException("unsupported type: " + type);
+                }
+            }
+            default:
+            {
+                if(content instanceof String) {
+                    return new HtmlBuffer.Tag("pre").body(
+                            //<code class="language-xml">
+                            new HtmlBuffer.Tag("code").attr("class", "language-" + NStringUtils.trim(type)).body(
+                                    HtmlBuffer.escapeString((String) content)
+                            )
+                    );
+                }else{
+                    throw new IllegalArgumentException("unsupported type: " + type);
+                }
+            }
+        }
+    }
     public HtmlBuffer.Node md2html(MdElement markdown, GeneratorContext generatorContext) {
         if (markdown == null) {
             return null;
