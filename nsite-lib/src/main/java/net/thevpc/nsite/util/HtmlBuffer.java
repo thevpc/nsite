@@ -6,6 +6,40 @@ import java.util.List;
 public class HtmlBuffer {
     private StringBuilder buffer = new StringBuilder();
 
+    public static String escapeString(String input) {
+            if (input == null) return "";
+            StringBuilder sb = new StringBuilder(input.length());
+            for (char c : input.toCharArray()) {
+                switch (c) {
+                    case '<' :{
+                        sb.append("&lt;");
+                        break;
+                    }
+                    case '>' :{
+                        sb.append("&gt;");
+                        break;
+                    }
+                    case '&' :{
+                        sb.append("&amp;");
+                        break;
+                    }
+                    case '"' :{
+                        sb.append("&quot;");
+                        break;
+                    }
+                    case '\'' :{
+                        sb.append("&#39;"); // or &apos; but it's less supported
+                        break;
+                    }
+                    default: {
+                        sb.append(c);
+                        break;
+                    }
+                }
+            }
+            return sb.toString();
+    }
+
     public HtmlBuffer tagPlain(String tag, String value) {
         buffer.append("<").append(tag).append(">")
                 .append(value).append("</").append(tag).append(">");
