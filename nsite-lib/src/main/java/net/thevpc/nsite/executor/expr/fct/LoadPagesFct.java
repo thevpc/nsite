@@ -39,7 +39,7 @@ public class LoadPagesFct extends BaseNexprNExprFct {
             level = 0;
             str = (String) strOrGroup;
             try {
-                parent = MPageLoader.load(NPath.of(str),fcontext);
+                parent = MPageLoader.loadPageFromFileOrDirectory(NPath.of(str),fcontext);
                 if (parent != null) {
                     level = parent.getLevel() + 1;
                 }
@@ -79,7 +79,7 @@ public class LoadPagesFct extends BaseNexprNExprFct {
                 })
                 .map(x -> {
                     try {
-                        return MPageLoader.load(x,fcontext);
+                        return MPageLoader.loadPageFromFileOrDirectory(x,fcontext);
                     } catch (Exception ex) {
                         NLog.ofScoped(getClass()).error(NMsg.ofC("unable to load page %s : %s",x,ex).asError(ex));
                         return null;
