@@ -249,7 +249,7 @@ public class MPage {
 
     @Override
     public String toString() {
-        return "MdPage{" +
+        return "MPage{" +
                 "pathName='" + pathName + '\'' +
                 ", id='" + id + '\'' +
                 ", path='" + path + '\'' +
