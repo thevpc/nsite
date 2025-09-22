@@ -339,7 +339,7 @@ public class NSiteProcessorManager {
     }
 
     private static NLog log() {
-        return NLog.of(NSiteProcessorManager.class).scoped();
+        return NLog.ofScoped(NSiteProcessorManager.class);
     }
 
     public void processFiles(NPath path, Predicate<NPath> filter) {
