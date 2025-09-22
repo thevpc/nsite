@@ -64,7 +64,7 @@ public class LoadPagesFct extends BaseNexprNExprFct {
         }else if (NPath.of(str).getName().equals(".folder-info.ntf")) {
             str = NPath.of(str).getParent().toString();
         }
-        NLog.of(LoadPagesFct.class).scoped().debug(NMsg.ofC("[%] %s(%s)","eval",name,StringUtils.toLiteralString(str)));
+        NLog.of(LoadPagesFct.class).scoped().debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(str)));
         int finalLevel = level;
         boolean finalSortAsc = sortAsc;
         List<MPage> pages = NPath.of(str).list().stream()
