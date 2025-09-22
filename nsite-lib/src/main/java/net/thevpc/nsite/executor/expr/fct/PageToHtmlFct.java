@@ -1,12 +1,12 @@
 package net.thevpc.nsite.executor.expr.fct;
 
+import net.thevpc.nsite.html.NHtmlTag;
 import net.thevpc.nuts.expr.NExprDeclarations;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.processor.html.PageToHtmlUtils;
 import net.thevpc.nsite.processor.pages.MPage;
-import net.thevpc.nsite.util.HtmlBuffer;
 import net.thevpc.nsite.util.StringUtils;
 import net.thevpc.nuts.log.NLog;
 import net.thevpc.nuts.util.NMsg;
@@ -28,12 +28,12 @@ public class PageToHtmlFct extends BaseNexprNExprFct {
 
         MPage title = (MPage) args.get(0).getValue().orNull();
         Object titlePrefix = args.size() > 1 ? args.get(1).getValue().orNull() : null;
-        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%] %s(%s)","eval",name,StringUtils.toLiteralString(title) + ")"));
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(title) + ")"));
         if (title == null) {
             return "";
         }
         NStringBuilder sb = new NStringBuilder();
-        sb.append(new HtmlBuffer.Tag(title.level == 0 ? "H1"
+        sb.append(new NHtmlTag(title.level == 0 ? "H1"
                 : title.level == 1 ? "H2"
                 : title.level == 2 ? "H3"
                 : "H4"
