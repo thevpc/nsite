@@ -28,6 +28,7 @@ import net.thevpc.nuts.util.NOptional;
 import net.thevpc.nuts.util.NStringUtils;
 
 import java.io.*;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -465,7 +466,16 @@ public class NSiteContext {
     }
 
     public void run(NSiteProjectConfig config0) {
-        NLogs.of().runWith(NLogContext.ofLog(NLog.of(NSiteContext.class)), ()-> {
+        NLogs.of().runWith(NLogContext.ofLog(NLog.of(NSiteContext.class))
+                        .withLog(m->{
+                            if(m.isError()){
+                                NErr.println(m);
+                            }else{
+                                NOut.println(m);
+                            }
+                        })
+                        .withMessagePrefix(a->NMsg.ofC("[%s] [%s]", Instant.now(),a.getLevel()))
+                , ()-> {
             NSiteProjectConfig config = config0.copy();
             String scriptType = config.getScriptType();
             String targetFolder = config.getTargetFolder();
