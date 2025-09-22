@@ -27,7 +27,7 @@ public class ProcessFileFct extends BaseNexprNExprFct {
         String str = (String) args.get(0).getValue().orNull();
         String path = FileProcessorUtils.toAbsolute(str, fcontext.getWorkingDirRequired());
         NPath opath = NPath.of(path);
-        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%] %s(%s)","eval",name,StringUtils.toLiteralString(opath) + ")"));
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(opath) + ")"));
         fcontext.getProcessorManager().processSourceRegularFile(opath, null);
         return "";
     }
