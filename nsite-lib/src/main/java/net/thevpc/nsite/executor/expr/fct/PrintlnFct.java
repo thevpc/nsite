@@ -32,7 +32,7 @@ public class PrintlnFct extends BaseNexprNExprFct {
                 sb.append(String.join(", ", all)).append("\n");
             }
         }
-        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%] %s(%s)","eval",name,StringUtils.toLiteralString(sb.toString()) + ")"));
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(sb.toString()) + ")"));
         return sb.toString();
     }
 }
