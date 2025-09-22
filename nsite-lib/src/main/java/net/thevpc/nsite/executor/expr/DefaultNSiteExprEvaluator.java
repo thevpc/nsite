@@ -74,7 +74,7 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
 //            eval = nExprNode.eval(decl2);
 //        }
         if(!eval.isPresent()) {
-            NLog.ofScoped(DefaultNSiteExprEvaluator.class).log(NMsg.ofC("unable to evaluate %s : %s", nExprNode,eval.getMessage().get()));
+            NLog.ofScoped(DefaultNSiteExprEvaluator.class).log(NMsg.ofC("unable to evaluate %s : %s", nExprNode,eval.getMessage().get()).asError());
         }
         return eval.get();
     }
