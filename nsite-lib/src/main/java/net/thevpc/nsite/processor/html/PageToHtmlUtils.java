@@ -1,8 +1,8 @@
 package net.thevpc.nsite.processor.html;
 
 import net.thevpc.nsite.context.NSiteContext;
+import net.thevpc.nsite.html.*;
 import net.thevpc.nsite.processor.pages.MPage;
-import net.thevpc.nsite.util.HtmlBuffer;
 import net.thevpc.nuts.lib.md.*;
 import net.thevpc.nuts.text.*;
 import net.thevpc.nuts.util.NColors;
@@ -17,11 +17,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PageToHtmlUtils {
-    public interface GeneratorContext{
+    public interface GeneratorContext {
         String nextId();
+
         static GeneratorContext of(NSiteContext fcontext) {
             NOptional<GeneratorContext> v = fcontext.getVar(GeneratorContext.class.getSimpleName());
-            if(!v.isPresent()) {
+            if (!v.isPresent()) {
                 MyGeneratorContext r = new MyGeneratorContext();
                 fcontext.setVar(GeneratorContext.class.getSimpleName(), r);
                 return r;
@@ -30,36 +31,37 @@ public class PageToHtmlUtils {
         }
 
     }
-    public HtmlBuffer.Node pageContent2html(MPage page, GeneratorContext generatorContext) {
-        return toHtml(page.getContentType(), NUtils.firstNonNull(page.getParsedContent(),page.getStringContent()),generatorContext);
+
+    public NHtmlNode pageContent2html(MPage page, GeneratorContext generatorContext) {
+        return toHtml(page.getContentType(), NUtils.firstNonNull(page.getParsedContent(), page.getStringContent()), generatorContext);
     }
 
     public NNormalizedText normalizeText(NText text) {
         return NTexts.of().normalize(text, new NTextTransformConfig()
-                        .setFlatten(true)
-                        .setNormalize(true)
-                        .setApplyTheme(true)
-                        .setThemeName(null)//perhaps override
-                        .setBasicTrueStyles(true)
-                        .setThemeName("whiteboard")
-                );
+                .setFlatten(true)
+                .setNormalize(true)
+                .setApplyTheme(true)
+                .setThemeName(null)//perhaps override
+                .setBasicTrueStyles(true)
+                .setThemeName("whiteboard")
+        );
     }
 
-    public HtmlBuffer.Node ntf2html(NText elem) {
+    public NHtmlNode ntf2html(NText elem) {
         switch (elem.type()) {
             case PLAIN: {
-                return new HtmlBuffer.Plain(((NTextPlain) elem).getValue());
+                return NHtml.raw(((NTextPlain) elem).getValue());
             }
             case LINK: {
                 NTextLink lnk = (NTextLink) elem;
-                return new HtmlBuffer.Tag("a")
+                return new NHtmlTag("a")
                         .attr("href", lnk.getValue())
                         .attr("class", "md-link")
                         .body(lnk.getValue());
             }
             case TITLE: {
                 NTextTitle title = (NTextTitle) elem;
-                HtmlBuffer.Tag t = new HtmlBuffer.Tag("H4")
+                NHtmlTag t = new NHtmlTag("H4")
                         .attr("class", "md-title-" + title.getLevel())
                         .body(
                                 ntf2html(title.getChild())
@@ -67,12 +69,12 @@ public class PageToHtmlUtils {
                 return t;
             }
             case LIST: {
-                List<HtmlBuffer.Node> nnn = new ArrayList<>();
+                List<NHtmlNode> nnn = new ArrayList<>();
                 NTextList ll = (NTextList) elem;
                 for (NText child : ll.getChildren()) {
                     nnn.add(ntf2html(child));
                 }
-                return new HtmlBuffer.TagList(nnn.toArray(new HtmlBuffer.Node[0]));
+                return new NHtmlTagList(nnn.toArray(new NHtmlNode[0]));
             }
             case CODE: {
                 NTextCode c = (NTextCode) elem;
@@ -83,18 +85,18 @@ public class PageToHtmlUtils {
                 if (inline) {
                     String value = text;
                     if (value.matches("[a-zA-Z0-9_-]+")) {
-                        return (new HtmlBuffer.Tag("mark")
+                        return (new NHtmlTag("mark")
                                 .attr("class", "md-code md-code-" + type + " " + language)
                                 .body(escapeCode(value)));
                     }
-                    return (new HtmlBuffer.Tag("code")
+                    return (new NHtmlTag("code")
                             .attr("class", "md-code md-code-" + type + " " + language)
                             .body(escapeCode(value)));
                 }
-                return (new HtmlBuffer.Tag("pre")
+                return (new NHtmlTag("pre")
                         .attr("class", "md-code md-code-" + type + " " + language)
                         .body(
-                                (new HtmlBuffer.Tag("code").attr("class", language).body(escapeCode(text)))
+                                (new NHtmlTag("code").attr("class", language).body(escapeCode(text)))
                         ));
             }
             case STYLED: {
@@ -103,7 +105,7 @@ public class PageToHtmlUtils {
                 NText c = style.getChild();
                 Set<String> hstyles = new HashSet<>();
                 Set<String> hclasses = new HashSet<>();
-                HtmlBuffer.Tag t = new HtmlBuffer.Tag("span");
+                NHtmlTag t = new NHtmlTag("span");
 //                hstyles.add("display: inline");
                 boolean blink = false;
                 for (NTextStyle st : styles) {
@@ -136,12 +138,12 @@ public class PageToHtmlUtils {
                             break;
                         }
                         case BACK_TRUE_COLOR: {
-                            Color cl=new Color(st.getVariant());
+                            Color cl = new Color(st.getVariant());
                             hstyles.add("background-color: " + NColors.toHtmlHex(cl));
                             break;
                         }
                         case FORE_TRUE_COLOR: {
-                            Color cl=new Color(st.getVariant());
+                            Color cl = new Color(st.getVariant());
                             hstyles.add("color: " + NColors.toHtmlHex(cl));
                             break;
                         }
@@ -155,70 +157,70 @@ public class PageToHtmlUtils {
                 t.attr("class", String.join(" ", hclasses));
                 t.body(ntf2html(style.getChild()));
                 if (blink) {
-                    t = new HtmlBuffer.Tag("blink").body(t);
+                    t = new NHtmlTag("blink").body(t);
                 }
                 return t;
             }
         }
-        return new HtmlBuffer.Plain(elem.toString());
+        return NHtml.raw(elem.toString());
     }
 
 
-    public HtmlBuffer.Node toHtml(String type, Object content,GeneratorContext generatorContext) {
+    public NHtmlNode toHtml(String type, Object content, GeneratorContext generatorContext) {
         switch (NStringUtils.trim(type)) {
             case "markdown": {
-                if(content instanceof MdElement){
+                if (content instanceof MdElement) {
                     return md2html((MdElement) content, generatorContext);
-                }else if(content instanceof String){
+                } else if (content instanceof String) {
                     try (StringReader reader = new StringReader((String) content)) {
                         MdParser p = MdFactory.createParser(reader);
                         MdElement md = p.parse();
                         return md2html(md, generatorContext);
                     }
-                }else{
+                } else {
                     throw new IllegalArgumentException("unsupported type: " + type);
                 }
             }
             case "ntf": {
-                if(content instanceof NText){
+                if (content instanceof NText) {
                     NText nnormalized = normalizeText((NText) content);
-//                    return new HtmlBuffer.Tag("pre").body(ntf2html(nnormalized));
+//                    return new NHtmlBuffer.NHtmlTag("pre").body(ntf2html(nnormalized));
                     return ntf2html(nnormalized);
-                }else if(content instanceof String){
-                    NText ntfContent = NText.of((String)content);
+                } else if (content instanceof String) {
+                    NText ntfContent = NText.of((String) content);
                     NText nnormalized = normalizeText(ntfContent);
-//                    return new HtmlBuffer.Tag("pre").body(ntf2html(nnormalized));
+//                    return new NHtmlBuffer.NHtmlTag("pre").body(ntf2html(nnormalized));
                     return ntf2html(nnormalized);
-                }else{
+                } else {
                     throw new IllegalArgumentException("unsupported type: " + type);
                 }
             }
-            default:
-            {
-                if(content instanceof String) {
-                    return new HtmlBuffer.Tag("pre").body(
+            default: {
+                if (content instanceof String) {
+                    return NHtml.tag("pre").body(
                             //<code class="language-xml">
-                            new HtmlBuffer.Tag("code").attr("class", "language-" + NStringUtils.trim(type)).body(
-                                    HtmlBuffer.escapeString((String) content)
+                            NHtml.tag("code").attr("class", "language-" + NStringUtils.trim(type)).body(
+                                    NHtml.escapeString((String) content)
                             )
                     );
-                }else{
+                } else {
                     throw new IllegalArgumentException("unsupported type: " + type);
                 }
             }
         }
     }
-    public HtmlBuffer.Node md2html(MdElement markdown, GeneratorContext generatorContext) {
+
+    public NHtmlNode md2html(MdElement markdown, GeneratorContext generatorContext) {
         if (markdown == null) {
             return null;
         }
         switch (markdown.type().group()) {
             case TEXT: {
                 MdText text = markdown.asText();
-                return new HtmlBuffer.Plain(text.getText());
+                return NHtml.raw(text.getText());
             }
             case PHRASE: {
-                HtmlBuffer.Tag p = new HtmlBuffer.Tag("p")
+                NHtmlTag p = new NHtmlTag("p")
                         .attr("class", "md-phrase");
                 for (MdElement child : markdown.asPhrase().getChildren()) {
                     p.body(md2html(child, generatorContext));
@@ -226,33 +228,33 @@ public class PageToHtmlUtils {
                 return p;
             }
             case BODY: {
-                return new HtmlBuffer.TagList(
+                return new NHtmlTagList(
                         Arrays.stream(markdown.asBody().getChildren())
                                 .map(x -> md2html(x, generatorContext))
-                                .toArray(HtmlBuffer.Node[]::new)
+                                .toArray(NHtmlNode[]::new)
                 );
             }
             case TITLE: {
                 MdTitle title = markdown.asTitle();
-                HtmlBuffer.Tag t = new HtmlBuffer.Tag("H4")
+                NHtmlTag t = new NHtmlTag("H4")
                         .attr("class", "md-title-" + title.getDepth())
                         .body(
                                 md2html(title.getValue(), generatorContext)
                         );
-                List<HtmlBuffer.Node> nnn = new ArrayList<>();
+                List<NHtmlNode> nnn = new ArrayList<>();
                 nnn.add(t);
                 for (MdElement child : title.getChildren()) {
                     nnn.add(md2html(child, generatorContext));
                 }
-                return new HtmlBuffer.TagList(nnn.toArray(new HtmlBuffer.Node[0]));
+                return new NHtmlTagList(nnn.toArray(new NHtmlNode[0]));
             }
             case ITALIC: {
-                return (new HtmlBuffer.Tag("i")
+                return (new NHtmlTag("i")
                         .attr("class", "md-italic")
                         .body(md2html(markdown.asItalic().getContent(), generatorContext)));
             }
             case BOLD: {
-                return (new HtmlBuffer.Tag("b")
+                return (new NHtmlTag("b")
                         .attr("class", "md-bold")
                         .body(md2html(markdown.asBold().getContent(), generatorContext)));
             }
@@ -263,22 +265,22 @@ public class PageToHtmlUtils {
                 if (code.isInline()) {
                     String value = code.getValue();
                     if (value.matches("[a-zA-Z0-9_-]+")) {
-                        return (new HtmlBuffer.Tag("mark")
+                        return (new NHtmlTag("mark")
                                 .attr("class", "md-code md-code-" + type + " " + language)
                                 .body(escapeCode(value)));
                     }
-                    return (new HtmlBuffer.Tag("code")
+                    return (new NHtmlTag("code")
                             .attr("class", "md-code md-code-" + type + " " + language)
                             .body(escapeCode(value)));
                 }
-                return (new HtmlBuffer.Tag("pre")
+                return (new NHtmlTag("pre")
                         .attr("class", "md-code md-code-" + type + " " + language)
                         .body(
-                                (new HtmlBuffer.Tag("code").attr("class", language).body(escapeCode(code.getValue())))
+                                (new NHtmlTag("code").attr("class", language).body(escapeCode(code.getValue())))
                         ));
             }
             case UNNUMBERED_ITEM: {
-                HtmlBuffer.Tag li = new HtmlBuffer.Tag("li")
+                NHtmlTag li = new NHtmlTag("li")
                         .attr("class", "md-uli")
                         .body(md2html(markdown.asUnNumItem().getValue(), generatorContext));
                 for (MdElement child : markdown.asUnNumItem().getChildren()) {
@@ -287,7 +289,7 @@ public class PageToHtmlUtils {
                 return li;
             }
             case NUMBERED_ITEM: {
-                HtmlBuffer.Tag li = new HtmlBuffer.Tag("li")
+                NHtmlTag li = new NHtmlTag("li")
                         .attr("class", "md-oli")
                         .body(md2html(markdown.asNumItem().getValue(), generatorContext));
                 for (MdElement child : markdown.asUnNumItem().getChildren()) {
@@ -297,7 +299,7 @@ public class PageToHtmlUtils {
             }
             case UNNUMBERED_LIST: {
                 MdUnNumberedList li = markdown.asUnNumList();
-                HtmlBuffer.Tag hli = new HtmlBuffer.Tag("ul")
+                NHtmlTag hli = new NHtmlTag("ul")
                         .attr("class", "md-ul");
                 for (MdUnNumberedItem child : li.getChildren()) {
                     hli.body(md2html(child, generatorContext));
@@ -306,10 +308,10 @@ public class PageToHtmlUtils {
             }
             case NUMBERED_LIST: {
                 MdUnNumberedList li = markdown.asUnNumList();
-                HtmlBuffer.Tag hli = new HtmlBuffer.Tag("ol")
+                NHtmlTag hli = new NHtmlTag("ol")
                         .attr("class", "md-ol");
                 for (MdUnNumberedItem child : li.getChildren()) {
-                    hli.body(new HtmlBuffer.Tag("li")
+                    hli.body(new NHtmlTag("li")
                             .attr("class", "md-oli")
                             .body(md2html(child, generatorContext)));
                 }
@@ -317,8 +319,8 @@ public class PageToHtmlUtils {
             }
             case IMAGE: {
                 MdImage li = markdown.asImage();
-                return new HtmlBuffer.Tag("p").body(
-                        new HtmlBuffer.Tag("img")
+                return new NHtmlTag("p").body(
+                        new NHtmlTag("img")
                                 .attr("src", li.getImageUrl())
                                 .attr("class", "md-img img-fluid border")
                                 .attr("alt", li.getImageTitle())
@@ -328,18 +330,18 @@ public class PageToHtmlUtils {
             }
             case LINK: {
                 MdLink li = markdown.asLink();
-                return new HtmlBuffer.Tag("a")
+                return new NHtmlTag("a")
                         .attr("href", li.getLinkUrl())
                         .attr("class", "md-link")
                         .body(li.getLinkTitle());
             }
             case HORIZONTAL_RULE: {
-                return new HtmlBuffer.Tag("hr").attr("class", "divider")
+                return new NHtmlTag("hr").attr("class", "divider")
                         .attr("class", "md-hr")
                         .setNoEnd(true);
             }
             case LINE_BREAK: {
-                return new HtmlBuffer.Tag("hr").attr("class", "divider")
+                return new NHtmlTag("hr").attr("class", "divider")
                         .attr("class", "md-br")
                         .setNoEnd(true);
             }
@@ -347,66 +349,66 @@ public class PageToHtmlUtils {
                 MdAdmonition li = markdown.asAdmonition();
                 switch (li.getType()) {
                     case WARNING: {
-                        return new HtmlBuffer.Tag("div").attr("class", "alert alert-warning mb-4")
-                                .body(new HtmlBuffer.TagList(
-                                        new HtmlBuffer.Tag("span").attr("class", "badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
-                                        new HtmlBuffer.Plain(" "),
+                        return new NHtmlTag("div").attr("class", "alert alert-warning mb-4")
+                                .body(new NHtmlTagList(
+                                        NHtml.tag("span").attr("class", "badge badge-danger text-uppercase").body(NHtml.raw("NOTE:")),
+                                        NHtml.space(),
                                         md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case DANGER: {
-                        return new HtmlBuffer.Tag("div").attr("class", "alert alert-danger mb-4")
-                                .body(new HtmlBuffer.TagList(
-                                        new HtmlBuffer.Tag("span").attr("class", "badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
-                                        new HtmlBuffer.Plain(" "),
+                        return NHtml.tag("div").attr("class", "alert alert-danger mb-4")
+                                .body(NHtml.list(
+                                        NHtml.tag("span").attr("class", "badge badge-danger text-uppercase").body(new NHtmlRaw("NOTE:")),
+                                        new NHtmlRaw(" "),
                                         md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case INFO: {
-                        return new HtmlBuffer.Tag("div").attr("class", "alert alert-info mb-4")
-                                .body(new HtmlBuffer.TagList(
-//                                        new HtmlBuffer.Tag("span").attr("class","badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
-//                                        new HtmlBuffer.Plain(" "),
+                        return NHtml.tag("div").attr("class", "alert alert-info mb-4")
+                                .body(NHtml.list(
+//                                        new NHtmlBuffer.NHtmlTag("span").attr("class","badge badge-danger text-uppercase").body(new NHtmlBuffer.NHtmlRaw("NOTE:")),
+//                                        NHtml.space(),
                                         md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case TIP: {
-                        return new HtmlBuffer.Tag("div").attr("class", "alert alert-success mb-4")
-                                .body(new HtmlBuffer.TagList(
-//                                        new HtmlBuffer.Tag("span").attr("class","badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
-//                                        new HtmlBuffer.Plain(" "),
+                        return NHtml.tag("div").attr("class", "alert alert-success mb-4")
+                                .body(NHtml.list(
+//                                        new NHtmlBuffer.NHtmlTag("span").attr("class","badge badge-danger text-uppercase").body(new NHtmlBuffer.NHtmlRaw("NOTE:")),
+//                                        NHtml.space(),
                                         md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case IMPORTANT: {
-                        return new HtmlBuffer.Tag("div").attr("class", "alert alert-success mb-4")
-                                .body(new HtmlBuffer.TagList(
-//                                        new HtmlBuffer.Tag("span").attr("class","badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
-//                                        new HtmlBuffer.Plain(" "),
+                        return NHtml.tag("div").attr("class", "alert alert-success mb-4")
+                                .body(NHtml.list(
+//                                        new NHtmlBuffer.NHtmlTag("span").attr("class","badge badge-danger text-uppercase").body(new NHtmlBuffer.NHtmlRaw("NOTE:")),
+//                                        NHtml.space(),
                                         md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case NOTE: {
-                        return new HtmlBuffer.Tag("div").attr("class", "alert alert-info mb-4")
-                                .body(new HtmlBuffer.TagList(
-                                        new HtmlBuffer.Tag("span").attr("class", "badge badge-success text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
-                                        new HtmlBuffer.Plain(" "),
+                        return NHtml.tag("div").attr("class", "alert alert-info mb-4")
+                                .body(NHtml.list(
+                                        NHtml.tag("span").attr("class", "badge badge-success text-uppercase").body(new NHtmlRaw("NOTE:")),
+                                        new NHtmlRaw(" "),
                                         md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     case CAUTION: {
-                        return new HtmlBuffer.Tag("div").attr("class", "alert alert-info mb-4")
-                                .body(new HtmlBuffer.TagList(
-                                        new HtmlBuffer.Tag("span").attr("class", "badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
-                                        new HtmlBuffer.Plain(" "),
+                        return NHtml.tag("div").attr("class", "alert alert-info mb-4")
+                                .body(NHtml.list(
+                                        NHtml.tag("span").attr("class", "badge badge-danger text-uppercase").body(new NHtmlRaw("NOTE:")),
+                                        new NHtmlRaw(" "),
                                         md2html(li.getContent(), generatorContext)
                                 ));
                     }
                     default: {
-                        return new HtmlBuffer.Tag("div").attr("class", "alert alert-info mb-4")
-                                .body(new HtmlBuffer.TagList(
-                                        new HtmlBuffer.Tag("span").attr("class", "badge badge-danger text-uppercase").body(new HtmlBuffer.Plain("NOTE:")),
-                                        new HtmlBuffer.Plain(" "),
+                        return NHtml.tag("div").attr("class", "alert alert-info mb-4")
+                                .body(NHtml.list(
+                                        NHtml.tag("span").attr("class", "badge badge-danger text-uppercase").body(new NHtmlRaw("NOTE:")),
+                                        new NHtmlRaw(" "),
                                         md2html(li.getContent(), generatorContext)
                                 ));
                     }
@@ -415,23 +417,23 @@ public class PageToHtmlUtils {
             }
             case TABLE: {
                 MdTable t = markdown.asTable();
-                HtmlBuffer.Tag table = new HtmlBuffer.Tag("table").attr("class", "table table-bordered table-striped");
+                NHtmlTag table = NHtml.tag("table").attr("class", "table table-bordered table-striped");
                 MdColumn[] columns = t.getColumns();
-                List<HtmlBuffer.Node> rows = new ArrayList<>();
+                List<NHtmlNode> rows = new ArrayList<>();
 
-                HtmlBuffer.Tag th = new HtmlBuffer.Tag("tr");
-                th.body(new HtmlBuffer.TagList(
-                        Arrays.stream(columns).map(x -> new HtmlBuffer.Tag("th").body(md2html(x.getName(), generatorContext))).collect(Collectors.toList())
+                NHtmlTag th = NHtml.tag("tr");
+                th.body(NHtml.list(
+                        Arrays.stream(columns).map(x -> NHtml.tag("th").body(md2html(x.getName(), generatorContext))).collect(Collectors.toList())
                 ));
                 rows.add(th);
                 for (MdRow row : t.getRows()) {
-                    HtmlBuffer.Tag tr = new HtmlBuffer.Tag("tr");
-                    tr.body(new HtmlBuffer.TagList(
-                            Arrays.stream(row.getCells()).map(x -> new HtmlBuffer.Tag("td").body(md2html(x, generatorContext))).collect(Collectors.toList())
+                    NHtmlTag tr = NHtml.tag("tr");
+                    tr.body(NHtml.list(
+                            Arrays.stream(row.getCells()).map(x -> NHtml.tag("td").body(md2html(x, generatorContext))).collect(Collectors.toList())
                     ));
                     rows.add(tr);
                 }
-                table.body(new HtmlBuffer.TagList(rows));
+                table.body(NHtml.list(rows));
                 return table;
             }
             case XML: {
@@ -447,12 +449,12 @@ public class PageToHtmlUtils {
         return null;
     }
 
-    private HtmlBuffer.Node md2htmlXmlTabs(MdXml xml, GeneratorContext generatorContext) {
+    private NHtmlNode md2htmlXmlTabs(MdXml xml, GeneratorContext generatorContext) {
         String dv = xml.getProperties().get("defaultValue");
         String valuesString = xml.getProperties().get("values");
         //Map<String, String> map = valuesString == null ? null : NElementParser.ofJson().parse(valuesString, Map.class);
-        List<HtmlBuffer.Node> allHeader = new ArrayList<>();
-        List<HtmlBuffer.Node> allContent = new ArrayList<>();
+        List<NHtmlNode> allHeader = new ArrayList<>();
+        List<NHtmlNode> allContent = new ArrayList<>();
         String newUuid = "id" + generatorContext.nextId().replace("-", "");
         MdElement[] children = xml.getContent().asBody().getChildren();
         for (int i = 0; i < children.length; i++) {
@@ -463,25 +465,25 @@ public class PageToHtmlUtils {
             String active = Objects.equals(dv, tabValue) ? "active" : "";
             String currId = newUuid + i;
             {
-                HtmlBuffer.Tag h = new HtmlBuffer.Tag("li").attr("class", "nav-item").attr("role", "presentation");
-                HtmlBuffer.Tag a = new HtmlBuffer.Tag("a").attr("class", "nav-link " + active).attr("id", currId + "-tab").attr("data-toggle", "tab")
+                NHtmlTag h = NHtml.tag("li").attr("class", "nav-item").attr("role", "presentation");
+                NHtmlTag a = NHtml.tag("a").attr("class", "nav-link " + active).attr("id", currId + "-tab").attr("data-toggle", "tab")
                         .attr("href", "#" + newUuid + i).attr("role", "tab").attr("aria-controls", currId).attr("aria-selected", active.equals("active") ? "true" : "false")
-                        .body(new HtmlBuffer.Plain(tabLabel));
+                        .body(new NHtmlRaw(tabLabel));
                 h.body(a);
                 allHeader.add(h);
             }
             {
-                HtmlBuffer.Tag h = new HtmlBuffer.Tag("div").attr("class", "tab-pane fade show " + active).attr("id", currId).attr("role", "tabpanel").attr("aria-labelledby", currId + "-tab");
+                NHtmlTag h = NHtml.tag("div").attr("class", "tab-pane fade show " + active).attr("id", currId).attr("role", "tabpanel").attr("aria-labelledby", currId + "-tab");
                 h.body(md2html(cx.getContent(), generatorContext));
                 allContent.add(h);
             }
 
         }
-        return new HtmlBuffer.TagList(
-                new HtmlBuffer.Tag("ul").attr("class", "nav nav-tabs").attr("role", "tablist")
-                        .body(new HtmlBuffer.TagList(allHeader)),
-                new HtmlBuffer.Tag("div").attr("class", "tab-content my-3")
-                        .body(new HtmlBuffer.TagList(allContent))
+        return NHtml.list(
+                NHtml.tag("ul").attr("class", "nav nav-tabs").attr("role", "tablist")
+                        .body(NHtml.list(allHeader)),
+                NHtml.tag("div").attr("class", "tab-content my-3")
+                        .body(NHtml.list(allContent))
         );
     }
 
