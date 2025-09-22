@@ -24,7 +24,7 @@ public class LoadFileFct extends BaseNexprNExprFct {
         }
         NSiteContext fcontext = fcontext(context);
         String str = (String) args.get(0).getValue().orNull();
-        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%] %s(%s)","eval",name,StringUtils.toLiteralString(str)));
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(str)));
         return FileProcessorUtils.loadString(
                 NPath.of(FileProcessorUtils.toAbsolute(str, fcontext.getWorkingDirRequired()))
         );
