@@ -58,7 +58,7 @@ public class MPageLoader {
             MPage g = new MPage()
                     .setPath(path.toString())
                     .setTitle(path.getName())
-                    .setPathName(path.getName());
+                    .setPathName(".folder-info.md".equals(path.getName())?path.getParent().getName() :  path.getName());
             if (firstLine != null) {
                 NStringBuilder yamlPrefix = new NStringBuilder();
                 if (firstLine.startsWith("---")) {
