@@ -5,8 +5,8 @@
 // */
 //package net.thevpc.nsite.context;
 //
-//import net.thevpc.nuts.NErr;
-//import net.thevpc.nuts.NOut;
+//import net.thevpc.nuts.io.NErr;
+//import net.thevpc.nuts.io.NOut;
 //
 ///**
 // *
