@@ -19,13 +19,17 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 
-import net.thevpc.nuts.*;
+import net.thevpc.nuts.artifact.NDescriptor;
+import net.thevpc.nuts.artifact.NDescriptorParser;
+import net.thevpc.nuts.artifact.NDescriptorStyle;
+import net.thevpc.nuts.core.NConfirmationMode;
+import net.thevpc.nuts.core.NSession;
+import net.thevpc.nuts.io.NAsk;
+import net.thevpc.nuts.io.NAskValidator;
 import net.thevpc.nuts.text.NText;
 import net.thevpc.nuts.text.NTextBuilder;
 import net.thevpc.nuts.text.NTextStyle;
-import net.thevpc.nuts.util.NMsg;
-import net.thevpc.nuts.util.NAsk;
-import net.thevpc.nuts.util.NAskValidator;
+import net.thevpc.nuts.util.*;
 import org.w3c.dom.Document;
 
 /**
