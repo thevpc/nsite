@@ -1,7 +1,7 @@
 package net.thevpc.nsite.executor.nsh;
 
-import net.thevpc.nuts.NOut;
-import net.thevpc.nuts.NSession;
+import net.thevpc.nuts.io.NOut;
+import net.thevpc.nuts.core.NSession;
 import net.thevpc.nuts.io.NTerminal;
 import net.thevpc.nsite.executor.NSiteExprEvaluator;
 import net.thevpc.nsite.context.NSiteContext;
