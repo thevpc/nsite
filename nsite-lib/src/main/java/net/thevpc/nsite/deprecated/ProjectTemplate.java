@@ -7,7 +7,7 @@ package net.thevpc.nsite.deprecated;
 import java.io.File;
 import java.util.List;
 
-import net.thevpc.nuts.NSession;
+import net.thevpc.nuts.core.NSession;
 
 /**
  *
