@@ -1,6 +1,6 @@
 package net.thevpc.nsite.deprecated;
 
-import net.thevpc.nuts.NSession;
+import net.thevpc.nuts.core.NSession;
 import net.thevpc.nuts.util.NLiteral;
 
 public class ValidatorFactory {
