@@ -5,7 +5,7 @@
  */
 package net.thevpc.nsite.mimetype;
 
-import net.thevpc.nuts.NConstants;
+import net.thevpc.nuts.core.NConstants;
 import net.thevpc.nuts.io.NIO;
 import net.thevpc.nuts.io.NPath;
 
