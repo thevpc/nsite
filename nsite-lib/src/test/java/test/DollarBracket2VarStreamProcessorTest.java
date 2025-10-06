@@ -1,6 +1,6 @@
 package test;
 
-import net.thevpc.nuts.NWorkspace;
+import net.thevpc.nuts.core.NWorkspace;
 import net.thevpc.nuts.Nuts;
 import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.processor.base.TagStreamProcessor;
