@@ -1,8 +1,8 @@
 package net.thevpc.nsite.processor;
 
 import net.thevpc.nsite.processor.impl.CopyStreamProcessor;
-import net.thevpc.nuts.NConstants;
-import net.thevpc.nuts.NIllegalArgumentException;
+import net.thevpc.nuts.core.NConstants;
+import net.thevpc.nuts.util.NIllegalArgumentException;
 import net.thevpc.nuts.io.NCp;
 import net.thevpc.nuts.io.NIOException;
 import net.thevpc.nuts.io.NPath;
