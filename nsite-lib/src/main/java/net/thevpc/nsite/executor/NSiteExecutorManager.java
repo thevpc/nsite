@@ -9,7 +9,7 @@ import net.thevpc.nsite.mimetype.MimeTypeConstants;
 import net.thevpc.nsite.processor.impl.DefaultNSiteStreamExecutor;
 import net.thevpc.nsite.util.FileProcessorUtils;
 import net.thevpc.nuts.log.NLog;
-import net.thevpc.nuts.util.NMsg;
+import net.thevpc.nuts.text.NMsg;
 import net.thevpc.nuts.util.NOptional;
 
 import java.io.ByteArrayOutputStream;
