@@ -9,7 +9,7 @@ import net.thevpc.nsite.processor.html.PageToHtmlUtils;
 import net.thevpc.nsite.processor.pages.MPage;
 import net.thevpc.nsite.util.StringUtils;
 import net.thevpc.nuts.log.NLog;
-import net.thevpc.nuts.util.NMsg;
+import net.thevpc.nuts.text.NMsg;
 import net.thevpc.nuts.util.NStringBuilder;
 
 import java.util.*;
