@@ -6,7 +6,7 @@ import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.util.StringUtils;
 import net.thevpc.nuts.log.NLog;
-import net.thevpc.nuts.util.NMsg;
+import net.thevpc.nuts.text.NMsg;
 
 import java.util.ArrayList;
 import java.util.List;
