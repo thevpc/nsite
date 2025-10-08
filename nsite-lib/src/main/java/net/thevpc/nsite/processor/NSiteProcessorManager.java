@@ -12,7 +12,7 @@ import net.thevpc.nsite.mimetype.MimeTypeConstants;
 import net.thevpc.nsite.processor.base.TagStreamProcessor;
 import net.thevpc.nsite.util.FileProcessorUtils;
 import net.thevpc.nuts.log.NLog;
-import net.thevpc.nuts.util.NMsg;
+import net.thevpc.nuts.text.NMsg;
 import net.thevpc.nuts.util.NOptional;
 import net.thevpc.nuts.util.NStream;
 import net.thevpc.nuts.util.NStringUtils;
