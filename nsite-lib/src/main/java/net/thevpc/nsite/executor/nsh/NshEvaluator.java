@@ -13,7 +13,7 @@ import net.thevpc.nsh.Nsh;
 import net.thevpc.nsh.NshConfig;
 import net.thevpc.nsite.util.StringUtils;
 import net.thevpc.nuts.log.NLog;
-import net.thevpc.nuts.util.NMsg;
+import net.thevpc.nuts.text.NMsg;
 
 public class NshEvaluator implements NSiteExprEvaluator {
     private final Nsh shell;
