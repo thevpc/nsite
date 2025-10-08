@@ -26,6 +26,7 @@ import net.thevpc.nuts.core.NConfirmationMode;
 import net.thevpc.nuts.core.NSession;
 import net.thevpc.nuts.io.NAsk;
 import net.thevpc.nuts.io.NAskValidator;
+import net.thevpc.nuts.text.NMsg;
 import net.thevpc.nuts.text.NText;
 import net.thevpc.nuts.text.NTextBuilder;
 import net.thevpc.nuts.text.NTextStyle;
