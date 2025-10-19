@@ -5,10 +5,7 @@ import net.thevpc.nsite.html.*;
 import net.thevpc.nsite.processor.pages.MPage;
 import net.thevpc.nuts.lib.md.*;
 import net.thevpc.nuts.text.*;
-import net.thevpc.nuts.util.NColors;
-import net.thevpc.nuts.util.NOptional;
-import net.thevpc.nuts.util.NStringUtils;
-import net.thevpc.nuts.util.NUtils;
+import net.thevpc.nuts.util.*;
 
 import java.awt.*;
 import java.io.StringReader;
@@ -139,12 +136,12 @@ public class PageToHtmlUtils {
                         }
                         case BACK_TRUE_COLOR: {
                             Color cl = new Color(st.getVariant());
-                            hstyles.add("background-color: " + NColors.toHtmlHex(cl));
+                            hstyles.add("background-color: " + NColor.toHtmlHex(cl));
                             break;
                         }
                         case FORE_TRUE_COLOR: {
                             Color cl = new Color(st.getVariant());
-                            hstyles.add("color: " + NColors.toHtmlHex(cl));
+                            hstyles.add("color: " + NColor.toHtmlHex(cl));
                             break;
                         }
                         default: {
