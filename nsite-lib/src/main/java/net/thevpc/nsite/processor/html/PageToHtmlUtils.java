@@ -135,12 +135,12 @@ public class PageToHtmlUtils {
                             break;
                         }
                         case BACK_TRUE_COLOR: {
-                            Color cl = new Color(st.getVariant());
+                            NColor cl = NColor.of32(st.getVariant());
                             hstyles.add("background-color: " + NColor.toHtmlHex(cl));
                             break;
                         }
                         case FORE_TRUE_COLOR: {
-                            Color cl = new Color(st.getVariant());
+                            NColor cl = NColor.of32(st.getVariant());
                             hstyles.add("color: " + NColor.toHtmlHex(cl));
                             break;
                         }
