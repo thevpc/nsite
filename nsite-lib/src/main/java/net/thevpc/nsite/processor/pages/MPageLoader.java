@@ -43,10 +43,12 @@ public class MPageLoader {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         fcontext.getProcessorManager().processSourceRegularFile(path, null, bos);
         String defaultContentType=null;
-        if (path.getName().endsWith(".md")) {
-            defaultContentType="markdown";
-        }else if (path.getName().endsWith(".ntf")) {
+        if (path.getName().endsWith(".ntf") || path.getName().endsWith(".ntf.md")) {
             defaultContentType="ntf";
+        }else if (path.getName().endsWith(".html.md")) {
+            defaultContentType="html";
+        }else if (path.getName().endsWith(".md")) {
+            defaultContentType="markdown";
         }else {
             throw new IllegalArgumentException("Unsupported file type: " + path.getName());
         }
@@ -115,6 +117,11 @@ public class MPageLoader {
                             MdElement md = p.parse();
                             g.setParsedContent(md);
                         }
+                        break;
+                    }
+                    case "html": {
+                        g.setParsedContent(content);
+                        break;
                     }
                 }
                 return g;
