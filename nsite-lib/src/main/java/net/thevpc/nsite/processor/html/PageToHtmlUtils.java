@@ -77,21 +77,21 @@ public class PageToHtmlUtils {
                 NTextCode c = (NTextCode) elem;
                 String type = "default";
                 String language = c.getQualifier();
-                String text = c.getValue();
+                String text = c.getValue()==null?"":c.getValue();
                 boolean inline = false;
                 if (inline) {
                     String value = text;
                     if (value.matches("[a-zA-Z0-9_-]+")) {
                         return (new NHtmlTag("mark")
-                                .attr("class", "md-code md-code-" + type + " " + language)
+                                .attr("class", classMdCode(type, language))
                                 .body(escapeCode(value)));
                     }
                     return (new NHtmlTag("code")
-                            .attr("class", "md-code md-code-" + type + " " + language)
+                            .attr("class", classMdCode(type, language))
                             .body(escapeCode(value)));
                 }
                 return (new NHtmlTag("pre")
-                        .attr("class", "md-code md-code-" + type + " " + language)
+                        .attr("class", classMdCode(type, language))
                         .body(
                                 (new NHtmlTag("code").attr("class", language).body(escapeCode(text)))
                         ));
@@ -192,6 +192,13 @@ public class PageToHtmlUtils {
                     throw new IllegalArgumentException("unsupported type: " + type);
                 }
             }
+            case "html": {
+                if (content instanceof String) {
+                    return new NHtmlRaw((String) content);
+                } else {
+                    throw new IllegalArgumentException("unsupported type: " + type);
+                }
+            }
             default: {
                 if (content instanceof String) {
                     return NHtml.tag("pre").body(
@@ -259,21 +266,21 @@ public class PageToHtmlUtils {
                 MdCode code = markdown.asCode();
                 String type = code.getType();
                 String language = code.getLanguage();
+                String value = code.getValue() == null ? "" : code.getValue();
                 if (code.isInline()) {
-                    String value = code.getValue();
                     if (value.matches("[a-zA-Z0-9_-]+")) {
                         return (new NHtmlTag("mark")
-                                .attr("class", "md-code md-code-" + type + " " + language)
+                                .attr("class", classMdCode(type, language))
                                 .body(escapeCode(value)));
                     }
                     return (new NHtmlTag("code")
-                            .attr("class", "md-code md-code-" + type + " " + language)
+                            .attr("class", classMdCode(type, language))
                             .body(escapeCode(value)));
                 }
                 return (new NHtmlTag("pre")
-                        .attr("class", "md-code md-code-" + type + " " + language)
+                        .attr("class", classMdCode(type, language))
                         .body(
-                                (new NHtmlTag("code").attr("class", language).body(escapeCode(code.getValue())))
+                                (new NHtmlTag("code").attr("class", language).body(escapeCode(value)))
                         ));
             }
             case UNNUMBERED_ITEM: {
@@ -444,6 +451,10 @@ public class PageToHtmlUtils {
             }
         }
         return null;
+    }
+
+    private String classMdCode(String type, String language) {
+        return "md-code md-code-" + type + " " + language;
     }
 
     private NHtmlNode md2htmlXmlTabs(MdXml xml, GeneratorContext generatorContext) {
