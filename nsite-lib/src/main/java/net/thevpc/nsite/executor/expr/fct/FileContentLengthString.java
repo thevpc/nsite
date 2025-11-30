@@ -21,7 +21,7 @@ public class FileContentLengthString extends BaseNexprNExprFct {
         }
         NSiteContext fcontext = fcontext(context);
         String str = (String) args.get(0).getValue().orNull();
-        long contentLength = NPath.of(str).contentLength();
+        long contentLength = NPath.of(str).getContentLength();
         if(contentLength<0){
             return "NOT_FOUND";
         }
