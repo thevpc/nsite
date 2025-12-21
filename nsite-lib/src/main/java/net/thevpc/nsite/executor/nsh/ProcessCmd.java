@@ -11,16 +11,19 @@ import net.thevpc.nsh.eval.NshExecutionContext;
 import net.thevpc.nsite.util.StringUtils;
 import net.thevpc.nuts.log.NLog;
 import net.thevpc.nuts.text.NMsg;
+import net.thevpc.nuts.util.NScore;
+import net.thevpc.nuts.util.NScorable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@NScore(fixed = NScorable.DEFAULT_SCORE)
 public class ProcessCmd extends NshBuiltinDefault {
 
     private final NSiteContext documentContext;
 
     public ProcessCmd(NSiteContext documentContext) {
-        super("process", 10, Options.class);
+        super("process", Options.class);
         this.documentContext = documentContext;
     }
 
