@@ -26,6 +26,7 @@ import net.thevpc.nuts.core.NConfirmationMode;
 import net.thevpc.nuts.core.NSession;
 import net.thevpc.nuts.io.NAsk;
 import net.thevpc.nuts.io.NAskValidator;
+import net.thevpc.nuts.io.NIn;
 import net.thevpc.nuts.text.NMsg;
 import net.thevpc.nuts.text.NText;
 import net.thevpc.nuts.text.NTextBuilder;
@@ -67,7 +68,7 @@ public class DefaultProjectTemplate implements ProjectTemplate {
                 if (DefaultProjectTemplate.this.session.getConfirm().orDefault() == NConfirmationMode.YES) {
                     return defaultValue;
                 }
-                return NAsk.of()
+                return NIn.ask()
                         .forString(
                                 NMsg.ofNtf(
                                         NTextBuilder.of()
@@ -395,7 +396,7 @@ public class DefaultProjectTemplate implements ProjectTemplate {
         if (p == null) {
             p = resolveFirstPomFile(getProjectRootFolder());
             if (p != null) {
-                if (!NAsk.of()
+                if (!NIn.ask()
                         .forBoolean(NMsg.ofC("accept project location %s?",
                                 NText.ofStyledPath(p.getPath())))
                         .setDefaultValue(false)
