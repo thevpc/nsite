@@ -79,7 +79,7 @@ public class MPageLoader {
                     br.reset();
                 }
                 if (!yamlPrefix.isBlank()) {
-                    NElement parsed = NElementParser.ofYaml().parse(yamlPrefix.toString());
+                    NElement parsed = NElementReader.ofYaml().read(yamlPrefix.toString());
                     NListContainerElement list = parsed.toListContainer().get();
                     for (NElement child : list.children()) {
                         NPairElement np = child.asNamedPair().get();
