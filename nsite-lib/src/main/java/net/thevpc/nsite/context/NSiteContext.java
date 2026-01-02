@@ -21,7 +21,7 @@ import net.thevpc.nsite.mimetype.DefaultNSiteMimeTypeResolver;
 import net.thevpc.nsite.mimetype.NSiteMimeTypeResolver;
 import net.thevpc.nsite.processor.html.PageToHtmlUtils;
 import net.thevpc.nuts.log.NLog;
-import net.thevpc.nuts.log.NLogContext;
+import net.thevpc.nuts.log.NLogScope;
 import net.thevpc.nuts.log.NLogs;
 import net.thevpc.nuts.text.NMsg;
 import net.thevpc.nuts.util.*;
@@ -465,7 +465,7 @@ public class NSiteContext {
     }
 
     public void run(NSiteProjectConfig config0) {
-        NLogs.of().runWith(NLogContext.ofLog(NLog.of(NSiteContext.class))
+        NLogs.of().runInScope(NLogScope.of().withLog(NLog.of(NSiteContext.class))
                         .withLog(m->{
                             if(m.isError()){
                                 NErr.println(m);
