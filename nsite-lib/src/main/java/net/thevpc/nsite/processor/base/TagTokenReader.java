@@ -36,42 +36,38 @@ public class TagTokenReader {
     }
 
     public TagToken next() {
-        try {
-            if (pushBack != null) {
-                TagToken c = pushBack;
-                pushBack = null;
-                return c;
-            }
-            StringBuilder plain = new StringBuilder();
-            while (true) {
-                if (br.read(escape)) {
-                    plain.append(startTag);
-                } else if (this.br.peek(startTag)) {
-                    if (plain.length() > 0) {
-                        String t = plain.toString();
-                        this.startOfLine = t.endsWith("\n");
-                        plain.setLength(0);
-                        return new TagToken(TagTokenType.PLAIN, t);
-                    }
-                    return readSpecialToken();
+        if (pushBack != null) {
+            TagToken c = pushBack;
+            pushBack = null;
+            return c;
+        }
+        StringBuilder plain = new StringBuilder();
+        while (true) {
+            if (br.read(escape)) {
+                plain.append(startTag);
+            } else if (this.br.peek(startTag)) {
+                if (plain.length() > 0) {
+                    String t = plain.toString();
+                    this.startOfLine = t.endsWith("\n");
+                    plain.setLength(0);
+                    return new TagToken(TagTokenType.PLAIN, t);
+                }
+                return readSpecialToken();
+            } else {
+                int rr = this.br.read();
+                if (rr >= 0) {
+                    plain.append((char) rr);
                 } else {
-                    int rr = this.br.read();
-                    if (rr >= 0) {
-                        plain.append((char) rr);
-                    } else {
-                        break;
-                    }
+                    break;
                 }
             }
-            if (plain.length() == 0) {
-                return null;
-            }
-            String t = plain.toString();
-            this.startOfLine = t.endsWith("\n");
-            return new TagToken(TagTokenType.PLAIN, t);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
+        if (plain.length() == 0) {
+            return null;
+        }
+        String t = plain.toString();
+        this.startOfLine = t.endsWith("\n");
+        return new TagToken(TagTokenType.PLAIN, t);
     }
 
     private static class StringBuilderImage{
@@ -98,183 +94,175 @@ public class TagTokenReader {
     }
 
     private TagToken readSpecialToken()  {
-        try {
-            int brackets = 0;
-            if (!br.read(startTag)) {
-                throw new IllegalArgumentException("expected " + startTag);
+        int brackets = 0;
+        if (!br.read(startTag)) {
+            throw new IllegalArgumentException("expected " + startTag);
+        }
+        StringBuilderImage buffer = new StringBuilderImage();
+        buffer.appendImageOnly(startTag);
+        boolean end = false;
+        while (!end) {
+            int c = br.peek();
+            if (c < 0) {
+                break;
             }
-            StringBuilderImage buffer = new StringBuilderImage();
-            buffer.appendImageOnly(startTag);
-            boolean end = false;
-            while (!end) {
-                int c = br.peek();
-                if (c < 0) {
+            switch (c) {
+                case '/': {
+                    if (br.read("//")) {
+                        buffer.append("//");
+                        while (true) {
+                            int cc = br.read();
+                            if (cc < 0) {
+                                break;
+                            } else if (cc == '\n') {
+                                buffer.append((char) cc);
+                                break;
+                            } else {
+                                buffer.append((char) cc);
+                            }
+                        }
+                    } else {
+                        buffer.append((char) c);
+                    }
                     break;
                 }
-                switch (c) {
-                    case '/': {
-                        if (br.read("//")) {
-                            buffer.append("//");
-                            while (true) {
-                                int cc = br.read();
-                                if (cc < 0) {
-                                    break;
-                                } else if (cc == '\n') {
-                                    buffer.append((char) cc);
-                                    break;
-                                } else {
-                                    buffer.append((char) cc);
-                                }
+                case '"': {
+                    buffer.append(br.readChar());
+                    while (true) {
+                        int cc = br.read();
+                        if (cc < 0) {
+                            break;
+                        } else if (cc == '"') {
+                            buffer.append((char) cc);
+                            break;
+                        } else if (cc == '\\') {
+                            buffer.append((char) cc);
+                            cc = br.read();
+                            if (cc >= 0) {
+                                buffer.append((char) cc);
                             }
                         } else {
-                            buffer.append((char) c);
+                            buffer.append((char) cc);
                         }
-                        break;
                     }
-                    case '"': {
-                        buffer.append(br.readChar());
-                        while (true) {
-                            int cc = br.read();
-                            if (cc < 0) {
-                                break;
-                            } else if (cc == '"') {
-                                buffer.append((char) cc);
-                                break;
-                            } else if (cc == '\\') {
-                                buffer.append((char) cc);
-                                cc = br.read();
-                                if (cc >= 0) {
-                                    buffer.append((char) cc);
-                                }
-                            } else {
+                    break;
+                }
+                case '\'': {
+                    buffer.append(br.readChar());
+                    while (true) {
+                        int cc = br.read();
+                        if (cc < 0) {
+                            break;
+                        } else if (cc == '\'') {
+                            buffer.append((char) cc);
+                            break;
+                        } else if (cc == '\\') {
+                            buffer.append((char) cc);
+                            cc = br.read();
+                            if (cc >= 0) {
                                 buffer.append((char) cc);
                             }
+                        } else {
+                            buffer.append((char) cc);
                         }
-                        break;
                     }
-                    case '\'': {
-                        buffer.append(br.readChar());
-                        while (true) {
-                            int cc = br.read();
-                            if (cc < 0) {
-                                break;
-                            } else if (cc == '\'') {
-                                buffer.append((char) cc);
-                                break;
-                            } else if (cc == '\\') {
-                                buffer.append((char) cc);
-                                cc = br.read();
-                                if (cc >= 0) {
-                                    buffer.append((char) cc);
-                                }
-                            } else {
+                    break;
+                }
+                case '`': {
+                    buffer.append(br.readChar());
+                    while (true) {
+                        int cc = br.read();
+                        if (cc < 0) {
+                            break;
+                        } else if (cc == '`') {
+                            buffer.append((char) cc);
+                            break;
+                        } else if (cc == '\\') {
+                            buffer.append((char) cc);
+                            cc = br.read();
+                            if (cc >= 0) {
                                 buffer.append((char) cc);
                             }
+                        } else {
+                            buffer.append((char) cc);
                         }
-                        break;
                     }
-                    case '`': {
+                    break;
+                }
+                case '{': {
+                    brackets++;
+                    if (isReadEndOfTag(buffer)) {
+                        end = true;
+                    } else {
                         buffer.append(br.readChar());
-                        while (true) {
-                            int cc = br.read();
-                            if (cc < 0) {
-                                break;
-                            } else if (cc == '`') {
-                                buffer.append((char) cc);
-                                break;
-                            } else if (cc == '\\') {
-                                buffer.append((char) cc);
-                                cc = br.read();
-                                if (cc >= 0) {
-                                    buffer.append((char) cc);
-                                }
-                            } else {
-                                buffer.append((char) cc);
-                            }
-                        }
-                        break;
                     }
-                    case '{': {
-                        brackets++;
+                    break;
+                }
+                case '}': {
+                    brackets--;
+                    boolean peek = br.peek(endTag);
+                    if (brackets <= 0) {
                         if (isReadEndOfTag(buffer)) {
                             end = true;
                         } else {
                             buffer.append(br.readChar());
                         }
-                        break;
-                    }
-                    case '}': {
-                        brackets--;
-                        boolean peek = br.peek(endTag);
-                        if (brackets <= 0) {
-                            if (isReadEndOfTag(buffer)) {
-                                end = true;
-                            } else {
-                                buffer.append(br.readChar());
-                            }
-                        } else {
-                            buffer.append(br.readChar());
-                        }
-                        break;
-                    }
-                    default: {
+                    } else {
                         buffer.append(br.readChar());
                     }
+                    break;
+                }
+                default: {
+                    buffer.append(br.readChar());
                 }
             }
-            String ss = buffer.buffer.toString().trim();
-            if (ss.startsWith(":")) {
-                if (TagStreamProcessor.startsWithWord(ss, ":if")) {
-                    return new TagToken(TagTokenType.IF, ss.substring(":if".length()).trim());
-
-                } else if (TagStreamProcessor.startsWithWord(ss, ":else if")) {
-                    return new TagToken(TagTokenType.CTRL_ELSE_IF, ss.substring(":else if".length()).trim());
-
-                } else if (TagStreamProcessor.startsWithWord(ss, ":else")) {
-                    return new TagToken(TagTokenType.CTRL_ELSE, ss.substring(":else".length()).trim());
-
-                } else if (TagStreamProcessor.startsWithWord(ss, ":for")) {
-                    return new TagToken(TagTokenType.FOR, ss.substring(":for".length()).trim());
-
-                } else if (TagStreamProcessor.startsWithWord(ss, ":include")) {
-                    return new TagToken(TagTokenType.INCLUDE, ss.substring(":include".length()).trim());
-
-                } else if (TagStreamProcessor.startsWithWord(ss, ":end")) {
-                    return new TagToken(TagTokenType.CTRL_END, ss.substring(":end".length()).trim());
-
-                } else if (ss.startsWith("::")) {
-                    return new TagToken(TagTokenType.STATEMENT, ss.substring(2));
-
-                } else if (ss.startsWith(":")) {
-                    return new TagToken(TagTokenType.STATEMENT, ss.substring(1));
-
-                } else {
-                    return new TagToken(TagTokenType.CTRL_OTHER, ss);
-                }
-            }
-            return new TagToken(TagTokenType.EXPR, ss);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
+        String ss = buffer.buffer.toString().trim();
+        if (ss.startsWith(":")) {
+            if (TagStreamProcessor.startsWithWord(ss, ":if")) {
+                return new TagToken(TagTokenType.IF, ss.substring(":if".length()).trim());
+
+            } else if (TagStreamProcessor.startsWithWord(ss, ":else if")) {
+                return new TagToken(TagTokenType.CTRL_ELSE_IF, ss.substring(":else if".length()).trim());
+
+            } else if (TagStreamProcessor.startsWithWord(ss, ":else")) {
+                return new TagToken(TagTokenType.CTRL_ELSE, ss.substring(":else".length()).trim());
+
+            } else if (TagStreamProcessor.startsWithWord(ss, ":for")) {
+                return new TagToken(TagTokenType.FOR, ss.substring(":for".length()).trim());
+
+            } else if (TagStreamProcessor.startsWithWord(ss, ":include")) {
+                return new TagToken(TagTokenType.INCLUDE, ss.substring(":include".length()).trim());
+
+            } else if (TagStreamProcessor.startsWithWord(ss, ":end")) {
+                return new TagToken(TagTokenType.CTRL_END, ss.substring(":end".length()).trim());
+
+            } else if (ss.startsWith("::")) {
+                return new TagToken(TagTokenType.STATEMENT, ss.substring(2));
+
+            } else if (ss.startsWith(":")) {
+                return new TagToken(TagTokenType.STATEMENT, ss.substring(1));
+
+            } else {
+                return new TagToken(TagTokenType.CTRL_OTHER, ss);
+            }
+        }
+        return new TagToken(TagTokenType.EXPR, ss);
     }
 
     private boolean isReadEndOfTag(StringBuilderImage image) {
-        try {
-            if (startOfLine && br.read(endTag + "\r\n")) {
-                image.appendImageOnly(endTag + "\r\n");
-                return true;
-            } else if (startOfLine && br.read(endTag + "\n")) {
-                image.appendImageOnly(endTag + "\n");
-                return true;
+        if (startOfLine && br.read(endTag + "\r\n")) {
+            image.appendImageOnly(endTag + "\r\n");
+            return true;
+        } else if (startOfLine && br.read(endTag + "\n")) {
+            image.appendImageOnly(endTag + "\n");
+            return true;
 //            } else if (br.read(endTag + "\n")) {
 //                image.appendImageOnly(endTag);
 //                return true;
-            } else if (br.read(endTag)) {
-                image.appendImageOnly(endTag);
-                return true;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } else if (br.read(endTag)) {
+            image.appendImageOnly(endTag);
+            return true;
         }
         return false;
     }
