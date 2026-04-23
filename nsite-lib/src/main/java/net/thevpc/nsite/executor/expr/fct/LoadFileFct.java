@@ -1,6 +1,6 @@
 package net.thevpc.nsite.executor.expr.fct;
 
-import net.thevpc.nuts.expr.NExprDeclarations;
+import net.thevpc.nuts.expr.NExprContext;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nsite.context.NSiteContext;
@@ -18,7 +18,7 @@ public class LoadFileFct extends BaseNexprNExprFct {
     }
 
     @Override
-    public Object eval(String name, List<NExprNodeValue> args, NExprDeclarations context) {
+    public Object eval(String name, List<NExprNodeValue> args, NExprContext context) {
         if (args.size() != 1) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }

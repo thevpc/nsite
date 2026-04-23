@@ -1,6 +1,6 @@
 package net.thevpc.nsite.executor.expr.fct;
 
-import net.thevpc.nuts.expr.NExprDeclarations;
+import net.thevpc.nuts.expr.NExprContext;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 
@@ -13,7 +13,7 @@ public class CurrentYearFct extends BaseNexprNExprFct {
     }
 
     @Override
-    public Object eval(String name, List<NExprNodeValue> args, NExprDeclarations context) {
+    public Object eval(String name, List<NExprNodeValue> args, NExprContext context) {
         if (args.size() != 0) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }

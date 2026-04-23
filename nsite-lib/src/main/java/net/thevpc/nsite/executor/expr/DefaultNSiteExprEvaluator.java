@@ -10,19 +10,16 @@ import net.thevpc.nuts.util.NOptional;
 
 public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
     public static final String NSITE_CONTEXT_VAR_NAME = "nsite";
-    private NExprMutableDeclarations rootDecls;
+    private NExprMutableContext rootDecls;
     private NExprs nExprs;
 
     public DefaultNSiteExprEvaluator() {
 
         nExprs = NExprs.of();
         NSiteNExprVar v = new NSiteNExprVar();
-        rootDecls = nExprs.newMutableDeclarations(true, new NExprEvaluator() {
-            @Override
-            public NOptional<NExprVar> getVar(String varName, NExprDeclarations context2) {
-                return NOptional.of(v);
-            }
-        });
+        rootDecls = NExprContextBuilder.of()
+                .setAutoDeclareVariables(true)
+                .buildMutable();
         declareFunction(new ExecFct());
         declareFunction(new CurrentYearFct());
         declareFunction(new PrintlnFct());
@@ -43,31 +40,30 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
     @Override
     public Object eval(String content, NSiteContext fcontext) {
         content = content.trim();
-        NExprMutableDeclarations decl = rootDecls.newMutableDeclarations();
+        NExprMutableContext decl = rootDecls.childContext().buildMutable();
         decl.declareConstant(NSITE_CONTEXT_VAR_NAME, fcontext);
         decl.declareConstant("cwd", System.getProperty("user.dir"));
         decl.declareConstant("projectRoot", fcontext.getProjectRoot());
         decl.declareConstant("dir", fcontext.getWorkingDir().orNull());
-        NExprDeclarations decl2 = decl.newDeclarations(new NExprEvaluator() {
-            @Override
-            public NOptional<NExprVar> getVar(String varName, NExprDeclarations context) {
-                NOptional<Object> var = fcontext.getVar(varName);
-                if (var.isPresent()) {
-                    return NOptional.of(new NExprVar() {
-                        @Override
-                        public Object get(String name, NExprDeclarations context) {
-                            return var.get();
-                        }
+        NExprContext decl2 = decl.childContext()
+                .declareVars((String varName, NExprContext context)->{
+                    NOptional<Object> var = fcontext.getVar(varName);
+                    if (var.isPresent()) {
+                        return NOptional.of(new NExprVar() {
+                            @Override
+                            public Object get(String name, NExprContext context) {
+                                return var.get();
+                            }
 
-                        @Override
-                        public Object set(String name, Object value, NExprDeclarations context) {
-                            return fcontext.setVar(name, value);
-                        }
-                    });
-                }
-                return NExprEvaluator.super.getVar(varName, context);
-            }
-        });
+                            @Override
+                            public Object set(String name, Object value, NExprContext context) {
+                                return fcontext.setVar(name, value);
+                            }
+                        });
+                    }
+                    return NOptional.ofNamedEmpty(varName);
+                })
+                .build();
         NExprNode nExprNode = decl2.parse(content).get();
         NOptional<Object> eval = nExprNode.eval(decl2);
 //        if (!eval.isPresent()) {
@@ -88,7 +84,7 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
         rootDecls.declareFunction(d.getName(), d);
     }
 
-    private static NSiteContext fcontext(NExprDeclarations context) {
+    private static NSiteContext fcontext(NExprContext context) {
         NExprVarDeclaration vd = context.getVar(NSITE_CONTEXT_VAR_NAME).get();
         return (NSiteContext) vd.get(context);
     }
@@ -98,12 +94,12 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
         }
 
         @Override
-        public Object get(String name, NExprDeclarations context) {
+        public Object get(String name, NExprContext context) {
             return fcontext(context).getVar(name).orNull();
         }
 
         @Override
-        public Object set(String name, Object value, NExprDeclarations context) {
+        public Object set(String name, Object value, NExprContext context) {
             return fcontext(context).setVar(name, value);
         }
     }
