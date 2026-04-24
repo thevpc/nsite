@@ -11,14 +11,17 @@ import net.thevpc.nuts.util.NOptional;
 public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
     public static final String NSITE_CONTEXT_VAR_NAME = "nsite";
     private NExprMutableContext rootDecls;
-    private NExprs nExprs;
 
     public DefaultNSiteExprEvaluator() {
 
-        nExprs = NExprs.of();
-        NSiteNExprVar v = new NSiteNExprVar();
         rootDecls = NExprContextBuilder.of()
                 .setAutoDeclareVariables(true)
+                .declareVars(new NExprVarResolver(){
+                    @Override
+                    public NOptional<NExprVar> getVar(String varName, NExprContext context) {
+                        return NOptional.of(new FContextNExprVar(varName));
+                    }
+                })
                 .buildMutable();
         declareFunction(new ExecFct());
         declareFunction(new CurrentYearFct());
@@ -49,17 +52,7 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
                 .declareVars((String varName, NExprContext context)->{
                     NOptional<Object> var = fcontext.getVar(varName);
                     if (var.isPresent()) {
-                        return NOptional.of(new NExprVar() {
-                            @Override
-                            public Object get(String name, NExprContext context) {
-                                return var.get();
-                            }
-
-                            @Override
-                            public Object set(String name, Object value, NExprContext context) {
-                                return fcontext.setVar(name, value);
-                            }
-                        });
+                        return NOptional.of(new FContextNExprVar(varName));
                     }
                     return NOptional.ofNamedEmpty(varName);
                 })
@@ -85,22 +78,31 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
     }
 
     private static NSiteContext fcontext(NExprContext context) {
-        NExprVarDeclaration vd = context.getVar(NSITE_CONTEXT_VAR_NAME).get();
+        NExprVar vd = context.getVar(NSITE_CONTEXT_VAR_NAME).get();
         return (NSiteContext) vd.get(context);
     }
 
-    private static class NSiteNExprVar implements NExprVar {
-        public NSiteNExprVar() {
+
+    private static class FContextNExprVar implements NExprVar {
+        private final String varName;
+
+        public FContextNExprVar(String varName) {
+            this.varName = varName;
         }
 
         @Override
-        public Object get(String name, NExprContext context) {
-            return fcontext(context).getVar(name).orNull();
+        public String getName() {
+            return varName;
         }
 
         @Override
-        public Object set(String name, Object value, NExprContext context) {
-            return fcontext(context).setVar(name, value);
+        public Object get(NExprContext context) {
+            return fcontext(context).getVar(varName).orNull();
+        }
+
+        @Override
+        public void set(Object value, NExprContext context) {
+            fcontext(context).setVar(varName, value);
         }
     }
 }

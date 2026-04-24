@@ -2,7 +2,7 @@ package net.thevpc.nsite.executor.expr;
 
 import net.thevpc.nuts.expr.NExprContext;
 import net.thevpc.nuts.expr.NExprFct;
-import net.thevpc.nuts.expr.NExprVarDeclaration;
+import net.thevpc.nuts.expr.NExprVar;
 import net.thevpc.nsite.context.NSiteContext;
 
 public abstract class BaseNexprNExprFct implements NExprFct {
@@ -13,7 +13,7 @@ public abstract class BaseNexprNExprFct implements NExprFct {
     }
 
     protected static NSiteContext fcontext(NExprContext context) {
-        NExprVarDeclaration vd = context.getVar(DefaultNSiteExprEvaluator.NSITE_CONTEXT_VAR_NAME).get();
+        NExprVar vd = context.getVar(DefaultNSiteExprEvaluator.NSITE_CONTEXT_VAR_NAME).get();
         return (NSiteContext) vd.get(context);
     }
 
