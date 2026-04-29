@@ -1,11 +1,11 @@
 package net.thevpc.nsite.executor.expr;
 
 import net.thevpc.nuts.expr.NExprContext;
-import net.thevpc.nuts.expr.NExprFunctionHandler;
+import net.thevpc.nuts.expr.NExprCallHandler;
 import net.thevpc.nuts.expr.NExprVar;
 import net.thevpc.nsite.context.NSiteContext;
 
-public abstract class BaseNexprNExprFct implements NExprFunctionHandler {
+public abstract class BaseNexprNExprFct implements NExprCallHandler {
     private String name;
 
     public BaseNexprNExprFct(String name) {

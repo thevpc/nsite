@@ -4,6 +4,7 @@ import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
 import net.thevpc.nsite.processor.html.PageToHtmlUtils;
 import net.thevpc.nsite.util.StringUtils;
+import net.thevpc.nuts.expr.NExprCallContext;
 import net.thevpc.nuts.expr.NExprContext;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nuts.log.NLog;
@@ -17,13 +18,16 @@ public class ToHtmlFct extends BaseNexprNExprFct {
     }
 
     @Override
-    public Object eval(String name, List<NExprNodeValue> args, NExprContext context) {
+    public Object eval(NExprCallContext callContext) {
+        String name = callContext.name();
+        List<NExprNodeValue> args = callContext.args();
+        NExprContext context = callContext.context();
         if (args.size() != 2) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
         NSiteContext fcontext = fcontext(context);
-        String type = (String) args.get(0).getValue().orNull();
-        String content = (String) args.get(1).getValue().orNull();
+        String type = (String) args.get(0).value().orNull();
+        String content = (String) args.get(1).value().orNull();
         NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)", "eval", name, StringUtils.toLiteralString(type) + ")"));
         return fcontext.md2Html().toHtml(type,content, PageToHtmlUtils.GeneratorContext.of(fcontext));
     }

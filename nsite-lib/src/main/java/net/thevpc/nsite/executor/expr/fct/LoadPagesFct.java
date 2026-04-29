@@ -1,5 +1,6 @@
 package net.thevpc.nsite.executor.expr.fct;
 
+import net.thevpc.nuts.expr.NExprCallContext;
 import net.thevpc.nuts.expr.NExprContext;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nuts.io.NDigest;
@@ -25,13 +26,16 @@ public class LoadPagesFct extends BaseNexprNExprFct {
     }
 
     @Override
-    public Object eval(String name, List<NExprNodeValue> args, NExprContext context) {
+    public Object eval(NExprCallContext callContext) {
+        String name = callContext.name();
+        List<NExprNodeValue> args = callContext.args();
+        NExprContext context = callContext.context();
         if (args.size() != 1) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
         NSiteContext fcontext = fcontext(context);
 
-        Object strOrGroup = args.get(0).getValue().orNull();
+        Object strOrGroup = args.get(0).value().orNull();
         String str = null;
         int level;
         MPage parent=null;

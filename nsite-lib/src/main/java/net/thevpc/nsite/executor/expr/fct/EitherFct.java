@@ -1,6 +1,7 @@
 package net.thevpc.nsite.executor.expr.fct;
 
 import net.thevpc.nsite.executor.expr.BaseNexprNExprFct;
+import net.thevpc.nuts.expr.NExprCallContext;
 import net.thevpc.nuts.expr.NExprContext;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nuts.util.NBlankable;
@@ -13,9 +14,12 @@ public class EitherFct extends BaseNexprNExprFct {
     }
 
     @Override
-    public Object eval(String name, List<NExprNodeValue> args, NExprContext context) {
+    public Object eval(NExprCallContext callContext) {
+        String name = callContext.name();
+        List<NExprNodeValue> args = callContext.args();
+        NExprContext context = callContext.context();
         for (NExprNodeValue arg : args) {
-            Object str = arg.getValue().orNull();
+            Object str = arg.value().orNull();
             if(!NBlankable.isBlank(str)){
                 return str;
             }

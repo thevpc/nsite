@@ -1,5 +1,6 @@
 package net.thevpc.nsite.executor.expr.fct;
 
+import net.thevpc.nuts.expr.NExprCallContext;
 import net.thevpc.nuts.expr.NExprContext;
 import net.thevpc.nuts.expr.NExprNodeValue;
 import net.thevpc.nsite.context.NSiteContext;
@@ -18,12 +19,15 @@ public class PageContentToHtmlFct extends BaseNexprNExprFct {
     }
 
     @Override
-    public Object eval(String name, List<NExprNodeValue> args, NExprContext context) {
+    public Object eval(NExprCallContext callContext) {
+        String name = callContext.name();
+        List<NExprNodeValue> args = callContext.args();
+        NExprContext context = callContext.context();
         if (args.size() != 1 && args.size() != 2) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
         NSiteContext fcontext = fcontext(context);
-        MPage page = (MPage) args.get(0).getValue().orNull();
+        MPage page = (MPage) args.get(0).value().orNull();
         NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(page) + ")"));
         if (page == null) {
             return "";

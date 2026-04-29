@@ -16,6 +16,7 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
 
         rootDecls = NExprContextBuilder.of()
                 .setAutoDeclareVariables(true)
+                .declareBuiltins()
                 .declareVars(new NExprVarResolver(){
                     @Override
                     public NOptional<NExprVar> getVar(String varName, NExprContext context) {
