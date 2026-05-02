@@ -28,7 +28,7 @@ public class ProcessFileFct extends BaseNexprNExprFct {
         }
         NSiteContext fcontext = fcontext(context);
 
-        String str = (String) args.get(0).value().orNull();
+        String str = (String) args.get(0).value().failFast().orNull();
         String path = FileProcessorUtils.toAbsolute(str, fcontext.getWorkingDirRequired());
         NPath opath = NPath.of(path);
         NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(opath) + ")"));

@@ -26,7 +26,7 @@ public class PrintFct extends BaseNexprNExprFct {
 
         List<String> all = new ArrayList<>();
         for (NExprNodeValue arg : args) {
-            all.add(String.valueOf(arg.value().orNull()));
+            all.add(String.valueOf(arg.value().failFast().orNull()));
         }
         StringBuilder sb = new StringBuilder();
         if (!all.isEmpty()) {

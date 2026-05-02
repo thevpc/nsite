@@ -35,7 +35,7 @@ public class LoadPagesFct extends BaseNexprNExprFct {
         }
         NSiteContext fcontext = fcontext(context);
 
-        Object strOrGroup = args.get(0).value().orNull();
+        Object strOrGroup = args.get(0).value().failFast().orNull();
         String str = null;
         int level;
         MPage parent=null;

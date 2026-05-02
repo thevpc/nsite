@@ -19,7 +19,7 @@ public class EitherFct extends BaseNexprNExprFct {
         List<NExprNodeValue> args = callContext.args();
         NExprContext context = callContext.context();
         for (NExprNodeValue arg : args) {
-            Object str = arg.value().orNull();
+            Object str = arg.value().failFast().orNull();
             if(!NBlankable.isBlank(str)){
                 return str;
             }

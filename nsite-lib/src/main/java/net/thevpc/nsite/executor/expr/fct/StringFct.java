@@ -24,7 +24,7 @@ public class StringFct extends BaseNexprNExprFct {
         if (args.size() != 1) {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
-        String str = (String) args.get(0).value().orNull();
+        String str = (String) args.get(0).value().failFast().orNull();
         NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(str)));
         return NLiteral.of(str).toStringLiteral();
     }

@@ -26,8 +26,8 @@ public class ToHtmlFct extends BaseNexprNExprFct {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
         NSiteContext fcontext = fcontext(context);
-        String type = (String) args.get(0).value().orNull();
-        String content = (String) args.get(1).value().orNull();
+        String type = (String) args.get(0).value().failFast().orNull();
+        String content = (String) args.get(1).value().failFast().orNull();
         NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)", "eval", name, StringUtils.toLiteralString(type) + ")"));
         return fcontext.md2Html().toHtml(type,content, PageToHtmlUtils.GeneratorContext.of(fcontext));
     }

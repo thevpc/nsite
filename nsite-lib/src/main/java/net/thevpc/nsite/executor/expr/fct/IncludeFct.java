@@ -32,7 +32,7 @@ public class IncludeFct extends BaseNexprNExprFct {
         }
         NSiteContext fcontext = fcontext(context);
 
-        String str = (String) args.get(0).value().orNull();
+        String str = (String) args.get(0).value().failFast().orNull();
         String path = FileProcessorUtils.toAbsolute(str, fcontext.getWorkingDirRequired());
         NPath opath = NPath.of(path);
         if(!opath.isRegularFile()){

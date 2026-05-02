@@ -30,8 +30,8 @@ public class PageToHtmlFct extends BaseNexprNExprFct {
         }
         NSiteContext fcontext = fcontext(context);
 
-        MPage title = (MPage) args.get(0).value().orNull();
-        Object titlePrefix = args.size() > 1 ? args.get(1).value().orNull() : null;
+        MPage title = (MPage) args.get(0).value().failFast().orNull();
+        Object titlePrefix = args.size() > 1 ? args.get(1).value().failFast().orNull() : null;
         NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(title) + ")"));
         if (title == null) {
             return "";

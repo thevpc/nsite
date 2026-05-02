@@ -27,7 +27,7 @@ public class LoadFileFct extends BaseNexprNExprFct {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
         NSiteContext fcontext = fcontext(context);
-        String str = (String) args.get(0).value().orNull();
+        String str = (String) args.get(0).value().failFast().orNull();
         NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(str)));
         return FileProcessorUtils.loadString(
                 NPath.of(FileProcessorUtils.toAbsolute(str, fcontext.getWorkingDirRequired()))

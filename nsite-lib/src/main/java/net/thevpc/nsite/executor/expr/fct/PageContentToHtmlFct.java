@@ -27,7 +27,7 @@ public class PageContentToHtmlFct extends BaseNexprNExprFct {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
         NSiteContext fcontext = fcontext(context);
-        MPage page = (MPage) args.get(0).value().orNull();
+        MPage page = (MPage) args.get(0).value().failFast().orNull();
         NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(page) + ")"));
         if (page == null) {
             return "";

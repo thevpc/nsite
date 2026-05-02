@@ -24,7 +24,7 @@ public class FileContentLengthString extends BaseNexprNExprFct {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
         NSiteContext fcontext = fcontext(context);
-        String str = (String) args.get(0).value().orNull();
+        String str = (String) args.get(0).value().failFast().orNull();
         long contentLength = NPath.of(str).getContentLength();
         if(contentLength<0){
             return "NOT_FOUND";

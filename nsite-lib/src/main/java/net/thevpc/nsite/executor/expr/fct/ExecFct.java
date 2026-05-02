@@ -23,7 +23,7 @@ public class ExecFct extends BaseNexprNExprFct {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
         NSiteContext fcontext = fcontext(context);
-        String pathString = (String) args.get(0).value().orNull();
+        String pathString = (String) args.get(0).value().failFast().orNull();
         NPath path = NPath.of(pathString);
         return fcontext.getExecutorManager().executeRegularFile(path, null);
     }
