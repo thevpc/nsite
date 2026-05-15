@@ -615,19 +615,19 @@ public class NSiteContext {
         NPath p2 = NPath.of(resolvePath(targetFolder)).toAbsolute();
         for (String path : config.getSourcePaths()) {
             NPath p1 = NPath.of(resolvePath(path)).toAbsolute();
-            if (p1.isEqOrDeepChildOf(p2)) {
+            if (p1.startsWith(p2)) {
                 clean = false;
             }
-            if (p2.isEqOrDeepChildOf(p1)) {
+            if (p2.startsWith(p1)) {
                 clean = false;
             }
         }
         for (String path : config.getResourcePaths()) {
             NPath p1 = NPath.of(resolvePath(path)).toAbsolute();
-            if (p1.isEqOrDeepChildOf(p2)) {
+            if (p1.startsWith(p2)) {
                 clean = false;
             }
-            if (p2.isEqOrDeepChildOf(p1)) {
+            if (p2.startsWith(p1)) {
                 clean = false;
             }
         }
