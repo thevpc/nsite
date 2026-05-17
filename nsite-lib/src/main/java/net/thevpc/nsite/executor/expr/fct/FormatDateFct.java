@@ -26,7 +26,7 @@ public class FormatDateFct extends BaseNexprNExprFct {
         }
         NSiteContext fcontext = fcontext(context);
 
-        Object d = args.get(0).value().failFast().orNull();
+        Object d = args.get(0).value().ifErrorThrow().orNull();
         if(d==null){
             return "";
         }
