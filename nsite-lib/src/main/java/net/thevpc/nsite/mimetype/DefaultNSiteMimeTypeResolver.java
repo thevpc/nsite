@@ -97,7 +97,7 @@ public class DefaultNSiteMimeTypeResolver implements NSiteMimeTypeResolver {
     @Override
     public String resolveMimetype(String path) {
         try {
-            String s = nameToMimeType.get(NPath.of(path).getName());
+            String s = nameToMimeType.get(NPath.of(path).name());
             if(s!=null){
                 return s;
             }

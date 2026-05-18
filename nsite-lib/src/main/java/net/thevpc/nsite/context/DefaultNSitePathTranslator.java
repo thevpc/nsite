@@ -34,7 +34,7 @@ public class DefaultNSitePathTranslator implements NSitePathTranslator {
     public String translatePath(String from) {
         NPath path = NPath.of(from);
         if (path.startsWith(source)) {
-            NPath r = path.subpath(source.getNameCount(), path.getNameCount());
+            NPath r = path.subpath(source.nameCount(), path.nameCount());
             NPath t = target.resolve(r);
             return t.toString();
         }

@@ -57,10 +57,10 @@ public class JPRootDoc implements JDRootDoc {
         }
         NPath path0=path;
         path0.walk().filter(x -> x.isRegularFile()
-                && x.getName().toString().endsWith(".java")
+                && x.name().toString().endsWith(".java")
         ).forEach(file -> {
             String pck =
-                    StreamSupport.stream(file.subpath(path0.getNameCount(), file.getNameCount()).getNames().spliterator(), false)
+                    StreamSupport.stream(file.subpath(path0.nameCount(), file.nameCount()).names().spliterator(), false)
                             .collect(Collectors.joining("."));
             if (packageFilter == null || packageFilter.test(pck)) {
                 parseFile(file);

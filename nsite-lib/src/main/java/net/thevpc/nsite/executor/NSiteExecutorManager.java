@@ -153,7 +153,7 @@ public class NSiteExecutorManager {
 
     public String executeRegularFile(NPath path, String mimeTypesString) {
         NPath absolutePath = context.toAbsolutePath(path);
-        NPath parentPath = absolutePath.getParent();
+        NPath parentPath = absolutePath.parent();
         if (!absolutePath.isRegularFile()) {
             throw new NIllegalArgumentException(NMsg.ofC("no a file : %s", path));
         }

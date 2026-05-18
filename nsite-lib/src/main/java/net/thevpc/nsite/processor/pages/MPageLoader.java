@@ -30,9 +30,9 @@ public class MPageLoader {
                 return loadPageFromFile(u, fcontext);
             }
         } else if (
-                (path.getName().endsWith(".md") && !path.getName().endsWith(".folder-info.md"))
+                (path.name().endsWith(".md") && !path.name().endsWith(".folder-info.md"))
                         ||
-                        (path.getName().endsWith(".ntf") && !path.getName().endsWith(".folder-info.ntf"))
+                        (path.name().endsWith(".ntf") && !path.name().endsWith(".folder-info.ntf"))
         ) {
             return loadPageFromFile(path, fcontext);
         }
@@ -43,14 +43,14 @@ public class MPageLoader {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         fcontext.getProcessorManager().processSourceRegularFile(path, null, bos);
         String defaultContentType=null;
-        if (path.getName().endsWith(".ntf") || path.getName().endsWith(".ntf.md")) {
+        if (path.name().endsWith(".ntf") || path.name().endsWith(".ntf.md")) {
             defaultContentType="ntf";
-        }else if (path.getName().endsWith(".html.md")) {
+        }else if (path.name().endsWith(".html.md")) {
             defaultContentType="html";
-        }else if (path.getName().endsWith(".md")) {
+        }else if (path.name().endsWith(".md")) {
             defaultContentType="markdown";
         }else {
-            throw new IllegalArgumentException("Unsupported file type: " + path.getName());
+            throw new IllegalArgumentException("Unsupported file type: " + path.name());
         }
         ByteArrayInputStream is = new ByteArrayInputStream(bos.toByteArray());
         int maxRowSize = 1024 * 4;
@@ -59,8 +59,8 @@ public class MPageLoader {
             String firstLine = br.readLine();
             MPage g = new MPage()
                     .setPath(path.toString())
-                    .setTitle(path.getName())
-                    .setPathName(".folder-info.md".equals(path.getName())?path.getParent().getName() :  path.getName());
+                    .setTitle(path.name())
+                    .setPathName(".folder-info.md".equals(path.name())?path.parent().name() :  path.name());
             if (firstLine != null) {
                 NStringBuilder yamlPrefix = new NStringBuilder();
                 if (firstLine.startsWith("---")) {

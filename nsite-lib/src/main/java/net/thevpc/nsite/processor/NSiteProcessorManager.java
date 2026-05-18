@@ -195,7 +195,7 @@ public class NSiteProcessorManager {
 
     public void processSourceRegularFile(NPath path, String mimeType) {
         NPath absolutePath = context.toAbsolutePath(path);
-        NPath parentPath = absolutePath.getParent();
+        NPath parentPath = absolutePath.parent();
         if (!absolutePath.isRegularFile()) {
             throw new NIllegalArgumentException(NMsg.ofC("unsupported file : %s", path.toString()));
         }
@@ -230,7 +230,7 @@ public class NSiteProcessorManager {
 
     public void processSourceRegularFile(NPath path, String mimeType, OutputStream out) {
         NPath absolutePath = context.toAbsolutePath(path);
-        NPath parentPath = absolutePath.getParent();
+        NPath parentPath = absolutePath.parent();
         if (!absolutePath.isRegularFile()) {
             throw new NIllegalArgumentException(NMsg.ofC("unsupported file : %s", path.toString()));
         }
@@ -280,7 +280,7 @@ public class NSiteProcessorManager {
                 context.setPathTranslator(new DefaultNSitePathTranslator(opath, NPath.of(targetFolder)));
             }
         } else {
-            NPath ppath = opath.getParent();
+            NPath ppath = opath.parent();
             context.setWorkingDir(ppath.toString());
             if (targetFolder != null) {
                 context.setPathTranslator(new DefaultNSitePathTranslator(ppath, NPath.of(targetFolder)));
@@ -329,7 +329,7 @@ public class NSiteProcessorManager {
                 context.setPathTranslator(new DefaultNSitePathTranslator(opath, NPath.of(targetFolder)));
             }
         } else {
-            NPath ppath = opath.getParent();
+            NPath ppath = opath.parent();
             context.setWorkingDir(ppath.toString());
             if (targetFolder != null) {
                 context.setPathTranslator(new DefaultNSitePathTranslator(opath, ppath));
@@ -369,7 +369,7 @@ public class NSiteProcessorManager {
 
     public NOptional<NSiteProcessor> resolveFileProcessor(NPath path, String mimeType) {
         NPath absolutePath = context.toAbsolutePath(path);
-        NPath parentPath = absolutePath.getParent();
+        NPath parentPath = absolutePath.parent();
         if (!absolutePath.isRegularFile()) {
             return NOptional.ofNamedEmpty(NMsg.ofC("processor not found for %s and %s", path, mimeType));
         }

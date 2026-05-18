@@ -37,7 +37,7 @@ public class StreamToExecutor implements NSiteExecutor {
         String p = context.getPathTranslator().translatePath(source.toString());
         if (p != null) {
             NPath targetPath = NPath.of(p);
-            FileProcessorUtils.mkdirs(targetPath.getParent());
+            FileProcessorUtils.mkdirs(targetPath.parent());
             try (InputStream in = source.getInputStream();
                     OutputStream out = targetPath.getOutputStream();) {
 //                context.getLog().debug(context.getContextName(), "update "+p+" (from "+source+") using "+streamProcessor);

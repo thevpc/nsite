@@ -90,7 +90,7 @@ public class NSiteContext {
         if (p.isDirectory()) {
             return p;
         }
-        NPath pp = p.getParent();
+        NPath pp = p.parent();
         if (pp == null) {
             throw new IllegalArgumentException("Unsupported");
         }
@@ -497,8 +497,8 @@ public class NSiteContext {
                 } else {
                     //throw new NIllegalArgumentException(NMsg.ofC("invalid project, missing project.nexpr : %s", oProjectDirPath));
                 }
-                for (NPath script : oProjectDirPath.resolve("scripts").list().stream().sorted(Comparator.comparing(x -> x.getName())).collect(Collectors.toList())) {
-                    if (!Objects.equals(getProjectFileName(), script.getName())) {
+                for (NPath script : oProjectDirPath.resolve("scripts").list().stream().sorted(Comparator.comparing(x -> x.name())).collect(Collectors.toList())) {
+                    if (!Objects.equals(getProjectFileName(), script.name())) {
                         initScripts.add(oProjectFile.toString());
                     }
                 }
