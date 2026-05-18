@@ -39,7 +39,7 @@ public class IncludeFct extends BaseNexprNExprFct {
             throw new IllegalArgumentException(name + " : path not found : " + path);
         }
         NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(opath)));
-        try (InputStream in = opath.getInputStream()) {
+        try (InputStream in = opath.inputStream()) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             fcontext.getProcessorManager().processStream(in, out, fcontext.getMimeTypeResolver().resolveMimetype(opath.toString()));
             return out.toString();

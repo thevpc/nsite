@@ -179,7 +179,7 @@ public class NSiteProcessorManager {
                         try {
                             String p = context.getPathTranslator().translatePath(x.toString());
                             if (p != null) {
-                                NCp.of().from(x).to(NPath.of(p)).setMkdirs(true).run();
+                                NCp.of().from(x).to(NPath.of(p)).mkdirs(true).run();
                                 //getProcessorExact(MimeTypeConstants.ANY_TYPE).processPath(x, null, context);
                             }
                         } catch (Exception ex) {
@@ -254,7 +254,7 @@ public class NSiteProcessorManager {
                     log().debug(NMsg.ofC("[%s] [%s] [%s] execute path : %s", contextName1, proc, mimeTypesString, s1));
                 }
 
-                try (InputStream in = path.getInputStream()) {
+                try (InputStream in = path.inputStream()) {
                     proc.processStream(in, out,
                             context.newChild()
                                     .setUserParentProperties(true)

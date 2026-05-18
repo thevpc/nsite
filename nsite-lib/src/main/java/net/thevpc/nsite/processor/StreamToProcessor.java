@@ -32,8 +32,8 @@ public class StreamToProcessor implements NSiteProcessor {
         if (p != null) {
             NPath targetPath = NPath.of(p);
             targetPath.mkParentDirs();
-            try (InputStream in = source.getInputStream();
-                    OutputStream out = targetPath.getOutputStream();) {
+            try (InputStream in = source.inputStream();
+                 OutputStream out = targetPath.outputStream();) {
 //                context.getLog().debug(context.getContextName(), "update "+p+" (from "+source+") using "+streamProcessor);
                 context.setVar("source",p);
                 context.setVar("target",targetPath);

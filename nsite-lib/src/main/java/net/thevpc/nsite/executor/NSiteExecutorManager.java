@@ -167,7 +167,7 @@ public class NSiteExecutorManager {
             } else {
                 NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] [%s] [%s] execute path : %s", "file", proc, mimeTypesString, s1));
             }
-            try (InputStream in = absolutePath.getInputStream()) {
+            try (InputStream in = absolutePath.inputStream()) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 proc.processStream(in, out,
                         context.newChild()

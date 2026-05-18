@@ -77,13 +77,13 @@ public class DefaultProjectTemplate implements ProjectTemplate {
                                                 .append(propName, NTextStyle.pale())
                                                 .append(")\n ?")
                                                 .toString()))
-                        .setDefaultValue(defaultValue)
-                        .setValidator(new NAskValidator<String>() {
+                        .defaultValue(defaultValue)
+                        .validator(new NAskValidator<String>() {
                             @Override
                             public String validate(String value, NAsk<String> question) throws NValidationException {
                                 return validator.validate(value);
                             }
-                        }).getValue();
+                        }).value();
             }
         };
     }
@@ -385,9 +385,9 @@ public class DefaultProjectTemplate implements ProjectTemplate {
 
     public NDescriptor askForPomAndUpdateConfig() {
         NDescriptor pomxml = askForPom();
-        getConfigProperty("ProjectGroup").setValue(pomxml.getId().getGroupId());
-        getConfigProperty("ProjectName").setValue(pomxml.getId().getArtifactId());
-        getConfigProperty("ProjectVersion").setValue(pomxml.getId().getVersion().toString());
+        getConfigProperty("ProjectGroup").setValue(pomxml.getId().groupId());
+        getConfigProperty("ProjectName").setValue(pomxml.getId().artifactId());
+        getConfigProperty("ProjectVersion").setValue(pomxml.getId().version().toString());
         return pomxml;
     }
 
@@ -399,8 +399,8 @@ public class DefaultProjectTemplate implements ProjectTemplate {
                 if (!NIn.ask()
                         .forBoolean(NMsg.ofC("accept project location %s?",
                                 NText.ofStyledPath(p.getPath())))
-                        .setDefaultValue(false)
-                        .getBooleanValue()) {
+                        .defaultValue(false)
+                        .booleanValue()) {
                     throw new NCancelException();
                 }
             }

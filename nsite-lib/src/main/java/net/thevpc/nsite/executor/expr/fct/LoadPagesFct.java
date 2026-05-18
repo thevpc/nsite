@@ -92,7 +92,7 @@ public class LoadPagesFct extends BaseNexprNExprFct {
                 .filter(x -> x != null)
                 .peek(x -> {
                     if(NBlankable.isBlank(x.getId())){
-                        String id="U"+NDigest.of().setSource(x.getPath().getBytes()).computeString();
+                        String id="U"+NDigest.of().source(x.getPath().getBytes()).computeString();
                         x.setId(id);
                     }
                     x.setLevel(finalLevel);

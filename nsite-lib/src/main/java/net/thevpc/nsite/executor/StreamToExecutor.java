@@ -38,8 +38,8 @@ public class StreamToExecutor implements NSiteExecutor {
         if (p != null) {
             NPath targetPath = NPath.of(p);
             FileProcessorUtils.mkdirs(targetPath.parent());
-            try (InputStream in = source.getInputStream();
-                    OutputStream out = targetPath.getOutputStream();) {
+            try (InputStream in = source.inputStream();
+                 OutputStream out = targetPath.outputStream();) {
 //                context.getLog().debug(context.getContextName(), "update "+p+" (from "+source+") using "+streamProcessor);
                 context.setVar("source",p);
                 context.setVar("target",targetPath);
