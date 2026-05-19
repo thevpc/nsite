@@ -376,7 +376,7 @@ public class DefaultProjectTemplate implements ProjectTemplate {
             if (!pomFile.isFile()) {
                 return null;
             }
-            NDescriptorParser.of().setDescriptorStyle(NDescriptorStyle.MAVEN).parse(pomFile);
+            NDescriptorParser.of().descriptorStyle(NDescriptorStyle.MAVEN).parse(pomFile);
             return pomFile;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -385,9 +385,9 @@ public class DefaultProjectTemplate implements ProjectTemplate {
 
     public NDescriptor askForPomAndUpdateConfig() {
         NDescriptor pomxml = askForPom();
-        getConfigProperty("ProjectGroup").setValue(pomxml.getId().groupId());
-        getConfigProperty("ProjectName").setValue(pomxml.getId().artifactId());
-        getConfigProperty("ProjectVersion").setValue(pomxml.getId().version().toString());
+        getConfigProperty("ProjectGroup").setValue(pomxml.id().groupId());
+        getConfigProperty("ProjectName").setValue(pomxml.id().artifactId());
+        getConfigProperty("ProjectVersion").setValue(pomxml.id().version().toString());
         return pomxml;
     }
 
@@ -406,7 +406,7 @@ public class DefaultProjectTemplate implements ProjectTemplate {
             }
         }
         try {
-            return NDescriptorParser.of().setDescriptorStyle(NDescriptorStyle.MAVEN)
+            return NDescriptorParser.of().descriptorStyle(NDescriptorStyle.MAVEN)
                     .parse(new File(getProjectRootFolder(), "pom.xml")).get();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
