@@ -92,7 +92,7 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
         }
 
         @Override
-        public String getName() {
+        public String name() {
             return varName;
         }
 
