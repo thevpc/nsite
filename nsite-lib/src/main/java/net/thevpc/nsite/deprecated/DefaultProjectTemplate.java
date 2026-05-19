@@ -65,7 +65,7 @@ public class DefaultProjectTemplate implements ProjectTemplate {
 
             @Override
             public String ask(String propName, String propertyTitle, StringValidator validator, String defaultValue) {
-                if (DefaultProjectTemplate.this.session.getConfirm().orDefault() == NConfirmationMode.YES) {
+                if (DefaultProjectTemplate.this.session.confirm().orDefault() == NConfirmationMode.YES) {
                     return defaultValue;
                 }
                 return NIn.ask()

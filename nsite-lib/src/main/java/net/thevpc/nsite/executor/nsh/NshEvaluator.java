@@ -58,7 +58,7 @@ public class NshEvaluator implements NSiteExprEvaluator {
     @Override
     public Object eval(String content, NSiteContext context) {
         NshContext ctx = shell.createInlineContext(shell.getRootContext(), context.getSourcePath().orElse("nsh"), new String[0]);
-        NSession session = NSession.of().copy().setTerminal(NTerminal.ofMem());
+        NSession session = NSession.of().copy().terminal(NTerminal.ofMem());
         return session.callWith(() -> {
             ctx.setSession(session);
             shell.executeScript(content, ctx);
