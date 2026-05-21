@@ -210,43 +210,43 @@ public class NSiteProjectConfig implements NCmdLineConfigurable ,Cloneable{
         switch (option.key()) {
             case "-i":
             case "--init": {
-                return cmdLine.matcher().matchEntry((v) -> NSiteProjectConfig.this.addInitScript(v.stringValue())).anyMatch();
+                return cmdLine.matcher().withAny().matchEntry((v) -> NSiteProjectConfig.this.addInitScript(v.stringValue())).anyMatch();
             }
             case "--clean": {
-                return cmdLine.matcher().matchFlag((v) -> NSiteProjectConfig.this.setClean(v.booleanValue())).anyMatch();
+                return cmdLine.matcher().withAny().matchFlag((v) -> NSiteProjectConfig.this.setClean(v.booleanValue())).anyMatch();
             }
             case "--script": {
-                return cmdLine.matcher().matchEntry((v) -> NSiteProjectConfig.this.setScriptType(v.stringValue())).anyMatch();
+                return cmdLine.matcher().withAny().matchEntry((v) -> NSiteProjectConfig.this.setScriptType(v.stringValue())).anyMatch();
             }
             case "-t":
             case "--to": {
-                return cmdLine.matcher().matchEntry((v) -> NSiteProjectConfig.this.setTargetFolder(v.stringValue())).anyMatch();
+                return cmdLine.matcher().withAny().matchEntry((v) -> NSiteProjectConfig.this.setTargetFolder(v.stringValue())).anyMatch();
             }
             case "-s":
             case "--src": {
-                return cmdLine.matcher().matchEntry((v) -> NSiteProjectConfig.this.addSource(v.stringValue())).anyMatch();
+                return cmdLine.matcher().withAny().matchEntry((v) -> NSiteProjectConfig.this.addSource(v.stringValue())).anyMatch();
             }
             case "-p":
             case "--project": {
-                return cmdLine.matcher().matchEntry((v) -> NSiteProjectConfig.this.setProjectPath(v.stringValue())).anyMatch();
+                return cmdLine.matcher().withAny().matchEntry((v) -> NSiteProjectConfig.this.setProjectPath(v.stringValue())).anyMatch();
             }
             case "-r":
             case "--resource": {
-                return cmdLine.matcher().matchEntry((v) -> NSiteProjectConfig.this.addResourceSource(v.stringValue())).anyMatch();
+                return cmdLine.matcher().withAny().matchEntry((v) -> NSiteProjectConfig.this.addResourceSource(v.stringValue())).anyMatch();
             }
             ///////////////////////////
 
             case "--java-source": {
-                return cmdLine.matcher().matchEntry((v) -> javaSourcePaths.add(v.stringValue())).anyMatch();
+                return cmdLine.matcher().withAny().matchEntry((v) -> javaSourcePaths.add(v.stringValue())).anyMatch();
             }
             case "--javadoc-target": {
-                return cmdLine.matcher().matchEntry((v) -> javadocTarget = v.stringValue()).anyMatch();
+                return cmdLine.matcher().withAny().matchEntry((v) -> javadocTarget = v.stringValue()).anyMatch();
             }
             case "--java-package": {
-                return cmdLine.matcher().matchEntry((v) -> javaPackages.add(v.stringValue())).anyMatch();
+                return cmdLine.matcher().withAny().matchEntry((v) -> javaPackages.add(v.stringValue())).anyMatch();
             }
             case "--javadoc-backend": {
-                return cmdLine.matcher().matchEntry((v) -> javadocBackend = v.stringValue()).anyMatch();
+                return cmdLine.matcher().withAny().matchEntry((v) -> javadocBackend = v.stringValue()).anyMatch();
             }
         }
         return false;
