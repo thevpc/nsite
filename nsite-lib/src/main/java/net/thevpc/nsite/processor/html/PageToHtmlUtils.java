@@ -7,7 +7,6 @@ import net.thevpc.nuts.lib.md.*;
 import net.thevpc.nuts.text.*;
 import net.thevpc.nuts.util.*;
 
-import java.awt.*;
 import java.io.StringReader;
 import java.util.*;
 import java.util.List;
@@ -35,40 +34,40 @@ public class PageToHtmlUtils {
 
     public NNormalizedText normalizeText(NText text) {
         return NTexts.of().normalize(text, new NTextTransformConfig()
-                .setFlatten(true)
-                .setNormalize(true)
-                .setApplyTheme(true)
-                .setThemeName(null)//perhaps override
-                .setBasicTrueStyles(true)
-                .setThemeName("whiteboard")
+                .flatten(true)
+                .normalize(true)
+                .applyTheme(true)
+                .themeName(null)//perhaps override
+                .basicTrueStyles(true)
+                .themeName("whiteboard")
         );
     }
 
     public NHtmlNode ntf2html(NText elem) {
         switch (elem.type()) {
             case PLAIN: {
-                return NHtml.raw(((NTextPlain) elem).getValue());
+                return NHtml.raw(((NTextPlain) elem).value());
             }
             case LINK: {
                 NTextLink lnk = (NTextLink) elem;
                 return new NHtmlTag("a")
-                        .attr("href", lnk.getValue())
+                        .attr("href", lnk.value())
                         .attr("class", "md-link")
-                        .body(lnk.getValue());
+                        .body(lnk.value());
             }
             case TITLE: {
                 NTextTitle title = (NTextTitle) elem;
                 NHtmlTag t = new NHtmlTag("H4")
-                        .attr("class", "md-title-" + title.getLevel())
+                        .attr("class", "md-title-" + title.level())
                         .body(
-                                ntf2html(title.getChild())
+                                ntf2html(title.child())
                         );
                 return t;
             }
             case LIST: {
                 List<NHtmlNode> nnn = new ArrayList<>();
                 NTextList ll = (NTextList) elem;
-                for (NText child : ll.getChildren()) {
+                for (NText child : ll.children()) {
                     nnn.add(ntf2html(child));
                 }
                 return new NHtmlTagList(nnn.toArray(new NHtmlNode[0]));
@@ -76,8 +75,8 @@ public class PageToHtmlUtils {
             case CODE: {
                 NTextCode c = (NTextCode) elem;
                 String type = "default";
-                String language = c.getQualifier();
-                String text = c.getValue()==null?"":c.getValue();
+                String language = c.qualifier();
+                String text = c.value()==null?"":c.value();
                 boolean inline = false;
                 if (inline) {
                     String value = text;
@@ -98,15 +97,15 @@ public class PageToHtmlUtils {
             }
             case STYLED: {
                 NTextStyled style = (NTextStyled) elem;
-                NTextStyles styles = style.getStyles();
-                NText c = style.getChild();
+                NTextStyles styles = style.styles();
+                NText c = style.child();
                 Set<String> hstyles = new HashSet<>();
                 Set<String> hclasses = new HashSet<>();
                 NHtmlTag t = new NHtmlTag("span");
 //                hstyles.add("display: inline");
                 boolean blink = false;
                 for (NTextStyle st : styles) {
-                    switch (st.getType()) {
+                    switch (st.type()) {
                         case BOLD: {
                             hstyles.add("font-weight: bold");
                             break;
@@ -135,12 +134,12 @@ public class PageToHtmlUtils {
                             break;
                         }
                         case BACK_TRUE_COLOR: {
-                            NColor cl = NColor.of32(st.getVariant());
+                            NColor cl = NColor.of32(st.variant());
                             hstyles.add("background-color: " + NColor.toHtmlHex(cl));
                             break;
                         }
                         case FORE_TRUE_COLOR: {
-                            NColor cl = NColor.of32(st.getVariant());
+                            NColor cl = NColor.of32(st.variant());
                             hstyles.add("color: " + NColor.toHtmlHex(cl));
                             break;
                         }
@@ -152,7 +151,7 @@ public class PageToHtmlUtils {
                 }
                 t.attr("style", String.join(";", hstyles));
                 t.attr("class", String.join(" ", hclasses));
-                t.body(ntf2html(style.getChild()));
+                t.body(ntf2html(style.child()));
                 if (blink) {
                     t = new NHtmlTag("blink").body(t);
                 }

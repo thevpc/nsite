@@ -473,7 +473,7 @@ public class NSiteContext {
                                 NOut.println(m);
                             }
                         })
-                        .withMessagePrefix(a->NMsg.ofC("[%s] [%s]", Instant.now(),a.getLevel()))
+                        .withMessagePrefix(a->NMsg.ofC("[%s] [%s]", Instant.now(),a.level()))
                 , ()-> {
             NSiteProjectConfig config = config0.copy();
             String scriptType = config.getScriptType();
