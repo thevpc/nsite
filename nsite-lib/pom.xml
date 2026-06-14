@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.thevpc.nsite</groupId>
     <artifactId>nsite-lib</artifactId>
-    <version>0.8.9.0</version>
+    <version>1.0.0.0</version>
     <packaging>jar</packaging>
     <name>Nuts Community Library for Folder Templating</name>
     <url>https://github.com/thevpc/nuts</url>
@@ -45,15 +45,14 @@
 
     <licenses>
         <license>
-            <name>GNU LESSER GENERAL PUBLIC LICENSE Version </name>
-<url>https://www.gnu.org/licenses/lgpl-3.0.en.html</url>
-
+            <name>GNU LESSER GENERAL PUBLIC LICENSE Version</name>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.en.html</url>
         </license>
     </licenses>
 
     <dependencies>
-        <dependency><groupId>net.thevpc.nuts</groupId><artifactId>nuts</artifactId><version>0.8.9</version></dependency>
-        <dependency><groupId>net.thevpc.nsh</groupId><artifactId>nsh</artifactId><version>0.8.9.0</version></dependency>
+        <dependency><groupId>net.thevpc.nuts</groupId><artifactId>nuts</artifactId><version>1.0.0</version></dependency>
+        <dependency><groupId>net.thevpc.nsh</groupId><artifactId>nsh</artifactId><version>1.0.0.0</version></dependency>
         <dependency><groupId>net.thevpc.nmarkdown</groupId><artifactId>nmarkdown</artifactId><version>0.8.9.0</version></dependency>
         <dependency><groupId>com.github.javaparser</groupId><artifactId>javaparser-symbol-solver-core</artifactId><version>3.16.1</version></dependency>
         <dependency><groupId>com.github.javaparser</groupId><artifactId>javaparser-core</artifactId><version>3.16.1</version></dependency>
