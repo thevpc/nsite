@@ -87,9 +87,9 @@ public class MPageLoader {
                         setPageHeaderVar(g, key, np.value());
                     }
                 }
-                String ct = NStringUtils.trim(g.getContentType());
+                String ct = NStringUtils.strip(g.getContentType());
                 if (NBlankable.isBlank(ct)) {
-                    ct = NStringUtils.trim(defaultContentType);
+                    ct = NStringUtils.strip(defaultContentType);
                 }
                 if (ct.startsWith("text/")) {
                     ct = ct.substring("text/".length());
@@ -134,7 +134,7 @@ public class MPageLoader {
 
 
     private static void setPageHeaderVar(MPage g, String key, NElement value) {
-        switch (NStringUtils.trim(key)) {
+        switch (NStringUtils.strip(key)) {
             case "id": {
                 g.setId(value.asStringValue().orNull());
                 break;

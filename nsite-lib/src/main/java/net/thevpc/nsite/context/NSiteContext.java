@@ -479,7 +479,7 @@ public class NSiteContext {
             String scriptType = config.getScriptType();
             String targetFolder = config.getTargetFolder();
             setVars(config.getVars());
-            this.contextName = NStringUtils.trimToNull(config.getContextName());
+            this.contextName = NStringUtils.stripToNull(config.getContextName());
             String projectPath = config.getProjectPath();
             boolean projectFolderSpecified = !NBlankable.isBlank(projectPath);
             List<String> initScripts = new ArrayList<>();

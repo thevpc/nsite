@@ -163,7 +163,7 @@ public class PageToHtmlUtils {
 
 
     public NHtmlNode toHtml(String type, Object content, GeneratorContext generatorContext) {
-        switch (NStringUtils.trim(type)) {
+        switch (NStringUtils.strip(type)) {
             case "markdown": {
                 if (content instanceof MdElement) {
                     return md2html((MdElement) content, generatorContext);
@@ -202,7 +202,7 @@ public class PageToHtmlUtils {
                 if (content instanceof String) {
                     return NHtml.tag("pre").body(
                             //<code class="language-xml">
-                            NHtml.tag("code").attr("class", "language-" + NStringUtils.trim(type)).body(
+                            NHtml.tag("code").attr("class", "language-" + NStringUtils.strip(type)).body(
                                     NHtml.escapeString((String) content)
                             )
                     );

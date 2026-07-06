@@ -11,6 +11,7 @@ import net.thevpc.nsite.util.FileProcessorUtils;
 import net.thevpc.nuts.log.NLog;
 import net.thevpc.nuts.text.NMsg;
 import net.thevpc.nuts.util.NOptional;
+import net.thevpc.nuts.util.NStringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -62,7 +63,7 @@ public class NSiteExecutorManager {
             if (mimeType == null || mimeType.isEmpty() || mimeType.equals("*")) {
                 mimeType = MimeTypeConstants.ANY_TYPE;
             }
-            String[] mts = Stream.of(mimeType.split(";")).map(String::trim).filter(x -> x.length() > 0).toArray(String[]::new);
+            String[] mts = Stream.of(mimeType.split(";")).map(NStringUtils::strip).filter(x -> x.length() > 0).toArray(String[]::new);
             for (String mt : mts) {
                 NSiteExecutor m = getExecutorExact(mt);
                 if (m != null) {

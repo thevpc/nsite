@@ -102,7 +102,7 @@ public class LoadPagesFct extends BaseNexprNExprFct {
                         int r1 = o1.getOrder();
                         int r2 = o2.getOrder();
                         if (r1 == r2) {
-                            int i = NStringUtils.trim(o1.getPathName()).compareTo(o2.getPathName());
+                            int i = NStringUtils.strip(o1.getPathName()).compareTo(o2.getPathName());
                             if (i != 0) {
                                 return finalSortAsc ?i:-i;
                             }
