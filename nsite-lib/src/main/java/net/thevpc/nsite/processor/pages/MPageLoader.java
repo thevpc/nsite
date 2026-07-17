@@ -163,7 +163,7 @@ public class MPageLoader {
             case "authorUrl":
             case "authorURL":
             case "author_url": {
-                g.setAuthorURL(value.asStringValue().orNull());
+                g.setAuthorUrl(value.asStringValue().orNull());
                 break;
             }
             case "authorImageUrl":

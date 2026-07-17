@@ -1,12 +1,9 @@
 package net.thevpc.nsite.processor.pages;
 
 import net.thevpc.nuts.elem.NObjectElement;
-import net.thevpc.nuts.lib.md.MdElement;
-import net.thevpc.nuts.text.NText;
 
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Map;
 
 public class MPage {
     public String contentType;
@@ -29,7 +26,7 @@ public class MPage {
 
     private String author;
     private String authorTitle;
-    private String authorURL;
+    private String authorUrl;
     private String authorImageUrl;
     private Instant publishDate;
     private Instant lastModified;
@@ -223,12 +220,12 @@ public class MPage {
         this.authorTitle = authorTitle;
     }
 
-    public String getAuthorURL() {
-        return authorURL;
+    public String getAuthorUrl() {
+        return authorUrl;
     }
 
-    public void setAuthorURL(String authorURL) {
-        this.authorURL = authorURL;
+    public void setAuthorUrl(String authorUrl) {
+        this.authorUrl = authorUrl;
     }
 
     public String getAuthorImageUrl() {
@@ -261,7 +258,7 @@ public class MPage {
                 ", sortAsc=" + sortAsc +
                 ", author='" + author + '\'' +
                 ", authorTitle='" + authorTitle + '\'' +
-                ", authorURL='" + authorURL + '\'' +
+                ", authorURL='" + authorUrl + '\'' +
                 ", authorImageUrl='" + authorImageUrl + '\'' +
                 ", publishDate=" + publishDate +
                 ", lastModified=" + lastModified +
