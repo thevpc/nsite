@@ -59,7 +59,6 @@ public class MdDoclet /*extends Doclet*/ {
 //    private static String STATIC_METHOD_ICON = "\uD83E\uDDF2";
 //    private static String CONST_ICON = "\uD83E\uDDCA";
 //    public static void main(String[] args) {
-//        System.out.println("Hello");
 ////        com.sun.tools.javadoc.Main.main(new String[]{
 ////            "-doclet", "net.thevpc.nuts.lib.template.javadoc.MdDoclet",
 //////            "-docletpath", "/data/public/git/docusaurus-docklet/target/docusaurus-docklet-0.1.jar:/usr/java/jdk1.8.0_211-amd64/lib/tools.jar",
