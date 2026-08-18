@@ -8,7 +8,7 @@ import net.thevpc.nuts.lib.md.MdElement;
 import net.thevpc.nuts.lib.md.MdFactory;
 import net.thevpc.nuts.lib.md.MdParser;
 import net.thevpc.nuts.text.NText;
-import net.thevpc.nuts.text.NTexts;
+import net.thevpc.nuts.text.NTextParser;
 import net.thevpc.nuts.util.NBlankable;
 import net.thevpc.nuts.util.NStringBuilder;
 import net.thevpc.nuts.util.NStringUtils;
@@ -104,7 +104,7 @@ public class MPageLoader {
                     case "ntf":
                     case "x-ntf": {
                         try (Reader r = new StringReader(content)) {
-                            NText text = NTexts.of().parser().parse(r);
+                            NText text = NTextParser.of().parse(r);
                             g.setParsedContent(text);
                         }
                         break;
