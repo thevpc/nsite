@@ -46,21 +46,25 @@ public class PageToHtmlUtils {
     public NHtmlNode ntf2html(NText elem) {
         switch (elem.type()) {
             case PLAIN: {
-                return NHtml.raw(((NTextPlain) elem).value());
+                return NHtml.splitLines(((NTextPlain) elem).value());
             }
             case LINK: {
                 NTextLink lnk = (NTextLink) elem;
                 return new NHtmlTag("a")
                         .attr("href", lnk.value())
                         .attr("class", "md-link")
-                        .body(lnk.value());
+                        .body(NHtml.splitLines(lnk.value()));
             }
             case TITLE: {
                 NTextTitle title = (NTextTitle) elem;
                 NHtmlTag t = new NHtmlTag("H4")
                         .attr("class", "md-title-" + title.level())
                         .body(
-                                ntf2html(title.child())
+                                NHtml.list(
+                                        ntf2html(title.child()),
+                                        NHtml.tag("br")
+                                )
+
                         );
                 return t;
             }
@@ -181,12 +185,16 @@ public class PageToHtmlUtils {
                 if (content instanceof NText) {
                     NText nnormalized = normalizeText((NText) content);
 //                    return new NHtmlBuffer.NHtmlTag("pre").body(ntf2html(nnormalized));
-                    return ntf2html(nnormalized);
+                    NHtmlNode h = ntf2html(nnormalized);
+                    return NHtml.tag("pre").attr("class","text-ntf")
+                            .body(h);
                 } else if (content instanceof String) {
                     NText ntfContent = NText.of((String) content);
                     NText nnormalized = normalizeText(ntfContent);
 //                    return new NHtmlBuffer.NHtmlTag("pre").body(ntf2html(nnormalized));
-                    return ntf2html(nnormalized);
+                    NHtmlNode h = ntf2html(nnormalized);
+                    return NHtml.tag("pre").attr("class","text-ntf")
+                            .body(h);
                 } else {
                     throw new IllegalArgumentException("unsupported type: " + type);
                 }
@@ -276,11 +284,7 @@ public class PageToHtmlUtils {
                             .attr("class", classMdCode(type, language))
                             .body(escapeCode(value)));
                 }
-                return (new NHtmlTag("pre")
-                        .attr("class", classMdCode(type, language))
-                        .body(
-                                (new NHtmlTag("code").attr("class", language).body(escapeCode(value)))
-                        ));
+                return toHtml(language,code.getValue(),generatorContext);
             }
             case UNNUMBERED_ITEM: {
                 NHtmlTag li = new NHtmlTag("li")
@@ -453,7 +457,34 @@ public class PageToHtmlUtils {
     }
 
     private String classMdCode(String type, String language) {
-        return "md-code md-code-" + type + " " + language;
+        StringBuilder btype=new StringBuilder("md-code md-code");
+        switch (type) {
+            case "```":{
+                btype.append("-ac3");
+                break;
+            }
+            case "`":{
+                btype.append("-ac1");
+                break;
+            }
+            default:{
+                for (char c : type.toCharArray()) {
+                    switch (c){
+                        case '`':{
+                            btype.append("-ac");
+                            break;
+                        }
+                        default:{
+                            btype.append(c);
+                        }
+                    }
+                }
+            }
+        }
+        if(!language.isEmpty()){
+            btype.append("-").append(language);
+        }
+        return btype.toString();
     }
 
     private NHtmlNode md2htmlXmlTabs(MdXml xml, GeneratorContext generatorContext) {

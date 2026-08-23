@@ -26,6 +26,6 @@ class PlainTagNode extends TagNode {
         if (a.length() > 20) {
             a = a.substring(0, 20) + "...";
         }
-        return "NHtmlRaw(" + NLiteral.of(a).toStringLiteral() + ')';
+        return "Plain(" + NLiteral.of(a).toStringLiteral() + ')';
     }
 }

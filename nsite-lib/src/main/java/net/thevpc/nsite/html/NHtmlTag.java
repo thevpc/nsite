@@ -44,6 +44,14 @@ public class NHtmlTag extends NHtmlNode {
         for (NHtmlAttr attr : attrs) {
             sb.append(" ").append(attr.name).append("=\"").append(attr.value).append("\"");
         }
+        switch (name.toLowerCase()){
+            case "br":
+            case "hr":
+            {
+                sb.append(">");
+                return sb.toString();
+            }
+        }
         if (body.size() == 0 && noEnd) {
             sb.append("/>");
         } else {

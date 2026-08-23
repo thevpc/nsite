@@ -51,7 +51,7 @@ public class NshEvaluator implements NSiteExprEvaluator {
     }
 
     public void setVar(String varName, String newValue) {
-        NLog.ofScoped(getClass()).debug(NMsg.ofC("%{] %s =%s", "eval", varName, StringUtils.toLiteralString(newValue)));
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s = %s", "eval-var", varName, StringUtils.toLiteralString(newValue)));
         docContext.setVar(varName, newValue);
     }
 
