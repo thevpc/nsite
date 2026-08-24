@@ -1,9 +1,9 @@
 package net.thevpc.nsite;
 
+import net.thevpc.nuts.app.NAppComplete;
 import net.thevpc.nuts.app.NApplication;
 import net.thevpc.nuts.app.NApp;
 import net.thevpc.nuts.app.NAppRun;
-import net.thevpc.nuts.cmdline.NCmdLineRunner;
 import net.thevpc.nuts.cmdline.NArg;
 import net.thevpc.nuts.cmdline.NCmdLine;
 import net.thevpc.nsite.context.NSiteContext;
@@ -18,25 +18,27 @@ public class NSiteMain {
 
     @NAppRun
     public void run() {
-        NApplication.of().runCmdLine(new NCmdLineRunner() {
-            @Override
-            public boolean next(NArg arg, NCmdLine cmdLine) {
-                if(arg.isOption()){
-                    if(config.configureFirst(cmdLine)){
-                        return true;
-                    }
-                    return false;
-                }else{
-                    config.addSource(cmdLine.next().get().image());
-                    return false;
-                }
-            }
+        processCmdline();
+        new NSiteContext().run(config);
+    }
 
-            @Override
-            public void run(NCmdLine cmdLine) {
-                new NSiteContext().run(config);
+    @NAppComplete
+    public void complete() {
+        processCmdline().printCompleteResult();
+    }
+
+    private NCmdLine processCmdline() {
+        NCmdLine cmdLine = NApplication.of().cmdLine();
+        cmdLine.matcher().with(c -> {
+            NArg arg = c.peek().get();
+            if (arg.isOption()) {
+                return config.configureFirst(c);
+            } else {
+                config.addSource(c.next().get().image());
+                return false;
             }
-        });
+        }).requireAll();
+        return cmdLine;
     }
 
 
