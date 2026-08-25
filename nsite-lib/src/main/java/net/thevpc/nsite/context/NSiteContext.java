@@ -509,7 +509,7 @@ public class NSiteContext {
             }
 
             if (NBlankable.isBlank(targetFolder)) {
-                throw new NIllegalArgumentException(NMsg.ofPlain("missing target folder"));
+                throw new NIllegalArgumentException(NMsg.ofP("missing target folder"));
             }
 
             if (config.getInitScripts() != null) {
@@ -535,7 +535,7 @@ public class NSiteContext {
 
 
             if (sourcePaths.isEmpty()) {
-                throw new NIllegalArgumentException(NMsg.ofPlain("missing path to process"));
+                throw new NIllegalArgumentException(NMsg.ofP("missing path to process"));
             }
 
             if (scriptType != null) {
@@ -555,7 +555,7 @@ public class NSiteContext {
                 }
             }
             if (targetFolder == null) {
-                throw new NIllegalArgumentException(NMsg.ofPlain("missing target folder"));
+                throw new NIllegalArgumentException(NMsg.ofP("missing target folder"));
             }
 
             config.setInitScripts(initScripts);

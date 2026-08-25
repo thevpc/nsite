@@ -6,18 +6,19 @@ import net.thevpc.nuts.expr.*;
 import net.thevpc.nsite.context.NSiteContext;
 import net.thevpc.nuts.log.NLog;
 import net.thevpc.nuts.text.NMsg;
+import net.thevpc.nuts.util.NBlankable;
 import net.thevpc.nuts.util.NOptional;
 
 public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
     public static final String NSITE_CONTEXT_VAR_NAME = "nsite";
-    private NExprMutableContext rootDecls;
+    private final NExprMutableContext rootDecls;
 
     public DefaultNSiteExprEvaluator() {
 
         rootDecls = NExprContextBuilder.of()
                 .setAutoDeclareVariables(true)
                 .declareBuiltins()
-                .declareVars(new NExprVarResolver(){
+                .declareVars(new NExprVarResolver() {
                     @Override
                     public NOptional<NExprVar> getVar(String varName, NExprContext context) {
                         return NOptional.of(new FContextNExprVar(varName));
@@ -39,6 +40,7 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
         declareFunction(new FormatDateFct());
         declareFunction(new FileContentLengthString());
         declareFunction(new EitherFct());
+        declareFunction(new HashFilesFct());
     }
 
     @Override
@@ -49,8 +51,10 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
         decl.declareConstant("cwd", System.getProperty("user.dir"));
         decl.declareConstant("projectRoot", fcontext.getProjectRoot());
         decl.declareConstant("dir", fcontext.getWorkingDir().orNull());
+
+
         NExprContext decl2 = decl.childContext()
-                .declareVars((String varName, NExprContext context)->{
+                .declareVars((String varName, NExprContext context) -> {
                     NOptional<Object> var = fcontext.getVar(varName);
                     if (var.isPresent()) {
                         return NOptional.of(new FContextNExprVar(varName));
@@ -63,8 +67,8 @@ public class DefaultNSiteExprEvaluator implements NSiteExprEvaluator {
 //        if (!eval.isPresent()) {
 //            eval = nExprNode.eval(decl2);
 //        }
-        if(!eval.isPresent()) {
-            NLog.ofScoped(DefaultNSiteExprEvaluator.class).log(NMsg.ofC("unable to evaluate %s : %s", nExprNode,eval.message().get()).asError());
+        if (!eval.isPresent()) {
+            NLog.ofScoped(DefaultNSiteExprEvaluator.class).log(NMsg.ofC("unable to evaluate %s : %s", nExprNode, eval.message().get()).asError());
         }
         return eval.get();
     }
