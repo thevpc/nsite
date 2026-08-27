@@ -122,6 +122,7 @@ public class TagTokenReader {
                             }
                         }
                     } else {
+                        br.read();
                         buffer.append((char) c);
                     }
                     break;
