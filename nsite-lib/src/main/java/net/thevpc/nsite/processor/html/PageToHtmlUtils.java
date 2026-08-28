@@ -33,7 +33,7 @@ public class PageToHtmlUtils {
     }
 
     public NNormalizedText normalizeText(NText text) {
-        return NText.normalize(text, new NTextTransformConfig()
+        return text.normalize(new NTextTransformConfig()
                 .flatten(true)
                 .normalize(true)
                 .applyTheme(true)
