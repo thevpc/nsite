@@ -36,7 +36,7 @@ public class PageToHtmlFct extends BaseNexprNExprFct {
         if (title == null) {
             return "";
         }
-        NStringBuilder sb = new NStringBuilder();
+        NStringBuilder sb = NStringBuilder.of();
         sb.append(new NHtmlTag(title.level == 0 ? "H1"
                 : title.level == 1 ? "H2"
                 : title.level == 2 ? "H3"

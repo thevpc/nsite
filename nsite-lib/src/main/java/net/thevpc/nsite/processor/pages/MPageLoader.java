@@ -62,7 +62,7 @@ public class MPageLoader {
                     .setTitle(path.name())
                     .setPathName(".folder-info.md".equals(path.name())?path.parent().name() :  path.name());
             if (firstLine != null) {
-                NStringBuilder yamlPrefix = new NStringBuilder();
+                NStringBuilder yamlPrefix = NStringBuilder.of();
                 if (firstLine.startsWith("---")) {
                     while (true) {
                         br.mark(maxRowSize);
