@@ -44,69 +44,59 @@ public class PageToHtmlUtils {
     }
 
     public NHtmlNode ntf2html(NText elem) {
+        if (elem == null) {
+            return new NHtmlRaw("");
+        }
+        StringBuilder sb = new StringBuilder(1024);
+        appendNtf(elem, sb);
+        return new NHtmlRaw(sb.toString());
+    }
+
+    private void appendNtf(NText elem, StringBuilder sb) {
+        if (elem == null) {
+            return;
+        }
         switch (elem.type()) {
             case PLAIN: {
-                return NHtml.splitLines(((NTextPlain) elem).value());
+                appendPlain(((NTextPlain) elem).value(), sb);
+                break;
             }
             case LINK: {
                 NTextLink lnk = (NTextLink) elem;
-                return new NHtmlTag("a")
-                        .attr("href", lnk.value())
-                        .attr("class", "md-link")
-                        .body(NHtml.splitLines(lnk.value()));
+                String val = lnk.value() == null ? "" : lnk.value();
+                sb.append("<a href=\"").append(NHtml.escapeString(val)).append("\" class=\"md-link\">");
+                appendPlain(val, sb);
+                sb.append("</a>");
+                break;
             }
             case TITLE: {
                 NTextTitle title = (NTextTitle) elem;
-                NHtmlTag t = new NHtmlTag("H4")
-                        .attr("class", "md-title-" + title.level())
-                        .body(
-                                NHtml.list(
-                                        ntf2html(title.child()),
-                                        NHtml.tag("br")
-                                )
-
-                        );
-                return t;
+                sb.append("<h4 class=\"md-title-").append(title.level()).append("\">");
+                appendNtf(title.child(), sb);
+                sb.append("<br></h4>");
+                break;
             }
             case LIST: {
-                List<NHtmlNode> nnn = new ArrayList<>();
                 NTextList ll = (NTextList) elem;
                 for (NText child : ll.children()) {
-                    nnn.add(ntf2html(child));
+                    appendNtf(child, sb);
                 }
-                return new NHtmlTagList(nnn.toArray(new NHtmlNode[0]));
+                break;
             }
             case CODE: {
                 NTextCode c = (NTextCode) elem;
-                String type = "default";
-                String language = c.qualifier();
-                String text = c.value()==null?"":c.value();
-                boolean inline = false;
-                if (inline) {
-                    String value = text;
-                    if (value.matches("[a-zA-Z0-9_-]+")) {
-                        return (new NHtmlTag("mark")
-                                .attr("class", classMdCode(type, language))
-                                .body(escapeCode(value)));
-                    }
-                    return (new NHtmlTag("code")
-                            .attr("class", classMdCode(type, language))
-                            .body(escapeCode(value)));
-                }
-                return (new NHtmlTag("pre")
-                        .attr("class", classMdCode(type, language))
-                        .body(
-                                (new NHtmlTag("code").attr("class", language).body(escapeCode(text)))
-                        ));
+                String language = c.qualifier() == null ? "" : c.qualifier();
+                String text = c.value() == null ? "" : c.value();
+                sb.append("<pre class=\"").append(classMdCode("default", language)).append("\">");
+                sb.append("<code class=\"").append(NHtml.escapeString(language)).append("\">");
+                sb.append(escapeCode(text));
+                sb.append("</code></pre>");
+                break;
             }
             case STYLED: {
                 NTextStyled style = (NTextStyled) elem;
                 NTextStyles styles = style.styles();
-                NText c = style.child();
-                Set<String> hstyles = new HashSet<>();
-                Set<String> hclasses = new HashSet<>();
-                NHtmlTag t = new NHtmlTag("span");
-//                hstyles.add("display: inline");
+                List<String> hstyles = new ArrayList<>();
                 boolean blink = false;
                 for (NTextStyle st : styles) {
                     switch (st.type()) {
@@ -119,6 +109,7 @@ public class PageToHtmlUtils {
                         }
                         case ITALIC: {
                             hstyles.add("font-style: italic");
+                            break;
                         }
                         case BLINK: {
                             blink = true;
@@ -134,7 +125,7 @@ public class PageToHtmlUtils {
                             break;
                         }
                         case STRIKED: {
-                            hstyles.add("text-decoration:line-through");
+                            hstyles.add("text-decoration: line-through");
                             break;
                         }
                         case BACK_TRUE_COLOR: {
@@ -147,22 +138,74 @@ public class PageToHtmlUtils {
                             hstyles.add("color: " + NColor.toHtmlHex(cl));
                             break;
                         }
+                        case FORE_COLOR: {
+                            NColor cl = NColor.ansiToColor(st.variant());
+                            if (cl != null) {
+                                hstyles.add("color: " + NColor.toHtmlHex(cl));
+                            }
+                            break;
+                        }
+                        case BACK_COLOR: {
+                            NColor cl = NColor.ansiToColor(st.variant());
+                            if (cl != null) {
+                                hstyles.add("background-color: " + NColor.toHtmlHex(cl));
+                            }
+                            break;
+                        }
                         default: {
-                            NText ee = normalizeText(elem);
-                            hstyles.add("color: red");
+                            break;
                         }
                     }
                 }
-                t.attr("style", String.join(";", hstyles));
-                t.attr("class", String.join(" ", hclasses));
-                t.body(ntf2html(style.child()));
                 if (blink) {
-                    t = new NHtmlTag("blink").body(t);
+                    sb.append("<blink>");
                 }
-                return t;
+                if (!hstyles.isEmpty()) {
+                    sb.append("<span style=\"").append(String.join(";", hstyles)).append("\">");
+                }
+                appendNtf(style.child(), sb);
+                if (!hstyles.isEmpty()) {
+                    sb.append("</span>");
+                }
+                if (blink) {
+                    sb.append("</blink>");
+                }
+                break;
+            }
+            default: {
+                appendPlain(elem.toString(), sb);
+                break;
             }
         }
-        return NHtml.raw(elem.toString());
+    }
+
+    private void appendPlain(String s, StringBuilder sb) {
+        if (s == null || s.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                case '&':
+                    sb.append("&amp;");
+                    break;
+                case '"':
+                    sb.append("&quot;");
+                    break;
+                case '\n':
+                    sb.append("<br>");
+                    break;
+                default:
+                    sb.append(c);
+                    break;
+            }
+        }
     }
 
 
