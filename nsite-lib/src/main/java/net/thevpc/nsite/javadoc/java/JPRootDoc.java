@@ -1,67 +1,65 @@
-/**
- * ====================================================================
- * Nuts : Network Updatable Things Service
- * (universal package manager)
- * <br>
- * is a new Open Source Package Manager to help install packages
- * and libraries for runtime execution. Nuts is the ultimate companion for
- * maven (and other build managers) as it helps installing all package
- * dependencies at runtime. Nuts is not tied to java and is a good choice
- * to share shell scripts and other 'things' . Its based on an extensible
- * architecture to help supporting a large range of sub managers / repositories.
- * <br>
- *
- * Copyright [2020] [thevpc]
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 3 (the "License");
- * you may  not use this file except in compliance with the License. You may obtain
- * a copy of the License at https://www.gnu.org/licenses/lgpl-3.0.en.html
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an 
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
- * either express or implied. See the License for the specific language 
- * governing permissions and limitations under the License.
- * <br>
- * ====================================================================
-*/
 package net.thevpc.nsite.javadoc.java;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import net.thevpc.nuts.io.NPath;
+import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import net.thevpc.nsite.javadoc.JDClassDoc;
+import net.thevpc.nsite.javadoc.JDPackageDoc;
 import net.thevpc.nsite.javadoc.JDRootDoc;
+import net.thevpc.nuts.io.NPath;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-/**
- *
- * @author thevpc
- */
 public class JPRootDoc implements JDRootDoc {
 
-    private Map<String, JDClassDoc> classes = new HashMap<String, JDClassDoc>();
+    private Map<String, JDClassDoc> classes = new HashMap<>();
+    private Map<String, JPPackageDoc> packages = new HashMap<>();
+    private JavaParser parser;
+
+    public void initParser(List<NPath> sourceRoots) {
+        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+        combinedTypeSolver.add(new ReflectionTypeSolver());
+        for (NPath srcRoot : sourceRoots) {
+            NPath s = srcRoot;
+            if (s.resolve("pom.xml").isRegularFile() && s.resolve("src/main/java").isDirectory()) {
+                s = s.resolve("src/main/java");
+            }
+            File f = s.toFile().orNull();
+            if (f != null && f.isDirectory()) {
+                try {
+                    combinedTypeSolver.add(new JavaParserTypeSolver(f));
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+        }
+        ParserConfiguration configuration = new ParserConfiguration();
+        configuration.setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
+        this.parser = new JavaParser(configuration);
+    }
 
     public void parseSrcFolder(NPath path, Predicate<String> packageFilter) {
-        //support for maven
-        if(path.resolve("pom.xml").isRegularFile()
-                && path.resolve("src/main/java").isDirectory()
-        ){
-            path=path.resolve("src/main/java");
+        if (path.resolve("pom.xml").isRegularFile() && path.resolve("src/main/java").isDirectory()) {
+            path = path.resolve("src/main/java");
         }
-        NPath path0=path;
-        path0.walk().filter(x -> x.isRegularFile()
-                && x.name().toString().endsWith(".java")
-        ).forEach(file -> {
-            String pck =
-                    StreamSupport.stream(file.subpath(path0.nameCount(), file.nameCount()).names().spliterator(), false)
-                            .collect(Collectors.joining("."));
+        NPath path0 = path;
+        path0.walk().filter(x -> x.isRegularFile() && x.name().toString().endsWith(".java")).forEach(file -> {
+            String pck = StreamSupport.stream(file.subpath(path0.nameCount(), file.nameCount() - 1).names().spliterator(), false)
+                    .collect(Collectors.joining("."));
             if (packageFilter == null || packageFilter.test(pck)) {
                 parseFile(file);
             }
@@ -70,29 +68,82 @@ public class JPRootDoc implements JDRootDoc {
 
     public void parseFile(NPath path) {
         try {
-            new VoidVisitorAdapter<Object>() {
-                PackageDeclaration p;
+            File f = path.toFile().orNull();
+            if (f == null || !f.exists()) {
+                return;
+            }
+            CompilationUnit cu = null;
+            if (parser != null) {
+                ParseResult<CompilationUnit> result = parser.parse(f);
+                cu = result.getResult().orElse(null);
+            }
+            if (cu == null) {
+                cu = StaticJavaParser.parse(f);
+            }
+            if (cu == null) {
+                return;
+            }
 
-                @Override
-                public void visit(ClassOrInterfaceDeclaration n, Object arg) {
-                    super.visit(n, arg);
-                    add(new JPClassDoc(JPRootDoc.this, n, p.getName().asString()));
+            String pckName = cu.getPackageDeclaration().map(PackageDeclaration::getNameAsString).orElse("");
+            JPPackageDoc pkgDoc = packages.computeIfAbsent(pckName, JPPackageDoc::new);
+
+            if (path.name().toString().equals("package-info.java")) {
+                JavadocComment jc = null;
+                if (cu.getPackageDeclaration().isPresent()) {
+                    PackageDeclaration pd = cu.getPackageDeclaration().get();
+                    if (pd.getComment().isPresent() && pd.getComment().get() instanceof JavadocComment) {
+                        jc = (JavadocComment) pd.getComment().get();
+                    }
                 }
-
-                @Override
-                public void visit(PackageDeclaration p, Object arg) {
-                    super.visit(p, arg);
-                    this.p = p;
+                if (jc == null && cu.getComment().isPresent() && cu.getComment().get() instanceof JavadocComment) {
+                    jc = (JavadocComment) cu.getComment().get();
                 }
+                if (jc == null) {
+                    for (com.github.javaparser.ast.comments.Comment c : cu.getAllComments()) {
+                        if (c instanceof JavadocComment) {
+                            jc = (JavadocComment) c;
+                            // continue to pick the last one if multiple exist (e.g. license + javadoc)
+                        }
+                    }
+                }
+                if (jc != null) {
+                    pkgDoc.setDescription(new JPDoc(JPDoc.parseJavadoc(jc.getContent())));
+                }
+                return;
+            }
 
-            }.visit(StaticJavaParser.parse(path.toPath().get()), null);
+            for (TypeDeclaration<?> type : cu.getTypes()) {
+                if (type.isPublic() || type.isProtected() || (!type.isPrivate() && !type.isProtected() && !type.isPublic())) {
+                    JPClassDoc classDoc = new JPClassDoc(this, type, pckName);
+                    add(classDoc);
+                    pkgDoc.addType(classDoc);
+                }
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error parsing " + path, e);
         }
     }
 
-    public JDClassDoc get(String qualifiedName) {
-        return classes.get(qualifiedName);
+    @Override
+    public JDClassDoc findClass(String qualifiedName) {
+        if (qualifiedName == null) {
+            return null;
+        }
+        JDClassDoc doc = classes.get(qualifiedName);
+        if (doc != null) {
+            return doc;
+        }
+        for (JDClassDoc c : classes.values()) {
+            if (c.name().equals(qualifiedName) || c.qualifiedName().equals(qualifiedName)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public JDPackageDoc findPackage(String packageName) {
+        return packages.get(packageName);
     }
 
     public JPRootDoc add(JDClassDoc c) {
@@ -102,7 +153,15 @@ public class JPRootDoc implements JDRootDoc {
 
     @Override
     public JDClassDoc[] classes() {
-        return classes.values().toArray(new JDClassDoc[0]);
+        List<JDClassDoc> list = new ArrayList<>(classes.values());
+        list.sort(Comparator.comparing(JDClassDoc::qualifiedName));
+        return list.toArray(new JDClassDoc[0]);
     }
 
+    @Override
+    public JDPackageDoc[] packages() {
+        List<JDPackageDoc> list = new ArrayList<>(packages.values());
+        list.sort(Comparator.comparing(JDPackageDoc::name));
+        return list.toArray(new JDPackageDoc[0]);
+    }
 }

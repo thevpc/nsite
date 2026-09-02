@@ -1,53 +1,103 @@
-/**
- * ====================================================================
- *            Nuts : Network Updatable Things Service
- *                  (universal package manager)
- * <br>
- * is a new Open Source Package Manager to help install packages
- * and libraries for runtime execution. Nuts is the ultimate companion for
- * maven (and other build managers) as it helps installing all package
- * dependencies at runtime. Nuts is not tied to java and is a good choice
- * to share shell scripts and other 'things' . Its based on an extensible
- * architecture to help supporting a large range of sub managers / repositories.
- * <br>
- *
- * Copyright [2020] [thevpc]
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 3 (the "License"); 
- * you may  not use this file except in compliance with the License. You may obtain
- * a copy of the License at https://www.gnu.org/licenses/lgpl-3.0.en.html
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an 
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
- * either express or implied. See the License for the specific language 
- * governing permissions and limitations under the License.
- * <br>
- * ====================================================================
-*/
 package net.thevpc.nsite.javadoc.java;
 
+import com.github.javaparser.ast.type.ArrayType;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.resolution.types.ResolvedType;
 import net.thevpc.nsite.javadoc.JDType;
 
-/**
- *
- * @author thevpc
- */
 public class JPType implements JDType {
 
     private Type type;
+    private String typeString;
+    private ResolvedType resolvedType;
 
     public JPType(Type type) {
         this.type = type;
+        if (type != null) {
+            try {
+                this.resolvedType = type.resolve();
+            } catch (Throwable ex) {
+                // Ignore resolution failure - fallback to AST name
+            }
+        }
+    }
+
+    public JPType(String typeString) {
+        this.typeString = typeString;
     }
 
     @Override
     public boolean isPrimitive() {
-        return type.isPrimitiveType();
+        if (type != null) {
+            return type.isPrimitiveType();
+        }
+        if (typeString != null) {
+            switch (typeString) {
+                case "boolean":
+                case "byte":
+                case "short":
+                case "int":
+                case "long":
+                case "float":
+                case "double":
+                case "char":
+                case "void":
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isArray() {
+        if (type != null) {
+            return type.isArrayType();
+        }
+        return typeString != null && typeString.endsWith("[]");
+    }
+
+    @Override
+    public String name() {
+        return asString();
+    }
+
+    @Override
+    public String simpleName() {
+        String s = asString();
+        int idx = s.indexOf('<');
+        String base = idx > 0 ? s.substring(0, idx) : s;
+        int dot = base.lastIndexOf('.');
+        String simple = dot >= 0 ? base.substring(dot + 1) : base;
+        if (idx > 0) {
+            return simple + s.substring(idx);
+        }
+        return simple;
+    }
+
+    @Override
+    public String qualifiedName() {
+        if (resolvedType != null) {
+            try {
+                return resolvedType.describe();
+            } catch (Throwable ex) {
+                // ignore
+            }
+        }
+        return asString();
+    }
+
+    @Override
+    public String asString() {
+        if (type != null) {
+            return type.asString();
+        }
+        return typeString != null ? typeString : "";
     }
 
     @Override
     public String toString() {
-        return type.asString();
+        return asString();
     }
-
 }

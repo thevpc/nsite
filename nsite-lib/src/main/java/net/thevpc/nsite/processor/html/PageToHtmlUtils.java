@@ -266,7 +266,7 @@ public class PageToHtmlUtils {
 
     public NHtmlNode md2html(MdElement markdown, GeneratorContext generatorContext) {
         if (markdown == null) {
-            return null;
+            return new NHtmlRaw("");
         }
         switch (markdown.type().group()) {
             case TEXT: {
@@ -282,11 +282,24 @@ public class PageToHtmlUtils {
                 return p;
             }
             case BODY: {
-                return new NHtmlTagList(
-                        Arrays.stream(markdown.asBody().getChildren())
-                                .map(x -> md2html(x, generatorContext))
-                                .toArray(NHtmlNode[]::new)
-                );
+                List<NHtmlNode> nodes = new ArrayList<>();
+                for (MdElement child : markdown.asBody().getChildren()) {
+                    if (child == null) {
+                        continue;
+                    }
+                    if (isInlineRootElement(child)) {
+                        NHtmlNode rendered = md2html(child, generatorContext);
+                        if (rendered != null && !rendered.toString().trim().isEmpty()) {
+                            nodes.add(new NHtmlTag("p").attr("class", "md-phrase").body(rendered));
+                        }
+                    } else {
+                        NHtmlNode rendered = md2html(child, generatorContext);
+                        if (rendered != null) {
+                            nodes.add(rendered);
+                        }
+                    }
+                }
+                return new NHtmlTagList(nodes.toArray(new NHtmlNode[0]));
             }
             case TITLE: {
                 MdTitle title = markdown.asTitle();
@@ -298,7 +311,20 @@ public class PageToHtmlUtils {
                 List<NHtmlNode> nnn = new ArrayList<>();
                 nnn.add(t);
                 for (MdElement child : title.getChildren()) {
-                    nnn.add(md2html(child, generatorContext));
+                    if (child == null) {
+                        continue;
+                    }
+                    if (isInlineRootElement(child)) {
+                        NHtmlNode rendered = md2html(child, generatorContext);
+                        if (rendered != null && !rendered.toString().trim().isEmpty()) {
+                            nnn.add(new NHtmlTag("p").attr("class", "md-phrase").body(rendered));
+                        }
+                    } else {
+                        NHtmlNode rendered = md2html(child, generatorContext);
+                        if (rendered != null) {
+                            nnn.add(rendered);
+                        }
+                    }
                 }
                 return new NHtmlTagList(nnn.toArray(new NHtmlNode[0]));
             }
@@ -324,8 +350,8 @@ public class PageToHtmlUtils {
                                 .body(escapeCode(value)));
                     }
                     return (new NHtmlTag("code")
-                            .attr("class", classMdCode(type, language))
-                            .body(escapeCode(value)));
+                                .attr("class", classMdCode(type, language))
+                                .body(escapeCode(value)));
                 }
                 return toHtml(language,code.getValue(),generatorContext);
             }
@@ -342,7 +368,7 @@ public class PageToHtmlUtils {
                 NHtmlTag li = new NHtmlTag("li")
                         .attr("class", "md-oli")
                         .body(md2html(markdown.asNumItem().getValue(), generatorContext));
-                for (MdElement child : markdown.asUnNumItem().getChildren()) {
+                for (MdElement child : markdown.asNumItem().getChildren()) {
                     li.body(md2html(child, generatorContext));
                 }
                 return li;
@@ -357,13 +383,11 @@ public class PageToHtmlUtils {
                 return hli;
             }
             case NUMBERED_LIST: {
-                MdUnNumberedList li = markdown.asUnNumList();
+                MdNumberedList li = markdown.asNumList();
                 NHtmlTag hli = new NHtmlTag("ol")
                         .attr("class", "md-ol");
-                for (MdUnNumberedItem child : li.getChildren()) {
-                    hli.body(new NHtmlTag("li")
-                            .attr("class", "md-oli")
-                            .body(md2html(child, generatorContext)));
+                for (MdNumberedItem child : li.getChildren()) {
+                    hli.body(md2html(child, generatorContext));
                 }
                 return hli;
             }
@@ -380,10 +404,14 @@ public class PageToHtmlUtils {
             }
             case LINK: {
                 MdLink li = markdown.asLink();
+                String title = li.getLinkTitle();
+                if (title != null && title.startsWith("`") && title.endsWith("`") && title.length() >= 2) {
+                    title = title.substring(1, title.length() - 1);
+                }
                 return new NHtmlTag("a")
                         .attr("href", li.getLinkUrl())
                         .attr("class", "md-link")
-                        .body(li.getLinkTitle());
+                        .body(title != null ? title : "");
             }
             case HORIZONTAL_RULE: {
                 return new NHtmlTag("hr").attr("class", "divider")
@@ -391,7 +419,7 @@ public class PageToHtmlUtils {
                         .setNoEnd(true);
             }
             case LINE_BREAK: {
-                return new NHtmlTag("hr").attr("class", "divider")
+                return new NHtmlTag("br")
                         .attr("class", "md-br")
                         .setNoEnd(true);
             }
@@ -488,15 +516,39 @@ public class PageToHtmlUtils {
             }
             case XML: {
                 MdXml xml = markdown.asXml();
-                switch (xml.getTag().toLowerCase()) {
+                String tag = xml.getTag().toLowerCase();
+                switch (tag) {
                     case "tabs": {
                         return md2htmlXmlTabs(xml, generatorContext);
                     }
+                    case "a":
+                    case "span":
+                    case "div":
+                    case "b":
+                    case "i":
+                    case "strong":
+                    case "em":
+                    case "code":
+                    case "pre":
+                    case "p":
+                    case "br":
+                    case "hr": {
+                        NHtmlTag htag = new NHtmlTag(tag);
+                        if (xml.getProperties() != null) {
+                            for (Map.Entry<String, String> entry : ((Map<String, String>) xml.getProperties()).entrySet()) {
+                                htag.attr(entry.getKey(), entry.getValue());
+                            }
+                        }
+                        if (xml.getContent() != null) {
+                            htag.body(md2html(xml.getContent(), generatorContext));
+                        }
+                        return htag;
+                    }
                 }
-                return null;
+                return new NHtmlRaw("");
             }
         }
-        return null;
+        return new NHtmlRaw("");
     }
 
     private String classMdCode(String type, String language) {
@@ -586,6 +638,22 @@ public class PageToHtmlUtils {
             }
         }
         return sb.toString();
+    }
+
+    private static boolean isInlineRootElement(MdElement e) {
+        if (e == null) {
+            return false;
+        }
+        if (e.isText() || e.isBold() || e.isItalic()) {
+            return true;
+        }
+        if (e instanceof MdCode && ((MdCode) e).isInline()) {
+            return true;
+        }
+        if (e.isLink()) {
+            return true;
+        }
+        return false;
     }
 
     static class MyGeneratorContext implements GeneratorContext {

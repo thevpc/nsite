@@ -1,46 +1,42 @@
-/**
- * ====================================================================
- *            Nuts : Network Updatable Things Service
- *                  (universal package manager)
- * <br>
- * is a new Open Source Package Manager to help install packages
- * and libraries for runtime execution. Nuts is the ultimate companion for
- * maven (and other build managers) as it helps installing all package
- * dependencies at runtime. Nuts is not tied to java and is a good choice
- * to share shell scripts and other 'things' . Its based on an extensible
- * architecture to help supporting a large range of sub managers / repositories.
- * <br>
- *
- * Copyright [2020] [thevpc]
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 3 (the "License");
- * you may  not use this file except in compliance with the License. You may obtain
- * a copy of the License at https://www.gnu.org/licenses/lgpl-3.0.en.html
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- * <br>
- * ====================================================================
-*/
 package net.thevpc.nsite.javadoc.java;
 
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import net.thevpc.nsite.javadoc.JDParameter;
 import net.thevpc.nsite.javadoc.JDType;
 
-/**
- *
- * @author thevpc
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class JPParameter implements JDParameter {
-    
+
     private Parameter parameter;
+    private String name;
+    private JDType type;
     private String javadocContent;
+    private List<String> annotations = new ArrayList<>();
 
     public JPParameter(Parameter parameter, String javadocContent) {
         this.parameter = parameter;
+        this.name = parameter != null ? parameter.getName().toString() : "";
+        this.type = parameter != null ? new JPType(parameter.getType()) : new JPType("");
         this.javadocContent = javadocContent;
+        if (parameter != null) {
+            for (AnnotationExpr annotation : parameter.getAnnotations()) {
+                annotations.add(annotation.toString());
+            }
+        }
+    }
+
+    public JPParameter(String name, JDType type, String javadocContent) {
+        this.name = name;
+        this.type = type;
+        this.javadocContent = javadocContent;
+    }
+
+    @Override
+    public String[] annotations() {
+        return annotations.toArray(new String[0]);
     }
 
     @Override
@@ -48,14 +44,22 @@ public class JPParameter implements JDParameter {
         return javadocContent;
     }
 
+    public void setJavadocContent(String javadocContent) {
+        this.javadocContent = javadocContent;
+    }
+
     @Override
     public JDType type() {
-        return new JPType(parameter.getType());
+        return type;
     }
 
     @Override
     public String name() {
-        return parameter.getName().toString();
+        return name;
     }
-    
+
+    @Override
+    public String toString() {
+        return (type != null ? type.asString() : "") + " " + name;
+    }
 }

@@ -26,10 +26,14 @@ public class NHtmlTagList extends NHtmlNode {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (NHtmlNode node : all) {
-            sb.append(node);
-            if (newLine) {
-                sb.append("\n");
+        if (all != null) {
+            for (NHtmlNode node : all) {
+                if (node != null) {
+                    sb.append(node);
+                    if (newLine) {
+                        sb.append("\n");
+                    }
+                }
             }
         }
         return sb.toString();

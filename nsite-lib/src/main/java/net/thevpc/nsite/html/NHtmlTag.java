@@ -28,12 +28,16 @@ public class NHtmlTag extends NHtmlNode {
     }
 
     public NHtmlTag body(NHtmlNode value) {
-        body.add(value);
+        if (value != null) {
+            body.add(value);
+        }
         return this;
     }
 
     public NHtmlTag body(String value) {
-        body.add(new NHtmlRaw(value));
+        if (value != null) {
+            body.add(new NHtmlRaw(value));
+        }
         return this;
     }
 
@@ -42,7 +46,7 @@ public class NHtmlTag extends NHtmlNode {
         StringBuilder sb = new StringBuilder();
         sb.append("<").append(name);
         for (NHtmlAttr attr : attrs) {
-            sb.append(" ").append(attr.name).append("=\"").append(attr.value).append("\"");
+            sb.append(" ").append(attr.name).append("=\"").append(attr.value != null ? attr.value : "").append("\"");
         }
         switch (name.toLowerCase()){
             case "br":
@@ -57,7 +61,9 @@ public class NHtmlTag extends NHtmlNode {
         } else {
             sb.append(">");
             for (NHtmlNode b : body) {
-                sb.append(b);
+                if (b != null) {
+                    sb.append(b);
+                }
             }
             sb.append("</").append(name).append(">");
         }
