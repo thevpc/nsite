@@ -25,6 +25,7 @@ public class DefaultNSiteMimeTypeResolver implements NSiteMimeTypeResolver {
     public static final NSiteMimeTypeResolver DEFAULT = new DefaultNSiteMimeTypeResolver()
             .setExtensionMimeType("nexpr", MimeTypeConstants.NEXPR)
             .setExtensionMimeType("ntf", NConstants.Ntf.MIME_TYPE)
+            .setExtensionMimeType("ps1", "application/x-powershell")
             .setImmutable();
     private final Map<String, String> extensionToMimeType = new HashMap<>();
     private final Map<String, String> nameToMimeType = new HashMap<>();

@@ -12,6 +12,7 @@ import net.thevpc.nsite.util.StringUtils;
 import net.thevpc.nuts.log.NLog;
 import net.thevpc.nuts.text.NMsg;
 import net.thevpc.nuts.util.NStringBuilder;
+import net.thevpc.nuts.util.NStringUtils;
 
 import java.util.*;
 
@@ -32,7 +33,9 @@ public class PageToHtmlFct extends BaseNexprNExprFct {
 
         MPage title = (MPage) args.get(0).value().ifErrorThrow().orNull();
         Object titlePrefix = args.size() > 1 ? args.get(1).value().ifErrorThrow().orNull() : null;
-        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(title) + ")"));
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,
+                StringUtils.toLiteralString(NStringUtils.truncate((title==null?"":title).toString().replace("\n","\\n"),50,"..."))
+                        + ")"));
         if (title == null) {
             return "";
         }

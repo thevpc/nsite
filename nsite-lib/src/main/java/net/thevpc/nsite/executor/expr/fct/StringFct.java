@@ -8,6 +8,7 @@ import net.thevpc.nsite.util.StringUtils;
 import net.thevpc.nuts.log.NLog;
 import net.thevpc.nuts.util.NLiteral;
 import net.thevpc.nuts.text.NMsg;
+import net.thevpc.nuts.util.NStringUtils;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class StringFct extends BaseNexprNExprFct {
             throw new IllegalStateException(name + " : invalid arguments count");
         }
         String str = (String) args.get(0).value().ifErrorThrow().orNull();
-        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(str)));
+        NLog.ofScoped(getClass()).debug(NMsg.ofC("[%s] %s(%s)","eval",name,StringUtils.toLiteralString(NStringUtils.truncate((str==null?"":str).replace("\n","\\n"),50,"..."))));
         return NLiteral.of(str).toStringLiteral();
     }
 }

@@ -33,7 +33,12 @@ public class NSiteProcessorManager {
         registerGlobalProcessorByMimeType(TagStreamProcessor.DOLLAR_BARACKET2, MimeTypeConstants.PLACEHOLDER_DOLLAR_BRACKET2);
         registerGlobalProcessorByMimeType(TagStreamProcessor.LT_PERCENT, MimeTypeConstants.PLACEHOLDER_LT_PERCENT);
 
-        registerGlobalProcessorByMimeType(TagStreamProcessor.BARACKET2, "text/html", "text/markdown", "text/x-shellscript", "application/x-shellscript",
+        registerGlobalProcessorByMimeType(TagStreamProcessor.BARACKET2, "text/html", "text/markdown",
+                "text/x-shellscript",
+                "application/x-sh",
+                "application/x-bash",
+                "application/x-shellscript",
+                "application/x-powershell",
                 MimeTypeConstants.ANY_TEXT
         );
         for (String mimeType : NConstants.Ntf.MIME_TYPES) {
@@ -213,9 +218,9 @@ public class NSiteProcessorManager {
                 String s1 = path.toString();
                 String s2 = absolutePath.toString();
                 if (s1.equals(s2)) {
-                    log().info(NMsg.ofC("[%s][%s] [%s] process path : %s", contextName1, proc, NStringUtils.firstNonBlank(mimeType, "no-mimetype"), s1));
+                    log().info(NMsg.ofC("[%s][%s] [%s] process path : %s", contextName1, proc, NStringUtils.firstNonBlank(mimeType0, "no-mimetype"), s1));
                 } else {
-                    log().info(NMsg.ofC("[%s][%s] [%s] process path : %s = %s", contextName1, proc, NStringUtils.firstNonBlank(mimeType, "no-mimetype"), s1, s2));
+                    log().info(NMsg.ofC("[%s][%s] [%s] process path : %s = %s", contextName1, proc, NStringUtils.firstNonBlank(mimeType0, "no-mimetype"), s1, s2));
                 }
                 proc.processPath(path, mimeType0,
                         context.newChild()
@@ -247,7 +252,7 @@ public class NSiteProcessorManager {
             if (proc != null) {
                 String s1 = path.toString();
                 String s2 = absolutePath.toString();
-                String mimeTypesString = NStringUtils.firstNonBlank(mimeType, "no-mimetype");
+                String mimeTypesString = NStringUtils.firstNonBlank(mimeType0, "no-mimetype");
                 if (s1.equals(s2)) {
                     log().debug(NMsg.ofC("[%s] [%s] [%s] execute path : %s = %s", contextName1, proc, mimeTypesString, s1, s2));
                 } else {
@@ -386,7 +391,7 @@ public class NSiteProcessorManager {
             if (proc != null) {
                 String s1 = path.toString();
                 String s2 = absolutePath.toString();
-                String mimeTypesString = NStringUtils.firstNonBlank(mimeType, "no-mimetype");
+                String mimeTypesString = NStringUtils.firstNonBlank(mimeType0, "no-mimetype");
                 if (s1.equals(s2)) {
                     log().debug(NMsg.ofC("[%s] [%s] [%s] execute path : %s = %s", contextName1, proc, mimeTypesString, s1, s2));
                 } else {
